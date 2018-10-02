@@ -5,7 +5,13 @@ import org.json.JSONObject;
 
 public class InitialPercept extends SimStartMessage {
 
-    public InitialPercept(long time, JSONObject content) {
-        super(time);
+    public InitialPercept(JSONObject content) {
+        super(content);
+    }
+
+    @Override
+    public JSONObject makePercept() {
+        //TODO
+        return new JSONObject();
     }
 }

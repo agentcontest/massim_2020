@@ -7,15 +7,16 @@ public class AuthResponseMessage extends Message {
     public final static String OK = "ok";
     public final static String FAIL = "fail";
 
-    public String result;
+    private long time;
+    private String result;
 
-    public AuthResponseMessage(long time, JSONObject content) {
-        super(time);
+    public AuthResponseMessage(JSONObject content) {
+        this.time = content.optLong("time");
         this.result = content.optString("result");
     }
 
     public AuthResponseMessage(long time, String result) {
-        super(time);
+        this.time = time;
         this.result = result;
     }
 
@@ -29,5 +30,13 @@ public class AuthResponseMessage extends Message {
         JSONObject content = new JSONObject();
         content.append("result", result);
         return content;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public String getResult() {
+        return result;
     }
 }

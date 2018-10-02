@@ -5,8 +5,8 @@ import org.json.JSONObject;
 
 public class StepPercept extends RequestActionMessage {
 
-    public StepPercept(long time, JSONObject content) {
-        super(time, content);
+    public StepPercept(JSONObject content) {
+        super(content);
     }
 
     @Override

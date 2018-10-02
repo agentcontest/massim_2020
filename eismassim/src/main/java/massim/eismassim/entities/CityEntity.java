@@ -1,13 +1,9 @@
 package massim.eismassim.entities;
 
 import eis.iilang.*;
-import eis.iilang.Action;
 import massim.eismassim.EISEntity;
-import massim.protocol.Message;
-import massim.protocol.messagecontent.*;
-import massim.protocol.scenario.city.data.*;
-import massim.protocol.scenario.city.percept.CityInitialPercept;
-import massim.protocol.scenario.city.percept.CityStepPercept;
+import massim.protocol.messages.ActionMessage;
+import massim.protocol.messages.Message;
 import org.w3c.dom.Document;
 
 import java.util.*;
@@ -249,8 +245,7 @@ public class CityEntity extends EISEntity {
         });
 
         // create massim protocol action
-        massim.protocol.messagecontent.Action massimAction =
-                new massim.protocol.messagecontent.Action(action.getName(), parameters.toArray(new String[parameters.size()]));
+        ActionMessage msg = new ActionMessage(System.currentTimeMillis(), action.getName(), parameters.toArray(new String[parameters.size()]));
         massimAction.setID(currentActionId);
 
         return new Message(null, massimAction).toXML();

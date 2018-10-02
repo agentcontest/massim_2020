@@ -16,8 +16,7 @@ public class ActionMessage extends Message{
     private long id;
     private List<String> params;
 
-    public ActionMessage(long time, JSONObject content) {
-        super(time);
+    public ActionMessage(JSONObject content) {
         this.actionType = content.optString("type", UNKNOWN_ACTION);
         this.id = content.optLong("id", -1);
         JSONArray p = content.optJSONArray("p");
@@ -27,8 +26,7 @@ public class ActionMessage extends Message{
         }
     }
 
-    public ActionMessage(long time, String actionType, long id, ArrayList<String> params) {
-        super(time);
+    public ActionMessage(String actionType, long id, ArrayList<String> params) {
         this.actionType = actionType;
         this.id = id;
         this.params = params;
@@ -38,24 +36,12 @@ public class ActionMessage extends Message{
         return actionType;
     }
 
-    public void setActionType(String type) {
-        this.actionType = type;
-    }
-
     public long getId() {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public List<String> getParams() {
         return params;
-    }
-
-    public void setParams(List<String> params) {
-        this.params = params;
     }
 
     @Override

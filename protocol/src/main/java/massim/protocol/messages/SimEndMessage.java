@@ -4,11 +4,12 @@ import org.json.JSONObject;
 
 public class SimEndMessage extends Message {
 
+    private long time;
     private long score;
     private int ranking;
 
-    public SimEndMessage(long time, JSONObject content) {
-        super(time);
+    public SimEndMessage(JSONObject content) {
+        this.time = content.optLong("time");
         this.score = content.optLong("score", -1);
         this.ranking = content.optInt("ranking", -1);
     }
@@ -24,5 +25,17 @@ public class SimEndMessage extends Message {
         json.append("score", score);
         json.append("ranking", ranking);
         return json;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public long getScore() {
+        return score;
+    }
+
+    public int getRanking() {
+        return ranking;
     }
 }

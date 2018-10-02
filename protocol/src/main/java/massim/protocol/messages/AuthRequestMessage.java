@@ -4,13 +4,17 @@ import org.json.JSONObject;
 
 public class AuthRequestMessage extends Message {
 
-    public String username;
-    public String password;
+    private String username;
+    private String password;
 
-    public AuthRequestMessage(long time, JSONObject content) {
-        super(time);
+    public AuthRequestMessage(JSONObject content) {
         this.username = content.optString("user");
         this.password = content.optString("pw");
+    }
+
+    public AuthRequestMessage(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
     @Override

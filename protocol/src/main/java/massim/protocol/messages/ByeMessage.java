@@ -4,8 +4,14 @@ import org.json.JSONObject;
 
 public class ByeMessage extends Message {
 
+    private long time;
+
     public ByeMessage(long time) {
-        super(time);
+        this.time = time;
+    }
+
+    public ByeMessage(JSONObject content) {
+        this.time = content.optLong("time");
     }
 
     @Override
@@ -16,5 +22,9 @@ public class ByeMessage extends Message {
     @Override
     public JSONObject makeContent() {
         return new JSONObject();
+    }
+
+    public long getTime() {
+        return time;
     }
 }

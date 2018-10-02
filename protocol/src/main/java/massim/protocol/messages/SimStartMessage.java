@@ -2,10 +2,12 @@ package massim.protocol.messages;
 
 import org.json.JSONObject;
 
-public class SimStartMessage extends Message {
+public abstract class SimStartMessage extends Message {
 
-    public SimStartMessage(long time) {
-        super(time);
+    private long time;
+
+    public SimStartMessage(JSONObject content) {
+        this.time = content.optLong("time");
     }
 
     @Override
@@ -15,6 +17,18 @@ public class SimStartMessage extends Message {
 
     @Override
     public JSONObject makeContent() {
-        return new JSONObject();
+        JSONObject content = new JSONObject();
+        content.append("percept", makePercept());
+        return content;
+    }
+
+    /**
+     * Create the JSON representation of the percept part.
+     * Will be appended under the "percept" key of the "content" object.
+     */
+    public abstract JSONObject makePercept();
+
+    public long getTime() {
+        return time;
     }
 }

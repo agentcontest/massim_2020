@@ -7,11 +7,12 @@ import org.json.JSONObject;
  */
 public abstract class RequestActionMessage extends Message {
 
-    public long id;
-    public long deadline;
+    private long time;
+    private long id;
+    private long deadline;
 
-    public RequestActionMessage(long time, JSONObject content) {
-        super(time);
+    public RequestActionMessage(JSONObject content) {
+        this.time = content.optLong("time");
         this.id = content.optLong("id", -1);
         this.deadline = content.optLong("deadline", -1);
     }
@@ -39,5 +40,17 @@ public abstract class RequestActionMessage extends Message {
     public void updateIdAndDeadline(long id, long deadline) {
         this.id = id;
         this.deadline = deadline;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public long getDeadline() {
+        return deadline;
     }
 }

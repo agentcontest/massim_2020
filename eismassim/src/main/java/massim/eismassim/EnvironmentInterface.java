@@ -6,7 +6,7 @@ import eis.iilang.Action;
 import eis.iilang.EnvironmentState;
 import eis.iilang.IILElement;
 import eis.iilang.Percept;
-import massim.protocol.scenario.city.Actions;
+import massim.protocol.messages.scenario.Actions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
