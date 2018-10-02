@@ -3,11 +3,10 @@ package massim;
 import massim.config.ServerConfig;
 import massim.config.TeamConfig;
 import massim.monitor.Monitor;
-import massim.protocol.WorldData;
-import massim.protocol.messagecontent.Action;
-import massim.protocol.messagecontent.RequestAction;
-import massim.protocol.messagecontent.SimEnd;
-import massim.protocol.messagecontent.SimStart;
+import massim.protocol.messages.ActionMessage;
+import massim.protocol.messages.RequestActionMessage;
+import massim.protocol.messages.SimEndMessage;
+import massim.protocol.messages.SimStartMessage;
 import massim.scenario.AbstractSimulation;
 import massim.util.IOUtil;
 import massim.util.InputManager;
@@ -303,7 +302,7 @@ public class Server {
                 int steps = simConfig.optInt("steps", 1000);
 
                 // handle initial state
-                Map<String, SimStart> initialPercepts = sim.init(steps, simConfig, matchTeams);
+                Map<String, SimStartMessage> initialPercepts = sim.init(steps, simConfig, matchTeams);
                 handleSimState(sim.getName(), startTime, sim.getStaticData());
                 agentManager.handleInitialPercepts(initialPercepts);
 
@@ -311,14 +310,14 @@ public class Server {
                 for (int i = 0; i < steps; i++){
                     Log.log(Log.Level.NORMAL, "Simulation at step " + i);
                     handleInputs(sim);
-                    Map<String, RequestAction> percepts = sim.preStep(i);
-                    Map<String, Action> actions = agentManager.requestActions(percepts);
+                    Map<String, RequestActionMessage> percepts = sim.preStep(i);
+                    Map<String, ActionMessage> actions = agentManager.requestActions(percepts);
                     sim.step(i, actions); // execute step with agent actions
                     handleSimState(sim.getName(), startTime, sim.getSnapshot());
                 }
 
                 // handle final state
-                Map<String, SimEnd> finalPercepts = sim.finish();
+                Map<String, SimEndMessage> finalPercepts = sim.finish();
                 agentManager.handleFinalPercepts(finalPercepts);
                 result.put(sim.getName(), sim.getResult());
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
@@ -375,7 +374,7 @@ public class Server {
      * @param startTime string representation of the simulation's start time
      * @param world the world state
      */
-    private void handleSimState(String simId, String startTime, WorldData world) {
+    private void handleSimState(String simId, String startTime, JSONObject world) {
         if (monitor != null) monitor.updateState(world);
         if (replayWriter != null) replayWriter.updateState(simId, startTime, world);
     }

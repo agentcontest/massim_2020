@@ -1,10 +1,8 @@
 package massim.protocol.messages;
 
-import org.json.JSONArray;
+import massim.protocol.messages.scenario.InitialPercept;
+import massim.protocol.messages.scenario.StepPercept;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class Message {
 
@@ -35,44 +33,20 @@ public abstract class Message {
     }
 
     public static Message buildFromJson(JSONObject src) {
+        if(src == null) return null;
         long time = src.optLong("time", -1);
         String type = src.optString("type");
         JSONObject content = src.optJSONObject("content");
         if(content == null) return null;
         switch(type) {
-            case TYPE_ACTION:
-                String actionType = content.optString("type", "no-type");
-                long id = content.optLong("id", -1);
-                JSONArray p = content.optJSONArray("p");
-                List<String> params = new ArrayList<>();
-                for(int i = 0; i < p.length(); i++) {
-                    params.add(p.optString(i));
-                }
-                return new ActionMessage(time, actionType, id, params);
-
-            case TYPE_REQUEST_ACTION:
-                id = content.optLong("id", -1);
-                long deadline = content.optLong("deadline", -1);
-                return new RequestActionMessage(time, id, deadline);
-
-            case TYPE_AUTH_RESPONSE:
-                String result = content.optString("result");
-                return new AuthResponseMessage(time, result);
-
-            case TYPE_AUTH_REQUEST:
-                String username = content.optString("user");
-                String password = content.optString("pw");
-                return new AuthRequestMessage(time, username, password);
-
-            case TYPE_BYE:
-                return new ByeMessage(time);
-
-            case TYPE_SIM_START:
-
-            case TYPE_SIM_END:
-
-            default:
-                System.out.println("Message of type " + type + " cannot be build.");
+            case TYPE_ACTION: return new ActionMessage(time, content);
+            case TYPE_REQUEST_ACTION: return new StepPercept(time, content);
+            case TYPE_AUTH_RESPONSE: return new AuthResponseMessage(time, content);
+            case TYPE_AUTH_REQUEST: return new AuthRequestMessage(time, content);
+            case TYPE_BYE: return new ByeMessage(time);
+            case TYPE_SIM_START: return new InitialPercept(time, content);
+            case TYPE_SIM_END: return new SimEndMessage(time, content);
+            default: System.out.println("Message of type " + type + " cannot be build.");
         }
         return null;
     }

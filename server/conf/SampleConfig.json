@@ -9,27 +9,14 @@
 
   "match" : [
     {
-      "id" : "2018-SampleSimulation",
+      "id" : "2019-SampleSimulation",
       "scenarioClass" : "city.CitySimulation",
       "steps" : 1000,
-      "map" : "paris",
-      "seedCapital" : 5000,
-      "minLon" : 2.26,
-      "maxLon" : 2.41,
-      "minLat" : 48.82,
-      "maxLat" : 48.90,
-      "centerLat" : 48.8424,
-      "centerLon" : 2.3209,
-      "proximity" : 5,
-      "cellSize" : 200,
-      "randomSeed" : 18,
+      "randomSeed" : 17,
       "randomFail" : 1,
-      "gotoCost" : 1,
-      "rechargeRate" : 0.3,
 
-      "upgrades" : "$(upgrades/upgrades.json)",
       "roles" : "$(roles/roles.json)",
-      "entities" : [{"drone" : 4}, {"motorcycle" : 8}, {"car" : 10}, {"truck" : 12}],
+      "entities" : [{"standard" : 10}],
       "generate" : "$(generate/generate.json)"
     }
   ],

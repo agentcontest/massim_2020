@@ -1,12 +1,10 @@
 package massim.scenario;
 
 import massim.config.TeamConfig;
-import massim.protocol.DynamicWorldData;
-import massim.protocol.StaticWorldData;
-import massim.protocol.messagecontent.Action;
-import massim.protocol.messagecontent.RequestAction;
-import massim.protocol.messagecontent.SimEnd;
-import massim.protocol.messagecontent.SimStart;
+import massim.protocol.messages.ActionMessage;
+import massim.protocol.messages.RequestActionMessage;
+import massim.protocol.messages.SimEndMessage;
+import massim.protocol.messages.SimStartMessage;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -25,7 +23,7 @@ public abstract class AbstractSimulation {
      * @param matchTeams set of participating teams and their details
      * @return map of agent names to their respective initial (sim-start) percept
      */
-    public abstract Map<String, SimStart> init(int steps, JSONObject config, Set<TeamConfig> matchTeams);
+    public abstract Map<String, SimStartMessage> init(int steps, JSONObject config, Set<TeamConfig> matchTeams);
 
     /**
      * Called before each step.
@@ -33,7 +31,7 @@ public abstract class AbstractSimulation {
      * @param stepNo number of the simulation step
      * @return map from agent names to their current step percept (for request-action message)
      */
-    public abstract Map<String, RequestAction> preStep(int stepNo);
+    public abstract Map<String, RequestActionMessage> preStep(int stepNo);
 
     /**
      * Execute one step in the scenario.
@@ -41,13 +39,13 @@ public abstract class AbstractSimulation {
      * @param stepNo number of the simulation step
      * @param actionMap mapping from agent names to their actions for this step
      */
-    public abstract void step(int stepNo, Map<String, Action> actionMap);
+    public abstract void step(int stepNo, Map<String, ActionMessage> actionMap);
 
     /**
      * Finish scenario execution, prepare results, etc.
      * @return map from agent names to sim-end percepts
      */
-    public abstract Map<String, SimEnd> finish();
+    public abstract Map<String, SimEndMessage> finish();
 
     /**
      * @return a json object containing the simulation results in any form
@@ -63,13 +61,13 @@ public abstract class AbstractSimulation {
      * Called after each {@link #step(int, Map)}
      * @return a snapshot of the current world state
      */
-    public abstract DynamicWorldData getSnapshot();
+    public abstract JSONObject getSnapshot();
 
     /**
      * Must return a valid object after {@link #init(int, JSONObject, Set)} has been called.
      * @return all world data that does not change during the simulation
      */
-    public abstract StaticWorldData getStaticData();
+    public abstract JSONObject getStaticData();
 
     /**
      * Handles a given command if supported.

@@ -1,22 +1,19 @@
 package massim;
 
-import massim.protocol.Message;
-import massim.protocol.messagecontent.AuthRequest;
-import massim.protocol.messagecontent.AuthResponse;
+import massim.protocol.messages.AuthRequestMessage;
+import massim.protocol.messages.AuthResponseMessage;
+import massim.protocol.messages.Message;
 import massim.util.Log;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Responsible for network actions.
@@ -80,13 +77,13 @@ class LoginManager {
      * @param s the socket to send on
      * @param result whether the authentication was successful
      */
-    private void sendAuthResponse(Socket s, AuthResponse.AuthenticationResult result) {
+    private void sendAuthResponse(Socket s, String result) {
         try {
             OutputStream out = s.getOutputStream();
-            Document doc = new Message(System.currentTimeMillis(), new AuthResponse(result)).toXML();
-            TransformerFactory.newInstance().newTransformer().transform(new DOMSource(doc), new StreamResult(out));
+            AuthResponseMessage msg = new AuthResponseMessage(System.currentTimeMillis(), result);
+            out.write(msg.toJson().toString().getBytes());
             out.write(0);
-        } catch (IOException | TransformerException | TransformerFactoryConfigurationError e) {
+        } catch (IOException e) {
             Log.log(Log.Level.CRITICAL, "Auth response could not be sent.");
             e.printStackTrace();
         }
@@ -107,38 +104,42 @@ class LoginManager {
                 else if (b == -1) return; // stream ended
                 else buffer.write(b);
             }
-            Document authDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
-                    new ByteArrayInputStream(buffer.toByteArray()));
-            Message receivedMsg = Message.parse(authDoc);
-            if(receivedMsg != null){
-                if(receivedMsg.getContent() != null && receivedMsg.getContent() instanceof AuthRequest) {
-                    AuthRequest auth = (AuthRequest) receivedMsg.getContent();
+
+            String received = buffer.toString(StandardCharsets.UTF_8);
+            JSONObject json = null;
+            try {
+                json = new JSONObject(received);
+            } catch(JSONException e){
+                Log.log(Log.Level.ERROR, "Invalid JSON object received: " + received);
+            }
+            Message msg = Message.buildFromJson(json);
+
+            if(msg != null){
+                if(msg instanceof AuthRequestMessage) {
+                    AuthRequestMessage auth = (AuthRequestMessage) msg;
                     Log.log(Log.Level.NORMAL, "got authentication: username=" + auth.getUsername() + " password="
                             + auth.getPassword() + " address=" + s.getInetAddress().getHostAddress());
                     // check credentials and act accordingly
                     if (agentManager.auth(auth.getUsername(), auth.getPassword())) {
-                        sendAuthResponse(s, AuthResponse.AuthenticationResult.OK);
+                        sendAuthResponse(s, AuthResponseMessage.OK);
                         agentManager.handleNewConnection(s, auth.getUsername());
                     } else {
                         Log.log(Log.Level.ERROR, "Got invalid authentication from: " + s.getInetAddress().getHostAddress());
-                        sendAuthResponse(s, AuthResponse.AuthenticationResult.FAILED);
+                        sendAuthResponse(s, AuthResponseMessage.FAIL);
                         try {
                             s.close();
                         } catch (IOException ignored) {}
                     }
                 }
                 else{
-                    Log.log(Log.Level.ERROR, "Received message content: " + receivedMsg.getContent());
+                    Log.log(Log.Level.ERROR, "Expected AuthRequest, Received message of type: " + msg.getClass());
                 }
             }
             else{
-                Log.log(Log.Level.ERROR, "Received wrong message, expected auth-request.");
+                Log.log(Log.Level.ERROR, "Cannot handle message: " + received);
             }
         } catch (IOException e) {
             Log.log(Log.Level.ERROR, "Error while receiving authentication message");
-            e.printStackTrace();
-        } catch (ParserConfigurationException | SAXException e) {
-            Log.log(Log.Level.ERROR, "Error while parsing authentication message");
             e.printStackTrace();
         }
     }

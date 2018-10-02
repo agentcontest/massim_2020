@@ -1,32 +1,25 @@
 package massim.monitor;
 
-import massim.protocol.WorldData;
-import massim.protocol.scenario.city.data.DynamicCityData;
-import massim.protocol.scenario.city.data.StaticCityData;
-
 import org.json.JSONObject;
-
 import org.webbitserver.BaseWebSocketHandler;
 import org.webbitserver.WebServer;
 import org.webbitserver.WebServers;
 import org.webbitserver.WebSocketConnection;
-import org.webbitserver.handler.HttpToWebSocketHandler;
 import org.webbitserver.handler.EmbeddedResourceHandler;
+import org.webbitserver.handler.HttpToWebSocketHandler;
 import org.webbitserver.handler.StaticFileHandler;
 import org.webbitserver.handler.StringHttpHandler;
 
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-
 import java.net.InetSocketAddress;
 import java.net.URI;
-
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * The web monitor for the MASSim server.
@@ -126,24 +119,19 @@ public class Monitor {
      * Updates the current state of the monitor.
      * Called by the massim server after each step.
      */
-    public void updateState(WorldData worldData){
-        if (worldData instanceof StaticCityData) {
-            this.latestStatic = staticToJson((StaticCityData) worldData);
+    public void updateState(JSONObject worldData){
+        if (isStatic(worldData)) {
+            this.latestStatic = worldData.toString();
             this.broadcast(this.latestStatic);
-        } else if (worldData instanceof DynamicCityData) {
-            this.latestDynamic = dynamicToJson((DynamicCityData) worldData);
+        } else {
+            this.latestDynamic = worldData.toString();
             this.broadcast(this.latestDynamic);
         }
     }
 
-    private String staticToJson(StaticCityData data) {
-        JSONObject d = new JSONObject(data);
-        return d.toString();
-    }
-
-    private String dynamicToJson(DynamicCityData data) {
-        JSONObject d = new JSONObject(data);
-        return d.toString();
+    private boolean isStatic(JSONObject worldData) {
+        //TODO
+        return true;
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {

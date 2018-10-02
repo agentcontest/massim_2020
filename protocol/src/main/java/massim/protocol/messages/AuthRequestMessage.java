@@ -7,10 +7,10 @@ public class AuthRequestMessage extends Message {
     public String username;
     public String password;
 
-    public AuthRequestMessage(long time, String username, String password) {
+    public AuthRequestMessage(long time, JSONObject content) {
         super(time);
-        this.username = username;
-        this.password = password;
+        this.username = content.optString("user");
+        this.password = content.optString("pw");
     }
 
     @Override
@@ -24,5 +24,13 @@ public class AuthRequestMessage extends Message {
         content.append("user", username);
         content.append("pw", password);
         return content;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

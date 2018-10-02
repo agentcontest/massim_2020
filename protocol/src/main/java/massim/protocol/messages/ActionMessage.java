@@ -1,9 +1,9 @@
 package massim.protocol.messages;
 
-import massim.protocol.messagecontent.Action;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ActionMessage extends Message{
@@ -12,17 +12,24 @@ public class ActionMessage extends Message{
     private final static String UNKNOWN_ACTION = "unknownAction";
     public final static String RANDOM_FAIL = "randomFail";
 
-    public static final Action STD_NO_ACTION = new Action(NO_ACTION);
-    public static final Action STD_UNKNOWN_ACTION = new Action(UNKNOWN_ACTION);
-    public static final Action STD_RANDOM_FAIL_ACTION = new Action(RANDOM_FAIL);
-
     private String actionType;
     private long id;
     private List<String> params;
 
-    public ActionMessage(long time, String type, long id, List<String> params) {
+    public ActionMessage(long time, JSONObject content) {
         super(time);
-        this.actionType = type;
+        this.actionType = content.optString("type", UNKNOWN_ACTION);
+        this.id = content.optLong("id", -1);
+        JSONArray p = content.optJSONArray("p");
+        this.params = new ArrayList<>();
+        for(int i = 0; i < p.length(); i++) {
+            this.params.add(p.optString(i));
+        }
+    }
+
+    public ActionMessage(long time, String actionType, long id, ArrayList<String> params) {
+        super(time);
+        this.actionType = actionType;
         this.id = id;
         this.params = params;
     }

@@ -1,10 +1,5 @@
 package massim;
 
-import massim.protocol.WorldData;
-import massim.protocol.DynamicWorldData;
-import massim.protocol.StaticWorldData;
-import massim.util.IOUtil;
-
 import org.json.JSONObject;
 
 import java.io.File;
@@ -25,22 +20,25 @@ public class ReplayWriter {
         this.replayPath = replayPath;
     }
 
-    public void updateState(String simId, String startTime, WorldData world) {
-        if (world instanceof DynamicWorldData) {
-            DynamicWorldData dynamicWorld = (DynamicWorldData) world;
-
-            int step = dynamicWorld.step;
+    public void updateState(String simId, String startTime, JSONObject world) {
+        if (!isStatic(world)) {
+            int step = world.optInt("step");
             int group = step / GROUP_SIZE;
             String stepStr = String.valueOf(step);
 
             if (lastGroup != group || cache.has(stepStr)) cache = new JSONObject();
-            cache.put(stepStr, new JSONObject(dynamicWorld));
+            cache.put(stepStr, world);
             write(startTime, simId, String.valueOf(group * GROUP_SIZE), cache);
 
             lastGroup = group;
         } else {
-            write(startTime, simId, "static", new JSONObject(world));
+            write(startTime, simId, "static", world);
         }
+    }
+
+    private boolean isStatic(JSONObject world) {
+        //TODO
+        return true;
     }
 
     private void write(String startTime, String simId, String name, JSONObject json) {
