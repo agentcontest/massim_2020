@@ -19,7 +19,6 @@ import java.util.concurrent.Executors;
 
 /**
  * Environment interface to the MASSim server following the Environment Interface Standard (EIS).
- * Supports the City Scenario 2017.
  */
 public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
@@ -123,11 +122,10 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
             e.printStackTrace();
         }
 
-        // parse host, port and scenario
+        // parse host and port
         String host = config.optString("host", "localhost");
         int port = config.optInt("port", 12300);
-        String scenario = config.optString("scenario", "city2018");
-        Log.log("Configuring EIS: " + scenario + "@" + host + ":" + port);
+        Log.log("Configuring EIS: " + host + ":" + port);
 
         // annotate percepts with timestamps
         if(config.optBoolean("times", true)){
@@ -171,11 +169,11 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
             String password = jsonEntity.optString("password");
             if (password == null) throw new ParseException("Entity must have a valid password", 0);
 
-            EISEntity entity = EISEntity.createEntity(name, scenario, host, port, username, password);
+            EISEntity entity = EISEntity.createEntity(name, host, port, username, password);
 
-            if(jsonEntity.optBoolean("xml", true)){
-                entity.enableXML();
-                Log.log("Enable XML for entity " + entity.getName());
+            if(jsonEntity.optBoolean("json", true)){
+                entity.enableJSON();
+                Log.log("Enable JSON for entity " + entity.getName());
             }
             if(jsonEntity.optBoolean("iilang", true)){
                 entity.enableIILang();

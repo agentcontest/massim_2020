@@ -26,7 +26,7 @@ public class ActionMessage extends Message{
         }
     }
 
-    public ActionMessage(String actionType, long id, ArrayList<String> params) {
+    public ActionMessage(String actionType, long id, List<String> params) {
         this.actionType = actionType;
         this.id = id;
         this.params = params;

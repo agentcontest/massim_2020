@@ -12,7 +12,6 @@ import massim.eismassim.EnvironmentInterface;
 import massim.javaagents.agents.Agent;
 import massim.javaagents.agents.BasicAgent;
 import massim.javaagents.agents.DummyAgent;
-import massim.javaagents.agents.WarpAgent;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -90,9 +89,6 @@ public class Scheduler implements AgentListener, EnvironmentListener{
             switch(agentConf.className){
                 case "BasicAgent":
                     agent = new BasicAgent(agentConf.name, mailService);
-                    break;
-                case "WarpAgent":
-                    agent = new WarpAgent(agentConf.name, mailService);
                     break;
                 case "DummyAgent":
                     agent = new DummyAgent(agentConf.name, mailService);

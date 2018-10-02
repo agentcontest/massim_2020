@@ -7,22 +7,15 @@ import eis.iilang.Action;
 import eis.iilang.Numeral;
 import eis.iilang.Parameter;
 import eis.iilang.Percept;
-import massim.eismassim.entities.CityEntity;
-import massim.eismassim.util.Conversions;
-import massim.protocol.*;
-import massim.protocol.messagecontent.*;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import massim.eismassim.entities.ScenarioEntity;
+import massim.protocol.messages.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -46,7 +39,7 @@ public abstract class EISEntity implements Runnable{
     private String password;
     private String host;
     private int port;
-    private boolean useXML = false;
+    private boolean useJSON = false;
     private boolean useIILang = false;
 
     private boolean connected = false;
@@ -69,40 +62,42 @@ public abstract class EISEntity implements Runnable{
     protected long currentActionId;
     private long lastUsedActionIdPercept;
 
-    /**
-     * @return an array containing all classes representing percepts (extending
-     * {@link RequestAction} and {@link SimStart} in the entity's
-     * scenario)
-     */
-    protected abstract Class[] getPerceptTypes();
+    public EISEntity(String name, String host, int port, String username, String password) {
+        this.name = name;
+        this.host = host;
+        this.port = port;
+        this.username = username;
+        this.password = password;
+    }
 
     /**
      * Maps the sim-start-message to IILang.
      * @param startPercept the sim-start message to map
      * @return a list of percepts derived from the sim-start message
      */
-    protected abstract List<Percept> simStartToIIL(SimStart startPercept);
+    protected abstract List<Percept> simStartToIIL(SimStartMessage startPercept);
 
     /**
      * Maps the request-action-message to IILang.
      * @param message the step percept message
      * @return a collection of percepts derived from the request-action message
      */
-    protected abstract Collection<Percept> requestActionToIIL(Message message);
+    protected abstract Collection<Percept> requestActionToIIL(RequestActionMessage message);
 
     /**
      * Maps the sim-end-message to IILang.
      * @param endPercept the sim-end percept to map
      * @return a collection of percepts derived from the sim-end message
      */
-    protected abstract Collection<Percept> simEndToIIL(SimEnd endPercept);
+    protected abstract Collection<Percept> simEndToIIL(SimEndMessage endPercept);
 
     /**
-     * Maps an IILang-action to XML.
+     * Maps an IILang-action to JSON.
+     * @param id the action ID to use
      * @param action the action to transform
-     * @return the XML document (to send)
+     * @return the JSON object (to send)
      */
-    protected abstract Document actionToXML(Action action);
+    protected abstract JSONObject actionToJSON(long id, Action action);
 
     /**
      * Sets the environment interface for all entities
@@ -149,10 +144,10 @@ public abstract class EISEntity implements Runnable{
     }
 
     /**
-     * Enables xml output for percepts.
+     * Enables json output for percepts.
      */
-    void enableXML() {
-        useXML = true;
+    void enableJSON() {
+        useJSON = true;
     }
 
     /**
@@ -172,28 +167,14 @@ public abstract class EISEntity implements Runnable{
     /**
      * Factory method for creating a scenario-specific entity.
      * @param name name of the entity
-     * @param scenario the scenario to use
      * @param host massim server address
      * @param port massim server port
      * @param username entity user name for massim server
      * @param password password for massim server
      * @return an entity with the given parameters or null if the scenario is not known
      */
-    static EISEntity createEntity(String name, String scenario, String host, int port, String username, String password) {
-        EISEntity entity = null;
-        switch(scenario){
-            case "city2018":
-                entity = new CityEntity();
-                break;
-        }
-        if(entity != null){
-            entity.name = name;
-            entity.host = host;
-            entity.port = port;
-            entity.username = username;
-            entity.password = password;
-        }
-        return entity;
+    static EISEntity createEntity(String name, String host, int port, String username, String password) {
+        return new ScenarioEntity(name, host, port, username, password);
     }
 
     /**
@@ -209,62 +190,65 @@ public abstract class EISEntity implements Runnable{
         while (!terminated && connected){
 
             // receive a message
-            Document doc;
+            JSONObject json;
             try {
-                doc = receiveDocument();
-            } catch (IOException | SAXException | ParserConfigurationException e) {
+                json = receiveMessage();
+            } catch (IOException e) {
                 e.printStackTrace();
                 releaseConnection();
                 break;
             }
 
             // process message
-            Message msg = Message.parse(doc, getPerceptTypes());
+            Message msg = Message.buildFromJson(json);
             if (msg == null) continue;
 
-            if (msg.getContent() instanceof SimStart) {
+            if (msg instanceof SimStartMessage) {
+                SimStartMessage startMessage = (SimStartMessage) msg;
                 simStartPercepts.clear();
                 simStartPercepts.add(new Percept("simStart"));
-                simStartPercepts.addAll(simStartToIIL((SimStart) msg.getContent()));
+                simStartPercepts.addAll(simStartToIIL(startMessage));
 
-                if (times) annotatePercepts(simStartPercepts, new Numeral(msg.getTimestamp()));
+                if (times) annotatePercepts(simStartPercepts, new Numeral(startMessage.getTime()));
                 if (notifications) EI.sendNotifications(getName(), simStartPercepts);
                 if (queued) perceptsQueue.add(Collections.synchronizedSet(new HashSet<>(simStartPercepts)));
             }
-            else if (msg.getContent() instanceof RequestAction) {
-                RequestAction rac = (RequestAction) msg.getContent();
+            else if (msg instanceof RequestActionMessage) {
+                RequestActionMessage rac = (RequestActionMessage) msg;
                 long id = rac.getId();
 
                 requestActionPercepts.clear();
                 requestActionPercepts.add(new Percept("requestAction"));
-                requestActionPercepts.addAll(requestActionToIIL(msg));
+                requestActionPercepts.addAll(requestActionToIIL(rac));
 
-                if (times) annotatePercepts(requestActionPercepts, new Numeral(msg.getTimestamp()));
+                if (times) annotatePercepts(requestActionPercepts, new Numeral(rac.getTime()));
                 if (notifications) EI.sendNotifications(this.getName(), requestActionPercepts);
                 currentActionId = id;
                 if (queued) perceptsQueue.add(Collections.synchronizedSet(new HashSet<>(requestActionPercepts)));
             }
-            else if (msg.getContent() instanceof SimEnd) {
+            else if (msg instanceof SimEndMessage) {
+                SimEndMessage endMessage = (SimEndMessage) msg;
                 simStartPercepts.clear();
                 requestActionPercepts.clear();
                 simEndPercepts.clear();
                 simEndPercepts.add(new Percept("simEnd"));
-                simEndPercepts.addAll(simEndToIIL((SimEnd) msg.getContent()));
-                if (times) annotatePercepts(simEndPercepts,new Numeral(msg.getTimestamp()));
+                simEndPercepts.addAll(simEndToIIL(endMessage));
+                if (times) annotatePercepts(simEndPercepts,new Numeral(endMessage.getTime()));
                 if (notifications) EI.sendNotifications(this.getName(), simEndPercepts);
                 if (queued) perceptsQueue.add(Collections.synchronizedSet(new HashSet<>(simEndPercepts)));
             }
-            else if (msg.getContent() instanceof Bye) {
+            else if (msg instanceof ByeMessage) {
+                ByeMessage byeMessage = (ByeMessage) msg;
                 simStartPercepts.clear();
                 requestActionPercepts.clear();
                 byePercepts.clear();
                 byePercepts.add(new Percept("bye"));
-                if (times) annotatePercepts(byePercepts,new Numeral(msg.getTimestamp()));
+                if (times) annotatePercepts(byePercepts,new Numeral(byeMessage.getTime()));
                 if (notifications) EI.sendNotifications(this.getName(), byePercepts);
                 if (queued) perceptsQueue.add(Collections.synchronizedSet(new HashSet<>(byePercepts)));
             }
             else {
-                log("unexpected type " + msg.getContent().getClass());
+                log("unexpected type " + msg.getMessageType());
             }
         }
     }
@@ -318,7 +302,7 @@ public abstract class EISEntity implements Runnable{
     }
 
     /**
-     * Performs an action by transforming it to XML and sending it to the massim server.
+     * Performs an action by transforming it to JSON and sending it to the massim server.
      * @param action the action to perform
      * @throws ActException if the action could not be sent
      */
@@ -337,12 +321,12 @@ public abstract class EISEntity implements Runnable{
             }
         }
 
-        Document doc = actionToXML(action);
+        JSONObject json = actionToJSON(currentActionId, action);
         try {
             assert currentActionId != lastUsedActionId;
-            sendDocument(doc);
+            sendMessage(json);
             lastUsedActionId = currentActionId;
-        } catch (TransformerException | IOException e) {
+        } catch (IOException e) {
             releaseConnection();
             throw new ActException(ActException.FAILURE, "sending action failed", e);
         }
@@ -393,29 +377,31 @@ public abstract class EISEntity implements Runnable{
     private boolean authenticate() {
 
         // create and try to send message
-        Message authReq = new Message(null, new AuthRequest(username, password));
+        Message authReq = new AuthRequestMessage(username, password);
         try {
-            sendDocument(authReq.toXML());
-        } catch (IOException | TransformerException e) {
+            sendMessage(authReq.toJson());
+        } catch (IOException e) {
             log(e.getMessage());
             return false;
         }
 
         // get responseMsg
-        Document xmlResponse;
+        JSONObject jsonResponse;
         try {
-            xmlResponse = receiveDocument();
+            jsonResponse = receiveMessage();
         }
-        catch (IOException | SAXException | ParserConfigurationException e) {
+        catch (IOException e) {
             e.printStackTrace();
             return false;
         }
-        Message responseMsg = Message.parse(xmlResponse);
+        Message responseMsg = Message.buildFromJson(jsonResponse);
 
         // check for success
-        if (responseMsg == null || !(responseMsg.getContent() instanceof AuthResponse)) return false;
-        AuthResponse authResponse = (AuthResponse) responseMsg.getContent();
-        return authResponse.getResult() == AuthResponse.AuthenticationResult.OK;
+        if (responseMsg instanceof AuthResponseMessage) {
+            AuthResponseMessage authResponse = (AuthResponseMessage) responseMsg;
+            return authResponse.getResult().equals(AuthResponseMessage.OK);
+        }
+        return false;
     }
 
     /**
@@ -455,24 +441,23 @@ public abstract class EISEntity implements Runnable{
 
     /**
      * Sends a document.
-     * @param doc the document to be sent
+     * @param json the message to be sent
      * @throws IOException if the document could not be sent
      */
-    private void sendDocument(Document doc) throws IOException, TransformerException {
-        TransformerFactory.newInstance().newTransformer().transform(new DOMSource(doc), new StreamResult(out));
-        out.write(0);
-        out.flush();
-        if (useXML) log(Conversions.docToString(doc, true) + " sent");
+    private void sendMessage(JSONObject json) throws IOException {
+        OutputStreamWriter osw = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+        osw.write(json.toString());
+        osw.write(0);
+        osw.flush();
+        if (useJSON) log(json.toString(3) + "\nsent");
     }
 
     /**
      * Receives a document from the server,
      * @return the received document.
-     * @throws IOException if no document could be received
-     * @throws ParserConfigurationException if there's some bad problem with the DOM parser
-     * @throws SAXException if an error occurred during parsing
+     * @throws IOException if no message could be received
      */
-    private Document receiveDocument() throws IOException, ParserConfigurationException, SAXException {
+    private JSONObject receiveMessage() throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int read = in.read();
         while (read != 0) {
@@ -480,10 +465,15 @@ public abstract class EISEntity implements Runnable{
             buffer.write(read);
             read = in.read();
         }
-        byte[] raw = buffer.toByteArray();
-        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(raw));
-        if (useXML) log(Conversions.docToString(doc, true) + " received");
-        return doc;
+        String message = buffer.toString(StandardCharsets.UTF_8);
+        try {
+            JSONObject json = new JSONObject(message);
+            if (useJSON) log(json.toString(3) + "\nreceived");
+            return json;
+        } catch(JSONException e){
+            log("Invalid object: " + message);
+        }
+        return null;
     }
 
     protected void setType(String type) {

@@ -192,7 +192,7 @@ class AgentManager {
             } catch (TimeoutException e) {
                 Log.log(Log.Level.NORMAL, "No valid action available in time for agent " + name + ".");
             }
-            return new ActionMessage(-1, ActionMessage.NO_ACTION, id, new ArrayList<>());
+            return new ActionMessage(ActionMessage.NO_ACTION, id, new ArrayList<>());
         }
 
         /**
