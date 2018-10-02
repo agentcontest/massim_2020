@@ -7,7 +7,6 @@ import eis.iilang.Action;
 import eis.iilang.Numeral;
 import eis.iilang.Parameter;
 import eis.iilang.Percept;
-import massim.eismassim.entities.ScenarioEntity;
 import massim.protocol.messages.*;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -162,19 +161,6 @@ public abstract class EISEntity implements Runnable{
      */
     String getName(){
         return name;
-    }
-
-    /**
-     * Factory method for creating a scenario-specific entity.
-     * @param name name of the entity
-     * @param host massim server address
-     * @param port massim server port
-     * @param username entity user name for massim server
-     * @param password password for massim server
-     * @return an entity with the given parameters or null if the scenario is not known
-     */
-    static EISEntity createEntity(String name, String host, int port, String username, String password) {
-        return new ScenarioEntity(name, host, port, username, password);
     }
 
     /**

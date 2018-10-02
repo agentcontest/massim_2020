@@ -3,11 +3,8 @@ package massim;
 import massim.config.ServerConfig;
 import massim.config.TeamConfig;
 import massim.monitor.Monitor;
-import massim.protocol.messages.ActionMessage;
-import massim.protocol.messages.RequestActionMessage;
-import massim.protocol.messages.SimEndMessage;
-import massim.protocol.messages.SimStartMessage;
-import massim.scenario.AbstractSimulation;
+import massim.simulation.AbstractSimulation;
+import massim.simulation.game.Simulation;
 import massim.util.IOUtil;
 import massim.util.InputManager;
 import massim.util.Log;
@@ -280,49 +277,37 @@ public class Server {
      */
     private void runMatch(Set<TeamConfig> matchTeams) {
 
-        String startTime = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
-
-        JSONObject result = new JSONObject();
+        var startTime = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
+        var result = new JSONObject();
         for (JSONObject simConfig: config.simConfigs){
             // initialize random
             long randomSeed = simConfig.optLong("randomSeed", System.currentTimeMillis());
             Log.log(Log.Level.NORMAL, "Configuring random seed: " + randomSeed);
             RNG.initialize(randomSeed);
-            // create and run scenario instance with the given teams
-            String className = simConfig.optString("scenarioClass", "");
-            if (className.equals("")){
-                Log.log(Log.Level.ERROR, "No scenario class specified.");
-                continue;
+            // create and run simulation instance with the given teams
+            AbstractSimulation sim = new Simulation();
+
+            int steps = simConfig.optInt("steps", 1000);
+
+            // handle initial state
+            var initialPercepts = sim.init(steps, simConfig, matchTeams);
+            handleSimState(sim.getName(), startTime, sim.getStaticData());
+            agentManager.handleInitialPercepts(initialPercepts);
+
+            // handle steps
+            for (int i = 0; i < steps; i++){
+                Log.log(Log.Level.NORMAL, "Simulation at step " + i);
+                handleInputs(sim);
+                var percepts = sim.preStep(i);
+                var actions = agentManager.requestActions(percepts);
+                sim.step(i, actions); // execute step with agent actions
+                handleSimState(sim.getName(), startTime, sim.getSnapshot());
             }
-            try {
-                AbstractSimulation sim = (AbstractSimulation) AbstractSimulation.class.getClassLoader()
-                                                                .loadClass("massim.scenario." + className)
-                                                                .newInstance();
 
-                int steps = simConfig.optInt("steps", 1000);
-
-                // handle initial state
-                Map<String, SimStartMessage> initialPercepts = sim.init(steps, simConfig, matchTeams);
-                handleSimState(sim.getName(), startTime, sim.getStaticData());
-                agentManager.handleInitialPercepts(initialPercepts);
-
-                // handle steps
-                for (int i = 0; i < steps; i++){
-                    Log.log(Log.Level.NORMAL, "Simulation at step " + i);
-                    handleInputs(sim);
-                    Map<String, RequestActionMessage> percepts = sim.preStep(i);
-                    Map<String, ActionMessage> actions = agentManager.requestActions(percepts);
-                    sim.step(i, actions); // execute step with agent actions
-                    handleSimState(sim.getName(), startTime, sim.getSnapshot());
-                }
-
-                // handle final state
-                Map<String, SimEndMessage> finalPercepts = sim.finish();
-                agentManager.handleFinalPercepts(finalPercepts);
-                result.put(sim.getName(), sim.getResult());
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                Log.log(Log.Level.ERROR, "Could not load scenario class: " + className);
-            }
+            // handle final state
+            var finalPercepts = sim.finish();
+            agentManager.handleFinalPercepts(finalPercepts);
+            result.put(sim.getName(), sim.getResult());
         }
 
         // write match result to file

@@ -1,4 +1,4 @@
-package massim.scenario;
+package massim.simulation.game;
 
 import massim.config.TeamConfig;
 import massim.util.Log;

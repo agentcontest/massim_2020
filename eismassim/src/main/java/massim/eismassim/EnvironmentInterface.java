@@ -6,6 +6,7 @@ import eis.iilang.Action;
 import eis.iilang.EnvironmentState;
 import eis.iilang.IILElement;
 import eis.iilang.Percept;
+import massim.eismassim.entities.ScenarioEntity;
 import massim.protocol.messages.scenario.Actions;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -169,7 +170,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
             String password = jsonEntity.optString("password");
             if (password == null) throw new ParseException("Entity must have a valid password", 0);
 
-            EISEntity entity = EISEntity.createEntity(name, host, port, username, password);
+            EISEntity entity = new ScenarioEntity(name, host, port, username, password);
 
             if(jsonEntity.optBoolean("json", true)){
                 entity.enableJSON();

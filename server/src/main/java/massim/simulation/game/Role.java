@@ -1,7 +1,7 @@
-package massim.scenario;
+package massim.simulation.game;
 
 /**
- * A role in the scenario.
+ * A role in the simulation.
  */
 public class Role {
 

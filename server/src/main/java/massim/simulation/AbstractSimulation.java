@@ -1,4 +1,4 @@
-package massim.scenario;
+package massim.simulation;
 
 import massim.config.TeamConfig;
 import massim.protocol.messages.ActionMessage;
@@ -17,9 +17,9 @@ import java.util.Set;
 public abstract class AbstractSimulation {
 
     /**
-     * Setup the scenario. Called before the first step.
+     * Setup the simulation. Called before the first step.
      * @param steps total number of steps
-     * @param config the scenario's configuration.
+     * @param config the simulation's configuration.
      * @param matchTeams set of participating teams and their details
      * @return map of agent names to their respective initial (sim-start) percept
      */
@@ -34,7 +34,7 @@ public abstract class AbstractSimulation {
     public abstract Map<String, RequestActionMessage> preStep(int stepNo);
 
     /**
-     * Execute one step in the scenario.
+     * Execute one step in the simulation.
      * The agent's new actions have been set now.
      * @param stepNo number of the simulation step
      * @param actionMap mapping from agent names to their actions for this step
@@ -42,7 +42,7 @@ public abstract class AbstractSimulation {
     public abstract void step(int stepNo, Map<String, ActionMessage> actionMap);
 
     /**
-     * Finish scenario execution, prepare results, etc.
+     * Finish simulation execution, prepare results, etc.
      * @return map from agent names to sim-end percepts
      */
     public abstract Map<String, SimEndMessage> finish();

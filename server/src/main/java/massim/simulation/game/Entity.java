@@ -1,7 +1,7 @@
-package massim.scenario;
+package massim.simulation.game;
 
 /**
- * A controllable entity in the scenario.
+ * A controllable entity in the simulation.
  */
 public class Entity {
 

@@ -1,4 +1,4 @@
-package massim.scenario;
+package massim.simulation.game;
 
 /**
  * Stores some team info.

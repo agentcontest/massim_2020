@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import java.util.*;
 
 /**
- * An EIS compatible entity for the 2017 MAPC City scenario.
+ * An EIS compatible entity.
  */
 public class ScenarioEntity extends EISEntity {
 
