@@ -287,7 +287,7 @@ public class Server {
             // create and run simulation instance with the given teams
             AbstractSimulation sim = new Simulation();
 
-            int steps = simConfig.optInt("steps", 1000);
+            int steps = simConfig.getInt("steps");
 
             // handle initial state
             var initialPercepts = sim.init(steps, simConfig, matchTeams);
@@ -372,51 +372,51 @@ public class Server {
      */
     public static ServerConfig parseServerConfig(JSONObject conf){
         ServerConfig config = new ServerConfig();
-        JSONObject serverJSON = conf.optJSONObject("server");
+        JSONObject serverJSON = conf.getJSONObject("server");
         if (serverJSON == null) {
             Log.log(Log.Level.ERROR, "No server object in configuration.");
             serverJSON = new JSONObject();
         }
-        config.launch = serverJSON.optString("launch", "key");
+        config.launch = serverJSON.getString("launch");
         Log.log(Log.Level.NORMAL, "Configuring launch type: " + config.launch);
-        config.tournamentMode = serverJSON.optString("tournamentMode", "round-robin");
+        config.tournamentMode = serverJSON.getString("tournamentMode");
         Log.log(Log.Level.NORMAL, "Configuring tournament mode: " + config.tournamentMode);
-        config.teamSize = serverJSON.optInt("teamSize", 16);
+        config.teamSize = serverJSON.getInt("teamSize");
         Log.log(Log.Level.NORMAL, "Configuring team size: " + config.teamSize);
-        config.teamsPerMatch = serverJSON.optInt("teamsPerMatch", 2);
+        config.teamsPerMatch = serverJSON.getInt("teamsPerMatch");
         Log.log(Log.Level.NORMAL, "Configuring teams per match: " + config.teamsPerMatch);
-        config.port = serverJSON.optInt("port", 12300);
+        config.port = serverJSON.getInt("port");
         Log.log(Log.Level.NORMAL, "Configuring port: " + config.port);
-        config.backlog = serverJSON.optInt("backlog", 10000);
+        config.backlog = serverJSON.getInt("backlog");
         Log.log(Log.Level.NORMAL, "Configuring backlog: " + config.backlog);
-        config.agentTimeout = serverJSON.optInt("agentTimeout", 4000);
+        config.agentTimeout = serverJSON.getInt("agentTimeout");
         Log.log(Log.Level.NORMAL, "Configuring agent timeout: " + config.agentTimeout);
-        config.logPath = serverJSON.optString("logPath");
+        config.logPath = serverJSON.getString("logPath");
         Log.log(Log.Level.NORMAL, "Configuring log path: " + config.logPath);
-        config.logLevel = serverJSON.optString("logLevel", "normal");
+        config.logLevel = serverJSON.getString("logLevel");
         Log.log(Log.Level.NORMAL, "Configuring log level: " + config.logLevel);
-        config.resultPath = serverJSON.optString("resultPath", "results");
+        config.resultPath = serverJSON.getString("resultPath");
         Log.log(Log.Level.NORMAL, "Configuring result path: " + config.resultPath);
-        config.maxPacketLength = serverJSON.optInt("maxPacketLength", 65536);
+        config.maxPacketLength = serverJSON.getInt("maxPacketLength");
         Log.log(Log.Level.NORMAL, "Configuring max packet length: " + config.maxPacketLength);
-        config.replayPath = serverJSON.optString("replayPath");
+        config.replayPath = serverJSON.getString("replayPath");
         Log.log(Log.Level.NORMAL, "Configuring replay path: " + config.replayPath);
 
         // parse teams
-        JSONObject teamJSON = conf.optJSONObject("teams");
+        JSONObject teamJSON = conf.getJSONObject("teams");
         Set<String> allAgents = new HashSet<>();
         if (teamJSON == null) Log.log(Log.Level.ERROR, "No teams configured.");
         else{
             teamJSON.keySet().forEach(name -> {
                 TeamConfig team = new TeamConfig(name);
                 config.teams.add(team);
-                JSONArray accounts = teamJSON.optJSONArray(name);
+                JSONArray accounts = teamJSON.getJSONArray(name);
                 if (accounts != null){
                     for (int i = 0; i < Math.min(accounts.length(), config.teamSize); i++) {
-                        JSONArray account = accounts.optJSONArray(i);
+                        JSONArray account = accounts.getJSONArray(i);
                         if(account != null){
-                            String accName = account.optString(0);
-                            String accPw = account.optString(1);
+                            String accName = account.getString(0);
+                            String accPw = account.getString(1);
                             if(!accName.equals("") && !accPw.equals("")){
                                 if(!allAgents.add(accName))
                                     Log.log(Log.Level.CRITICAL, "Agent " + accName + " occurs in multiple teams.");
@@ -430,13 +430,13 @@ public class Server {
         }
 
         // parse matches
-        JSONArray matchJSON = conf.optJSONArray("match");
+        JSONArray matchJSON = conf.getJSONArray("match");
         if (matchJSON == null){
             Log.log(Log.Level.ERROR, "No match configured.");
             System.exit(0);
         }
         for(int i = 0; i < matchJSON.length(); i++){
-            JSONObject simConfig = matchJSON.optJSONObject(i);
+            JSONObject simConfig = matchJSON.getJSONObject(i);
             if (simConfig != null) {
                 config.simConfigs.add(simConfig);
             }
@@ -447,13 +447,13 @@ public class Server {
             Map<String, TeamConfig> teamMap = config.teams.stream()
                     .collect(Collectors.toMap(TeamConfig::getName, t -> t));
             List<Set<TeamConfig>> matchTeams = new Vector<>();
-            JSONArray manualConf = conf.optJSONArray("manual-mode");
+            JSONArray manualConf = conf.getJSONArray("manual-mode");
             if (manualConf == null){
                 Log.log(Log.Level.CRITICAL, "No teams configured for manual mode. Exiting.");
                 System.exit(0);
             }
             for(int i = 0; i < manualConf.length(); i++){
-                JSONArray teamList = manualConf.optJSONArray(i);
+                JSONArray teamList = manualConf.getJSONArray(i);
                 if(teamList != null){
                     Set<TeamConfig> parsedTeamNames = new HashSet<>();
                     for (int j = 0; j < config.teamsPerMatch; j++){
