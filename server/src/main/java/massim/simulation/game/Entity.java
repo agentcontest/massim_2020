@@ -5,13 +5,5 @@ package massim.simulation.game;
  */
 public class Entity {
 
-    private Role role;
 
-    public Entity(Role role) {
-        this.role = role;
-    }
-
-    public Role getRole() {
-        return role;
-    }
 }

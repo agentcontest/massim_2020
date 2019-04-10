@@ -5,6 +5,7 @@ import massim.util.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.management.relation.Role;
 import java.util.*;
 
 /**
@@ -19,7 +20,6 @@ public class WorldState {
     private Map<String, String> agentToTeam = new HashMap<>();
     private Map<String, Entity> agentToEntity = new HashMap<>();
     private Map<Entity, String> entityToAgent = new HashMap<>();
-    private Map<String, Role> roles;
     private List<String> agentNames;
 
     public WorldState(int steps, JSONObject config, Set<TeamConfig> matchTeams) {
@@ -31,8 +31,6 @@ public class WorldState {
         Log.log(Log.Level.NORMAL, "Configuring simulation id: " + id);
         randomFail = config.optInt("randomFail", 1);
         Log.log(Log.Level.NORMAL, "Configuring random fail probability: " + randomFail);
-
-        roles = parseRoles(config.optJSONObject("roles"));
 
         // store teams
         matchTeams.forEach(team -> {
@@ -51,7 +49,7 @@ public class WorldState {
                     String roleName = entityConf.keys().next();
                     int amount = entityConf.optInt(roleName, 0);
                     for (int j = 0; j < amount; j++){
-                        Entity entity = new Entity(roles.get(roleName));
+                        Entity entity = new Entity();
                         int finalI = i;
                         matchTeams.forEach(team -> {
                             String agentName;
@@ -70,28 +68,6 @@ public class WorldState {
                 }
             }
         }
-    }
-
-    /**
-     * Reads role information from the "role" JSON object.
-     * @param roleConf the JSON object hopefully containing some roles
-     */
-    private static Map<String, Role> parseRoles(JSONObject roleConf) {
-        if (roleConf == null){
-            Log.log(Log.Level.CRITICAL, "No roles defined");
-            return new HashMap<>();
-        }
-        Map<String, Role> roleMap = new HashMap<>();
-        roleConf.keys().forEachRemaining(roleName -> {
-            JSONObject roleJson = roleConf.optJSONObject(roleName);
-            if (roleJson == null) {
-                Log.log(Log.Level.ERROR, "Invalid JSON role object.");
-            }
-            else {
-                roleMap.put(roleName, new Role(roleName));
-            }
-        });
-        return roleMap;
     }
 }
 
