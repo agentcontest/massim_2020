@@ -8,6 +8,7 @@ import massim.protocol.messages.SimStartMessage;
 import massim.simulation.AbstractSimulation;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,12 +16,12 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public Map<String, SimStartMessage> init(int steps, JSONObject config, Set<TeamConfig> matchTeams) {
-        return null;
+        return new HashMap<>();
     }
 
     @Override
     public Map<String, RequestActionMessage> preStep(int stepNo) {
-        return null;
+        return new HashMap<>();
     }
 
     @Override
@@ -30,7 +31,7 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public Map<String, SimEndMessage> finish() {
-        return null;
+        return new HashMap<>();
     }
 
     @Override
@@ -40,17 +41,17 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public String getName() {
-        return null;
+        return "";
     }
 
     @Override
     public JSONObject getSnapshot() {
-        return null;
+        return new JSONObject();
     }
 
     @Override
     public JSONObject getStaticData() {
-        return null;
+        return new JSONObject();
     }
 
     @Override

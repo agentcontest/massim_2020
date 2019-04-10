@@ -1,5 +1,6 @@
 package massim;
 
+import massim.util.Log;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -42,6 +43,10 @@ public class ReplayWriter {
     }
 
     private void write(String startTime, String simId, String name, JSONObject json) {
+        if(json == null) {
+            Log.log(Log.Level.ERROR, "No JSON object to write.");
+            return;
+        }
         String prefix = startTime + "-" + simId;
         File file = Paths.get(this.replayPath, prefix, name + ".json").toFile();
         File dir = file.getParentFile();
