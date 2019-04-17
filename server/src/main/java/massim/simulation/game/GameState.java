@@ -75,6 +75,9 @@ class GameState {
                 }
             }
         }
+
+        // create goal area
+        grid.setTerrain(Position.of(gridX/2, gridY/2), Terrain.GOAL);
     }
 
     int getRandomFail() {

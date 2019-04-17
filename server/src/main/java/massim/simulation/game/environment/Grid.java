@@ -195,4 +195,10 @@ public class Grid {
     public boolean isFree(Position xy) {
         return !outOfBounds(xy) && collisionMap[xy.x][xy.y] == null;
     }
+
+    public void setTerrain(Position pos, Terrain terrainType) {
+        if (!outOfBounds(pos)) {
+            terrainMap[pos.x][pos.y] = terrainType;
+        }
+    }
 }
