@@ -9,15 +9,17 @@
 
   "match" : [
     {
-      "id" : "2019-SampleSimulation",
-      "scenarioClass" : "city.CitySimulation",
-      "steps" : 1000,
+      "steps" : 10,
       "randomSeed" : 17,
       "randomFail" : 1,
-
-      "roles" : "$(roles/roles.json)",
-      "entities" : [{"standard" : 10}],
-      "generate" : "$(generate/generate.json)"
+      "entities" : [{"standard" : 2}],
+      "grid" : {
+        "height" : 20,
+        "width" : 20
+      },
+      "attachLimit" : 10,
+      "generate" : {
+      }
     }
   ],
 

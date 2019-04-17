@@ -3,13 +3,13 @@ package massim.simulation.game;
 /**
  * Stores some team info.
  */
-public class TeamState {
+public class Team {
 
     private long score = 0;
 
     private String name;
 
-    TeamState(String name){
+    Team(String name){
         this.name = name;
     }
 
