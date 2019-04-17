@@ -205,4 +205,33 @@ class GameState {
     private boolean ofDifferentTeams(Entity e1, Entity e2) {
         return agentToTeam.get(e1.getAgentName()).equals(agentToTeam.get(e2.getAgentName()));
     }
+
+    public JSONObject takeSnapshot() {
+        JSONObject snapshot = new JSONObject();
+        for (GameObject o : gameObjects.values()) {
+            if (o instanceof Entity) {
+                JSONObject entity = new JSONObject();
+                entity.put("x", ((Entity) o).getPosition().x);
+                entity.put("y", ((Entity) o).getPosition().y);
+                entity.put("name", ((Entity) o).getAgentName());
+                entity.put("team", agentToTeam.get(((Entity) o).getAgentName()));
+                snapshot.put(o.getID(), entity);
+            }
+            else if (o instanceof Block) {
+                JSONObject block = new JSONObject();
+                block.put("x", ((Block) o).getPosition().x);
+                block.put("y", ((Block) o).getPosition().y);
+                block.put("type", ((Block) o).getBlockType());
+                snapshot.put(o.getID(), block);
+            }
+            else if (o instanceof Dispenser) {
+                JSONObject dispenser = new JSONObject();
+                dispenser.put("x", ((Dispenser) o).getPosition().x);
+                dispenser.put("y", ((Dispenser) o).getPosition().y);
+                dispenser.put("type", ((Dispenser) o).getBlockType());
+                snapshot.put(o.getID(), dispenser);
+            }
+        }
+        return snapshot;
+    }
 }

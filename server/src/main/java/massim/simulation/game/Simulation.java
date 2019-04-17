@@ -59,8 +59,7 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public JSONObject getSnapshot() {
-        // TODO
-        return new JSONObject();
+        return state.takeSnapshot();
     }
 
     @Override
