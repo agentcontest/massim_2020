@@ -1,5 +1,4 @@
 const gulp = require('gulp');
-const gutil = require('gulp-util');
 const browserify = require('browserify');
 const tsify = require('tsify');
 const watchify = require('watchify');
@@ -21,26 +20,22 @@ const watchedBrowserify = watchify(build());
 function bundle() {
   return watchedBrowserify
     .bundle()
-    .on('error', (e) => gutil.log(gutil.colors.red(e.message)))
+    .on('error', (e) => console.error(e.message))
     .pipe(source('main.js'))
     .pipe(buffer())
     .pipe(gulp.dest(www));
 }
 
 watchedBrowserify.on('update', bundle);
-watchedBrowserify.on('log', gutil.log);
+watchedBrowserify.on('log', console.log);
 
-gulp.task('ol-css', function() {
-  gulp.src('node_modules/openlayers/dist/ol.css')
-    .pipe(gulp.dest(www));
-});
-
-gulp.task('dev', ['ol-css'], function() {
+function dev() {
   return build()
     .bundle()
     .pipe(source('main.js'))
     .pipe(gulp.dest(www));
-});
+}
 
-gulp.task('watch', ['ol-css'], bundle);
-gulp.task('default', ['dev']);
+exports.dev = dev;
+exports.watch = bundle;
+exports.default = dev;
