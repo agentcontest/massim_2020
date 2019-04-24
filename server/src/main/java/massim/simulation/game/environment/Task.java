@@ -9,7 +9,16 @@ import java.util.stream.Collectors;
 
 public class Task {
 
+    private String name;
     private Map<Position, String> requirements = new HashMap<>();
+
+    private Task(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public Map<Position, String> getRequirements() {
         return requirements;
@@ -19,8 +28,8 @@ public class Task {
         requirements.put(position, blockType);
     }
 
-    public static Task generate(int size, List<String> blockTypes) {
-        Task task = new Task();
+    public static Task generate(String name, int size, List<String> blockTypes) {
+        Task task = new Task(name);
         // TODO improve task generation
         Position lastPosition = Position.of(0, 1);
         task.addRequiredBlock(lastPosition, blockTypes.get(RNG.nextInt(blockTypes.size())));
@@ -46,7 +55,7 @@ public class Task {
     public String toString() {
         return requirements.entrySet()
                 .stream()
-                .map(e -> "(" + e.getKey() + ","+e.getValue()+")")
+                .map(e -> "task(" + name + "," + e.getKey() + ","+e.getValue()+")")
                 .collect(Collectors.joining(","));
     }
 }
