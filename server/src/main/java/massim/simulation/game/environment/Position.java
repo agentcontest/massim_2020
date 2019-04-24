@@ -12,6 +12,10 @@ public class Position {
         this.y = y;
     }
 
+    Position copy() {
+        return new Position(x, y);
+    }
+
     public int distanceTo(Position other) {
         return Math.abs(x - other.x) + Math.abs(y - other.y);
     }

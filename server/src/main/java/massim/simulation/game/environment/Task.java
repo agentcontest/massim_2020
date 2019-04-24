@@ -1,24 +1,52 @@
 package massim.simulation.game.environment;
 
-import java.util.ArrayList;
+import massim.util.RNG;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Task {
 
-    private int width;
-    private List<String[]> rows = new ArrayList<>();
+    private Map<Position, String> requirements = new HashMap<>();
 
-    public Task(int width) {
-        this.width = width;
+    public Map<Position, String> getRequirements() {
+        return requirements;
     }
 
-    public boolean addRow(String[] row) {
-        if (row.length != width) return false;
-        rows.add(row);
-        return true;
+    private void addRequiredBlock(Position position, String blockType) {
+        requirements.put(position, blockType);
     }
 
-    public String[][] getBlocks() {
-        return rows.toArray(new String[0][]);
+    public static Task generate(int size, List<String> blockTypes) {
+        Task task = new Task();
+        // TODO improve task generation
+        Position lastPosition = Position.of(0, 1);
+        task.addRequiredBlock(lastPosition, blockTypes.get(RNG.nextInt(blockTypes.size())));
+        for (int i = 0; i < size; i++) {
+            lastPosition = lastPosition.copy();
+            int index = RNG.nextInt(blockTypes.size());
+            double direction = RNG.nextDouble();
+            if (direction <= .3) {
+                lastPosition.x -= 1;
+            }
+            else if (direction <= .6) {
+                lastPosition.x += 1;
+            }
+            else {
+                lastPosition.y += 1;
+            }
+            task.addRequiredBlock(lastPosition, blockTypes.get(index));
+        }
+        return task;
+    }
+
+    @Override
+    public String toString() {
+        return requirements.entrySet()
+                .stream()
+                .map(e -> "(" + e.getKey() + ","+e.getValue()+")")
+                .collect(Collectors.joining(","));
     }
 }
