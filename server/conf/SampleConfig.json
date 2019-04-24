@@ -18,8 +18,7 @@
         "width" : 20
       },
       "attachLimit" : 10,
-      "generate" : {
-      }
+      "blockTypes" : 3
     }
   ],
 

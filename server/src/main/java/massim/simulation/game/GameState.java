@@ -21,16 +21,24 @@ class GameState {
     private Map<Entity, String> entityToAgent = new HashMap<>();
     private List<String> agentNames;
 
+    private int step = -1;
+    private Grid grid;
     private Map<String, GameObject> gameObjects = new HashMap<>();
     private Map<Position, Dispenser> dispensers = new HashMap<>();
-    private Grid grid;
+    private Map<String, Task> tasks = new HashMap<>();
+    private List<String> blockTypes = new ArrayList<>();
 
     GameState(JSONObject config, Set<TeamConfig> matchTeams) {
         // parse simulation config
         randomFail = config.getInt("randomFail");
         Log.log(Log.Level.NORMAL, "config.randomFail: " + randomFail);
-        attachLimit = config.optInt("attachLimit");
+        attachLimit = config.getInt("attachLimit");
         Log.log(Log.Level.NORMAL, "config.attachLimit: " + attachLimit);
+        int numberOfBlockTypes = config.optInt("blockTypes");
+        Log.log(Log.Level.NORMAL, "config.blockTypes: " + numberOfBlockTypes);
+        for (int i = 0; i < numberOfBlockTypes; i++) {
+            blockTypes.add("b" + i);
+        }
 
         // create teams
         matchTeams.forEach(team -> {
@@ -97,6 +105,10 @@ class GameState {
         return agentToEntity.get(agentName);
     }
 
+    void prepare(int step) {
+        this.step = step;
+    }
+
     boolean move(Entity entity, String direction) {
         return grid.moveWithAttached(entity, direction, 1);
     }
@@ -117,11 +129,9 @@ class GameState {
 
     boolean detach(Entity entity, String direction) {
         Position target = entity.getPosition().moved(direction, 1);
-        if (target == null) return false;
-        String collidableID = grid.getCollidable(target);
-        GameObject gameObject = gameObjects.get(collidableID);
-        if (!(gameObject instanceof Attachable)) return false;
-        return grid.detach(entity, (Attachable) gameObject);
+        Attachable a = getAttachable(target);
+        if (a == null) return false;
+        return grid.detach(entity, a);
     }
 
     boolean connectEntities(Entity entity, Entity partnerEntity) {
@@ -173,6 +183,39 @@ class GameState {
             return true;
         }
         return false;
+    }
+
+    boolean submitTask(Entity e, String taskName) {
+        Task task = tasks.get(taskName);
+        if (task == null || task.isCompleted()) return false;
+        Position ePos = e.getPosition();
+        Set<Attachable> availableBlocks = grid.getAllAttached(e);
+        for (Map.Entry<Position, String> entry : task.getRequirements().entrySet()) {
+            Position pos = entry.getKey();
+            String reqType = entry.getValue();
+            Position checkPos = Position.of(pos.x + ePos.x, pos.y + ePos.y);
+            Attachable actualBlock = getAttachable(checkPos);
+            if (!(actualBlock instanceof Block)
+                    || !(((Block) actualBlock).getBlockType().equals(reqType))
+                    || !availableBlocks.contains(actualBlock)) {
+                return false;
+            }
+        }
+        task.getRequirements().keySet().forEach(pos -> {
+            Attachable a = getAttachable(pos);
+            if (a != null) {
+                grid.removeAttachable(a);
+                gameObjects.remove(a.getID());
+            }
+        });
+        teams.get(agentToTeam.get(e.getAgentName())).addScore(task.getReward());
+        return true;
+    }
+
+    Task createTask() {
+        Task t = Task.generate("task" + tasks.values().size(), step + 200, 5, blockTypes);
+        tasks.put(t.getName(), t);
+        return t;
     }
 
     Entity createEntity(Position xy, String name) {

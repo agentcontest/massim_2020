@@ -29,8 +29,9 @@ public class Simulation extends AbstractSimulation {
     }
 
     @Override
-    public Map<String, RequestActionMessage> preStep(int stepNo) {
+    public Map<String, RequestActionMessage> preStep(int step) {
         // TODO  create step percepts
+        state.prepare(step);
         return new HashMap<>();
     }
 
@@ -208,7 +209,18 @@ public class Simulation extends AbstractSimulation {
                     }
                     continue;
 
-                case "submit": //TODO
+                case "submit":
+                    if (params.size() != 1) {
+                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        continue;
+                    }
+                    String taskName = params.get(0);
+                    if (state.submitTask(entity, taskName)){
+                        entity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
+                    }
+                    else {
+                        entity.setLastActionResult(ActionMessage.RESULT_F);
+                    }
                     continue;
                 default:
                     entity.setLastActionResult(ActionMessage.UNKNOWN_ACTION);

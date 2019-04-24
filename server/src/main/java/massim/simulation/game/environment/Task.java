@@ -11,13 +11,28 @@ public class Task {
 
     private String name;
     private Map<Position, String> requirements = new HashMap<>();
+    private int deadline;
+    private boolean completed = false;
 
-    private Task(String name) {
+    private Task(String name, int deadline) {
         this.name = name;
+        this.deadline = deadline;
     }
 
     public String getName() {
         return name;
+    }
+
+    public int getDeadline() {
+        return deadline;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void complete() {
+        completed = true;
     }
 
     public Map<Position, String> getRequirements() {
@@ -28,8 +43,8 @@ public class Task {
         requirements.put(position, blockType);
     }
 
-    public static Task generate(String name, int size, List<String> blockTypes) {
-        Task task = new Task(name);
+    public static Task generate(String name, int deadline, int size, List<String> blockTypes) {
+        Task task = new Task(name, deadline);
         // TODO improve task generation
         Position lastPosition = Position.of(0, 1);
         task.addRequiredBlock(lastPosition, blockTypes.get(RNG.nextInt(blockTypes.size())));
@@ -57,5 +72,9 @@ public class Task {
                 .stream()
                 .map(e -> "task(" + name + "," + e.getKey() + ","+e.getValue()+")")
                 .collect(Collectors.joining(","));
+    }
+
+    public int getReward() {
+        return (int) (10 * Math.pow(requirements.size(), 2));
     }
 }

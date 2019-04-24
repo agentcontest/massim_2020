@@ -38,6 +38,14 @@ public class Grid {
         return b;
     }
 
+    public void removeAttachable(Attachable a) {
+        if (a == null) return;
+        a.detachAll();
+        Position pos = a.getPosition();
+        if (outOfBounds(pos)) return;
+        collisionMap[pos.x][pos.y] = null;
+    }
+
     public boolean insert(String id, Position pos) {
         if (outOfBounds(pos)) return false;
         if (collisionMap[pos.x][pos.y] != null) return false;
