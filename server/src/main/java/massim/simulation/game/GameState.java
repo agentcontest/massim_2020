@@ -1,12 +1,17 @@
 package massim.simulation.game;
 
 import massim.config.TeamConfig;
+import massim.protocol.messages.RequestActionMessage;
+import massim.protocol.messages.scenario.StepPercept;
+import massim.protocol.messages.scenario.data.TaskInfo;
+import massim.protocol.messages.scenario.data.Thing;
 import massim.simulation.game.environment.*;
 import massim.util.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * State of the game.
@@ -16,7 +21,6 @@ class GameState {
     private int randomFail;
     private int attachLimit;
     private Map<String, Team> teams = new HashMap<>();
-    private Map<String, String> agentToTeam = new HashMap<>();
     private Map<String, Entity> agentToEntity = new HashMap<>();
     private Map<Entity, String> entityToAgent = new HashMap<>();
     private List<String> agentNames;
@@ -41,11 +45,11 @@ class GameState {
         }
 
         // create teams
+        agentNames = new ArrayList<>();
         matchTeams.forEach(team -> {
-            team.getAgentNames().forEach(agName -> agentToTeam.put(agName, team.getName()));
+            agentNames.addAll(team.getAgentNames());
             teams.put(team.getName(), new Team(team.getName()));
         });
-        agentNames = new ArrayList<>(agentToTeam.keySet());
 
         // create grid environment
         JSONObject gridConf = config.getJSONObject("grid");
@@ -91,8 +95,8 @@ class GameState {
     /**
      * @return the agent entity of the given name or null if it does not exist
      */
-    Entity getEntityByID(String agentName) {
-        GameObject entity = gameObjects.get(agentName);
+    Entity getEntityByID(String goID) {
+        GameObject entity = gameObjects.get(goID);
         if (!(entity instanceof Entity)) return null;
         return (Entity) entity;
     }
@@ -101,8 +105,29 @@ class GameState {
         return agentToEntity.get(agentName);
     }
 
-    void prepare(int step) {
+    Map<String, RequestActionMessage> prepare(int step) {
         this.step = step;
+        Map<String, RequestActionMessage> result = new HashMap<>();
+        Set<TaskInfo> allTasks = tasks.values().stream()
+                .filter(t -> !t.isCompleted())
+                .map(Task::toPercept)
+                .collect(Collectors.toSet());
+        for (String agent : agentNames) {
+            Entity entity = getEntityByName(agent);
+            int vision = entity.getVision();
+            Position pos = entity.getPosition();
+            Set<Thing> visibleThings = new HashSet<>();
+            for (int dy = -vision; dy <= vision ; dy++) {
+                int y = pos.y + dy;
+                int visionLeft = vision - Math.abs(dy);
+                for (int x = pos.x - visionLeft ; x <= pos.x + visionLeft; x++) {
+                    Attachable a = getAttachable(Position.of(x, y));
+                    if (a != null) visibleThings.add(a.toPercept());
+                }
+            }
+            result.put(agent, new StepPercept(teams.get(entity.getTeamName()).getScore(), visibleThings, allTasks));
+        }
+        return result;
     }
 
     boolean move(Entity entity, String direction) {
@@ -205,7 +230,7 @@ class GameState {
                 gameObjects.remove(a.getID());
             }
         });
-        teams.get(agentToTeam.get(e.getAgentName())).addScore(task.getReward());
+        teams.get(e.getTeamName()).addScore(task.getReward());
         return true;
     }
 
@@ -217,11 +242,10 @@ class GameState {
     }
 
     Entity createEntity(Position xy, String name, String teamName) {
-        Entity e = grid.createEntity(xy, name);
+        Entity e = grid.createEntity(xy, name, teamName);
         registerGameObject(e);
         agentToEntity.put(name, e);
         entityToAgent.put(e, name);
-        agentToTeam.put(name, teamName);
         return e;
     }
 
@@ -251,7 +275,7 @@ class GameState {
     }
 
     private boolean ofDifferentTeams(Entity e1, Entity e2) {
-        return agentToTeam.get(e1.getAgentName()).equals(agentToTeam.get(e2.getAgentName()));
+        return !e1.getTeamName().equals(e2.getTeamName());
     }
 
     public JSONObject takeSnapshot() {
@@ -271,7 +295,7 @@ class GameState {
                 entity.put("x", ((Entity) o).getPosition().x);
                 entity.put("y", ((Entity) o).getPosition().y);
                 entity.put("name", ((Entity) o).getAgentName());
-                entity.put("team", agentToTeam.get(((Entity) o).getAgentName()));
+                entity.put("team", ((Entity) o).getTeamName());
                 entities.put(entity);
             }
             else if (o instanceof Block) {

@@ -1,5 +1,7 @@
 package massim.simulation.game.environment;
 
+import massim.protocol.messages.scenario.data.Thing;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,6 +12,8 @@ public abstract class Attachable extends Positionable {
     public Attachable(Position position) {
         super(position);
     }
+
+    public abstract Thing toPercept();
 
     void attach(Attachable other) {
         attachments.add(other);
@@ -28,6 +32,7 @@ public abstract class Attachable extends Positionable {
     void detachAll() {
         attachments.forEach(this::detach);
     }
+
 
     private void requestAttachment(Attachable requester) {
         attachments.add(requester);

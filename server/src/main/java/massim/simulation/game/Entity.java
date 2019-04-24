@@ -1,6 +1,7 @@
 package massim.simulation.game;
 
 import massim.protocol.messages.ActionMessage;
+import massim.protocol.messages.scenario.data.Thing;
 import massim.simulation.game.environment.Attachable;
 import massim.simulation.game.environment.Position;
 
@@ -14,13 +15,21 @@ import java.util.List;
 public class Entity extends Attachable {
 
     private String agentName;
+    private String teamName;
     private String lastAction = "";
     private List<String> lastActionParams = Collections.emptyList();
     private String lastActionResult = "";
 
-    public Entity(Position xy, String agentName) {
+    private int vision = 5;
+
+    public Entity(Position xy, String agentName, String teamName) {
         super(xy);
         this.agentName = agentName;
+        this.teamName = teamName;
+    }
+
+    public String getTeamName() {
+        return teamName;
     }
 
     void setLastActionResult(String result) {
@@ -47,5 +56,14 @@ public class Entity extends Attachable {
 
     String getLastActionResult() {
         return lastActionResult;
+    }
+
+    int getVision() {
+        return vision;
+    }
+
+    @Override
+    public Thing toPercept() {
+        return new Thing(getPosition().x, getPosition().y, Thing.TYPE_ENTITY, "");
     }
 }

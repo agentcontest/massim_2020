@@ -1,10 +1,10 @@
 package massim.simulation.game.environment;
 
+import massim.protocol.messages.scenario.data.TaskInfo;
+import massim.protocol.messages.scenario.data.Thing;
 import massim.util.RNG;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Task {
@@ -76,5 +76,13 @@ public class Task {
 
     public int getReward() {
         return (int) (10 * Math.pow(requirements.size(), 2));
+    }
+
+    public TaskInfo toPercept() {
+        Set<Thing> reqs = new HashSet<>();
+        requirements.forEach((pos, type) -> {
+            reqs.add(new Thing(pos.x, pos.y, type, ""));
+        });
+        return new TaskInfo(name, deadline, reqs);
     }
 }

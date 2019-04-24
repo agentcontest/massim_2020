@@ -24,7 +24,7 @@ _2045 A.D.: Another water crisis has struck the Mars people and collapsed the cu
 
 The scenario consists of two __teams__ of a number of agents each moving through the streets of a realistic city. The goal for each team is to build and keep as many __wells__ as possible to generate the most points (__score__).
 Wells are built with massium (the game's currency), which is rewarded for completing certain __jobs__ or __trading__ assembled items in general.
-An agent is characterized by its __battery__ (i.e. how long it can move without recharging), its __capacity__ (i.e. how much volume it can carry) its __speed__, its __vision__ (how far away it can perceive) and its __skill__ (how fast it can complete certain tasks). The scenario features 4 distinct __roles__: drones, motorcycles, cars and trucks, sorted by increasing capacity and energy, and decreasing speed.
+An agent is characterized by its __battery__ (i.e. how long it can move without recharging), its __capacity__ (i.e. how much volume it can carry) its __speed__, its __vision__ (how far away it can perceive) and its __skill__ (how fast it can complete certain taskInfos). The scenario features 4 distinct __roles__: drones, motorcycles, cars and trucks, sorted by increasing capacity and energy, and decreasing speed.
 The city map is taken from __OpenStreetMap__ data and routing is provided by the Contest server. As the simulation is divided into discrete steps, each agent can move a fixed distance each turn (unless its destination is closer than this distance).
 
 Each simulation features a set of random __items__. Items differ by their volume and how they can be acquired.

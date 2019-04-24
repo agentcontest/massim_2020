@@ -10,6 +10,10 @@ public abstract class SimStartMessage extends Message {
         this.time = content.optLong("time");
     }
 
+    public SimStartMessage(long time) {
+        this.time = time;
+    }
+
     @Override
     public String getMessageType() {
         return Message.TYPE_SIM_START;

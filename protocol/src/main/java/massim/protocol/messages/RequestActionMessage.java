@@ -17,6 +17,12 @@ public abstract class RequestActionMessage extends Message {
         this.deadline = content.optLong("deadline", -1);
     }
 
+    public RequestActionMessage(long time, long id, long deadline) {
+        this.time = time;
+        this.id = id;
+        this.deadline = deadline;
+    }
+
     @Override
     public String getMessageType() {
         return Message.TYPE_REQUEST_ACTION;

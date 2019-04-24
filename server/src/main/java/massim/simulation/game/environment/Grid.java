@@ -26,8 +26,8 @@ public class Grid {
         for (Terrain[] col : terrainMap) Arrays.fill(col, Terrain.EMPTY);
     }
 
-    public Entity createEntity(Position xy, String agentName) {
-        Entity e = new Entity(xy, agentName);
+    public Entity createEntity(Position xy, String agentName, String teamName) {
+        Entity e = new Entity(xy, agentName, teamName);
         insert(e.getID(), e.getPosition());
         return e;
     }

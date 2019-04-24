@@ -30,9 +30,7 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public Map<String, RequestActionMessage> preStep(int step) {
-        // TODO  create step percepts
-        state.prepare(step);
-        return new HashMap<>();
+        return state.prepare(step);
     }
 
     @Override
