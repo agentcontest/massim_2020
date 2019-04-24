@@ -1,0 +1,13 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: #eee;
+}
+
+canvas {
+  width: 500px;
+  height: 100px;
+  background: white;
+  margin: auto;
+  display: block;
+}

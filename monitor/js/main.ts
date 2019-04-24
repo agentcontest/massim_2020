@@ -1,5 +1,21 @@
+import { Ctrl } from './interfaces';
+import makeCtrl from './ctrl';
+import render from './view';
+
 export default function Monitor(canvas: HTMLCanvasElement) {
-  const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = 'green';
-  ctx.fillRect(10, 10, 10, 10);
+  let ctrl: Ctrl;
+  let redrawRequested = false;
+
+  const redraw = function() {
+    if (redrawRequested) return;
+    redrawRequested = true;
+    requestAnimationFrame(() => {
+      redrawRequested = false;
+      render(canvas, ctrl);
+    });
+  };
+
+  ctrl = makeCtrl(redraw);
+
+  redraw();
 }
