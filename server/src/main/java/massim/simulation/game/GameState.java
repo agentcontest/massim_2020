@@ -73,11 +73,7 @@ class GameState {
                                 Log.log(Log.Level.ERROR, "Too few agents configured for team " + team.getName()
                                         + ", using agent name " + agentName + ".");
                             }
-
-                            Entity entity = grid.createEntity(position, agentName);
-                            gameObjects.put(entity.getID(), entity);
-                            agentToEntity.put(agentName, entity);
-                            entityToAgent.put(entity, agentName);
+                            createEntity(position, agentName, team.getName());
                         }
                     }
                 }
@@ -189,20 +185,21 @@ class GameState {
         Task task = tasks.get(taskName);
         if (task == null || task.isCompleted()) return false;
         Position ePos = e.getPosition();
-        Set<Attachable> availableBlocks = grid.getAllAttached(e);
+        Set<Attachable> attachedBlocks = grid.getAllAttached(e);
         for (Map.Entry<Position, String> entry : task.getRequirements().entrySet()) {
             Position pos = entry.getKey();
             String reqType = entry.getValue();
             Position checkPos = Position.of(pos.x + ePos.x, pos.y + ePos.y);
             Attachable actualBlock = getAttachable(checkPos);
-            if (!(actualBlock instanceof Block)
-                    || !(((Block) actualBlock).getBlockType().equals(reqType))
-                    || !availableBlocks.contains(actualBlock)) {
-                return false;
+            if (actualBlock instanceof Block
+                && ((Block) actualBlock).getBlockType().equals(reqType)
+                && attachedBlocks.contains(actualBlock)) {
+                continue;
             }
+            return false;
         }
         task.getRequirements().keySet().forEach(pos -> {
-            Attachable a = getAttachable(pos);
+            Attachable a = getAttachable(pos.translate(e.getPosition()));
             if (a != null) {
                 grid.removeAttachable(a);
                 gameObjects.remove(a.getID());
@@ -213,20 +210,25 @@ class GameState {
     }
 
     Task createTask() {
+        // TODO use more config parameters
         Task t = Task.generate("task" + tasks.values().size(), step + 200, 5, blockTypes);
         tasks.put(t.getName(), t);
         return t;
     }
 
-    Entity createEntity(Position xy, String name) {
+    Entity createEntity(Position xy, String name, String teamName) {
         Entity e = grid.createEntity(xy, name);
         registerGameObject(e);
+        agentToEntity.put(name, e);
+        entityToAgent.put(e, name);
+        agentToTeam.put(name, teamName);
         return e;
     }
 
-    void createBlock(Position xy, String blockType) {
+    Block createBlock(Position xy, String blockType) {
         Block b = grid.createBlock(xy, blockType);
         registerGameObject(b);
+        return b;
     }
 
     void createDispenser(Position xy, String blockType) {

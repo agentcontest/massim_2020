@@ -101,4 +101,8 @@ public class Position {
     public String toString() {
         return "P(" + x + "," + y + ")";
     }
+
+    public Position translate(Position other) {
+        return Position.of(other.x + x, other.y + y);
+    }
 }
