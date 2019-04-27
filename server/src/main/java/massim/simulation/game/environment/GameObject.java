@@ -1,5 +1,7 @@
 package massim.simulation.game.environment;
 
+import massim.protocol.messages.scenario.data.Thing;
+
 import java.util.UUID;
 
 public abstract class GameObject {
@@ -9,4 +11,6 @@ public abstract class GameObject {
     public String getID() {
         return id;
     }
+
+    public abstract Thing toPercept();
 }

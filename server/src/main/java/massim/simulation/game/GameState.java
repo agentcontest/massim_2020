@@ -121,8 +121,8 @@ class GameState {
                 int y = pos.y + dy;
                 int visionLeft = vision - Math.abs(dy);
                 for (int x = pos.x - visionLeft ; x <= pos.x + visionLeft; x++) {
-                    Attachable a = getAttachable(Position.of(x, y));
-                    if (a != null) visibleThings.add(a.toPercept());
+                    GameObject go = getGameObject(Position.of(x, y));
+                    if (go != null) visibleThings.add(go.toPercept());
                 }
             }
             result.put(agent, new StepPercept(teams.get(entity.getTeamName()).getScore(), visibleThings, allTasks));
@@ -266,8 +266,12 @@ class GameState {
     }
 
     private Attachable getAttachable(Position position) {
-        GameObject go = gameObjects.get(grid.getCollidable(position));
+        GameObject go = getGameObject(position);
         return (go instanceof Attachable)? (Attachable) go : null;
+    }
+
+    private GameObject getGameObject(Position pos) {
+        return gameObjects.get(grid.getCollidable(pos));
     }
 
     private boolean attachedToOpponent(Attachable a, Entity entity) {

@@ -6,6 +6,7 @@ public class Thing {
 
     public static final String TYPE_ENTITY = "entity";
     public static final String TYPE_BLOCK = "block";
+    public static final String TYPE_DISPENSER = "dispenser";
 
     public int x;
     public int y;
