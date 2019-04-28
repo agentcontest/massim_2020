@@ -347,4 +347,14 @@ class GameState {
         });
         return snapshot;
     }
+
+    public JSONObject getResult() {
+        JSONObject result =  new JSONObject();
+        teams.values().forEach(t -> {
+            JSONObject teamResult = new JSONObject();
+            teamResult.put("score", t.getScore());
+            result.put(t.getName(), teamResult);
+        });
+        return result;
+    }
 }

@@ -48,8 +48,7 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public JSONObject getResult() {
-        // TODO
-        return null;
+        return state.getResult();
     }
 
     @Override
