@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static massim.protocol.messages.scenario.Actions.*;
+
 public class Simulation extends AbstractSimulation {
 
     private String name;
@@ -84,7 +86,7 @@ public class Simulation extends AbstractSimulation {
             if (entity.getLastActionResult().equals(ActionMessage.RESULT_F_RANDOM)) continue;
             List<String> params = entity.getLastActionParams();
             switch(entity.getLastAction()) {
-                case "moved":
+                case MOVE:
                     if (params.size() != 1) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
@@ -103,7 +105,7 @@ public class Simulation extends AbstractSimulation {
                     }
                     continue;
 
-                case "attach":
+                case ATTACH:
                     if (params.size() != 1) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
@@ -121,7 +123,7 @@ public class Simulation extends AbstractSimulation {
                     }
                     continue;
 
-                case "detach":
+                case DETACH:
                     if (params.size() != 1) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
@@ -139,7 +141,7 @@ public class Simulation extends AbstractSimulation {
                     }
                     continue;
 
-                case "rotate":
+                case ROTATE:
                     if (params.size() != 1) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
@@ -158,7 +160,7 @@ public class Simulation extends AbstractSimulation {
                     }
                     continue;
 
-                case "connect":
+                case CONNECT:
                     if (params.size() != 1) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
@@ -187,7 +189,7 @@ public class Simulation extends AbstractSimulation {
                     }
                     continue;
 
-                case "request":
+                case REQUEST:
                     if (params.size() != 1) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
@@ -205,7 +207,7 @@ public class Simulation extends AbstractSimulation {
                     }
                     continue;
 
-                case "submit":
+                case SUBMIT:
                     if (params.size() != 1) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
