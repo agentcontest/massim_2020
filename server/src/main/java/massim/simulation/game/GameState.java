@@ -135,7 +135,8 @@ class GameState {
                     if (go != null) visibleThings.add(go.toPercept());
                 }
             }
-            result.put(agent, new StepPercept(teams.get(entity.getTeamName()).getScore(), visibleThings, allTasks));
+            result.put(agent, new StepPercept(teams.get(entity.getTeamName()).getScore(), visibleThings, allTasks,
+                    entity.getLastAction(), entity.getLastActionResult()));
         }
         return result;
     }

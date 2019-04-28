@@ -14,19 +14,21 @@ public class StepPercept extends RequestActionMessage {
     public Set<Thing> things = new HashSet<>();
     public Set<TaskInfo> taskInfo = new HashSet<>();
     public long score;
-
-    // TODO last action
+    public String lastAction;
+    public String lastActionResult;
 
     public StepPercept(JSONObject content) {
         super(content);
         parsePercept(content.getJSONObject("percept"));
     }
 
-    public StepPercept(long score, Set<Thing> things, Set<TaskInfo> taskInfo) {
+    public StepPercept(long score, Set<Thing> things, Set<TaskInfo> taskInfo, String action, String result) {
         super(System.currentTimeMillis(), -1, -1); // id and deadline are updated later
         this.score = score;
         this.things.addAll(things);
         this.taskInfo.addAll(taskInfo);
+        this.lastAction = action;
+        this.lastActionResult = result;
     }
 
     @Override
@@ -39,6 +41,8 @@ public class StepPercept extends RequestActionMessage {
         percept.put("tasks", jsonTasks);
         things.forEach(t -> jsonThings.put(t.toJSON()));
         taskInfo.forEach(t -> jsonTasks.put(t.toJSON()));
+        percept.put("lastAction", lastAction);
+        percept.put("lastActionResult", lastActionResult);
         return percept;
     }
 
@@ -54,5 +58,7 @@ public class StepPercept extends RequestActionMessage {
             JSONObject jsonTask = jsonTasks.getJSONObject(i);
             taskInfo.add(TaskInfo.fromJson(jsonTask));
         }
+        lastAction = percept.getString("lastAction");
+        lastActionResult = percept.getString("lastActionResult");
     }
 }
