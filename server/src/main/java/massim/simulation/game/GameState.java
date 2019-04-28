@@ -225,7 +225,6 @@ class GameState {
     boolean requestBlock(Entity entity, String direction) {
         Position requestPosition = entity.getPosition().moved(direction, 1);
         Dispenser dispenser = dispensers.get(requestPosition);
-        System.out.println(dispenser + " sfs");
         if (dispenser != null && grid.isFree(requestPosition)){
             createBlock(requestPosition, dispenser.getBlockType());
             return true;
