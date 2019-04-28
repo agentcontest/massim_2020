@@ -15,6 +15,8 @@ public class StepPercept extends RequestActionMessage {
     public Set<TaskInfo> taskInfo = new HashSet<>();
     public long score;
 
+    // TODO last action
+
     public StepPercept(JSONObject content) {
         super(content);
         parsePercept(content.getJSONObject("percept"));
@@ -34,7 +36,7 @@ public class StepPercept extends RequestActionMessage {
         JSONArray jsonTasks = new JSONArray();
         percept.put("score", score);
         percept.put("things", jsonThings);
-        percept.put("taskInfos", jsonTasks);
+        percept.put("tasks", jsonTasks);
         things.forEach(t -> jsonThings.put(t.toJSON()));
         taskInfo.forEach(t -> jsonTasks.put(t.toJSON()));
         return percept;
@@ -43,7 +45,7 @@ public class StepPercept extends RequestActionMessage {
     private void parsePercept(JSONObject percept) {
         score = percept.getLong("score");
         JSONArray jsonThings = percept.getJSONArray("things");
-        JSONArray jsonTasks = percept.getJSONArray("taskInfos");
+        JSONArray jsonTasks = percept.getJSONArray("tasks");
         for (int i = 0; i < jsonThings.length(); i++) {
             JSONObject jsonThing = jsonThings.getJSONObject(i);
             things.add(Thing.fromJson(jsonThing));

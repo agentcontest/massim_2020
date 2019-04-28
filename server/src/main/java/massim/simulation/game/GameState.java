@@ -2,6 +2,8 @@ package massim.simulation.game;
 
 import massim.config.TeamConfig;
 import massim.protocol.messages.RequestActionMessage;
+import massim.protocol.messages.SimStartMessage;
+import massim.protocol.messages.scenario.InitialPercept;
 import massim.protocol.messages.scenario.StepPercept;
 import massim.protocol.messages.scenario.data.TaskInfo;
 import massim.protocol.messages.scenario.data.Thing;
@@ -103,6 +105,14 @@ class GameState {
 
     Entity getEntityByName(String agentName) {
         return agentToEntity.get(agentName);
+    }
+
+    Map<String, SimStartMessage> getInitialPercepts(int steps) {
+        Map<String, SimStartMessage> result = new HashMap<>();
+        for (Entity e: entityToAgent.keySet()) {
+            result.put(e.getAgentName(), new InitialPercept(e.getAgentName(), e.getTeamName(), steps));
+        }
+        return result;
     }
 
     Map<String, RequestActionMessage> prepare(int step) {

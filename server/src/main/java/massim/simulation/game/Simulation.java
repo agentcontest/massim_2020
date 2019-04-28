@@ -24,8 +24,10 @@ public class Simulation extends AbstractSimulation {
     @Override
     public Map<String, SimStartMessage> init(int steps, JSONObject config, Set<TeamConfig> matchTeams) {
         this.state = new GameState(config, matchTeams);
-        this.name = System.currentTimeMillis() + "_" + matchTeams.stream().map(TeamConfig::getName).collect(Collectors.joining("_"));
-        return new HashMap<>(); // TODO create initial percepts
+        this.name = System.currentTimeMillis() + "_" + matchTeams.stream()
+                .map(TeamConfig::getName)
+                .collect(Collectors.joining("_"));
+        return state.getInitialPercepts(steps);
     }
 
     @Override
@@ -35,7 +37,6 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public void step(int stepNo, Map<String, ActionMessage> actionMap) {
-        // TODO execute actions
         handleActions(actionMap);
     }
 
