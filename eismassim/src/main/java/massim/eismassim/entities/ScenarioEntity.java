@@ -27,11 +27,13 @@ public class ScenarioEntity extends EISEntity {
     @Override
     protected List<Percept> simStartToIIL(SimStartMessage startPercept) {
 
-        List<Percept> ret = new Vector<>();
+        List<Percept> ret = new ArrayList<>();
         if(!(startPercept instanceof InitialPercept)) return ret; // protocol incompatibility
         InitialPercept simStart = (InitialPercept) startPercept;
 
-        // TODO
+        ret.add(new Percept("name", new Identifier(simStart.agentName)));
+        ret.add(new Percept("team", new Identifier(simStart.teamName)));
+        ret.add(new Percept("steps", new Numeral(simStart.steps)));
 
         return ret;
     }
@@ -46,10 +48,10 @@ public class ScenarioEntity extends EISEntity {
         ret.add(new Percept("timestamp", new Numeral(percept.getTime())));
         ret.add(new Percept("deadline", new Numeral(percept.getDeadline())));
 
+        // TODO
+
         return ret;
     }
-
-
 
     @Override
     protected Collection<Percept> simEndToIIL(SimEndMessage endPercept) {
