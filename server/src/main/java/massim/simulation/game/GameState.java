@@ -2,6 +2,7 @@ package massim.simulation.game;
 
 import massim.config.TeamConfig;
 import massim.protocol.messages.RequestActionMessage;
+import massim.protocol.messages.SimEndMessage;
 import massim.protocol.messages.SimStartMessage;
 import massim.protocol.messages.scenario.InitialPercept;
 import massim.protocol.messages.scenario.StepPercept;
@@ -111,6 +112,21 @@ class GameState {
         Map<String, SimStartMessage> result = new HashMap<>();
         for (Entity e: entityToAgent.keySet()) {
             result.put(e.getAgentName(), new InitialPercept(e.getAgentName(), e.getTeamName(), steps));
+        }
+        return result;
+    }
+
+    Map<String, SimEndMessage> getFinalPercepts() {
+        Map<String, SimEndMessage> result = new HashMap<>();
+        List<Team> teamsSorted = new ArrayList<>(teams.values());
+        teamsSorted.sort((t1, t2) -> (int) (t2.getScore() - t1.getScore()));
+        Map<Team, Integer> rankings = new HashMap<>();
+        for (int i = 0; i < teamsSorted.size(); i++) {
+            rankings.put(teamsSorted.get(i), i + 1);
+        }
+        for (Entity e: entityToAgent.keySet()) {
+            Team team = teams.get(e.getTeamName());
+            result.put(e.getAgentName(), new SimEndMessage(team.getScore(), rankings.get(team)));
         }
         return result;
     }

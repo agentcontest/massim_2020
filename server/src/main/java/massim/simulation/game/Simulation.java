@@ -42,8 +42,7 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public Map<String, SimEndMessage> finish() {
-        // TODO create sim end percepts
-        return new HashMap<>();
+        return state.getFinalPercepts();
     }
 
     @Override

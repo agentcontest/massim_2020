@@ -14,6 +14,12 @@ public class SimEndMessage extends Message {
         this.ranking = content.optInt("ranking", -1);
     }
 
+    public SimEndMessage(long score, int ranking) {
+        this.time = System.currentTimeMillis();
+        this.score = score;
+        this.ranking = ranking;
+    }
+
     @Override
     public String getMessageType() {
         return Message.TYPE_SIM_END;
@@ -22,8 +28,8 @@ public class SimEndMessage extends Message {
     @Override
     public JSONObject makeContent() {
         JSONObject json = new JSONObject();
-        json.append("score", score);
-        json.append("ranking", ranking);
+        json.put("score", score);
+        json.put("ranking", ranking);
         return json;
     }
 
