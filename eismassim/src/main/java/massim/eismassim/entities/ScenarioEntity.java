@@ -1,9 +1,6 @@
 package massim.eismassim.entities;
 
-import eis.iilang.Action;
-import eis.iilang.Identifier;
-import eis.iilang.Numeral;
-import eis.iilang.Percept;
+import eis.iilang.*;
 import massim.eismassim.EISEntity;
 import massim.protocol.messages.ActionMessage;
 import massim.protocol.messages.RequestActionMessage;
@@ -48,7 +45,18 @@ public class ScenarioEntity extends EISEntity {
         ret.add(new Percept("timestamp", new Numeral(percept.getTime())));
         ret.add(new Percept("deadline", new Numeral(percept.getDeadline())));
 
-        // TODO
+        ret.add(new Percept("lastAction", new Identifier(percept.lastAction)));
+        ret.add(new Percept("lastActionResult", new Identifier(percept.lastActionResult)));
+        ret.add(new Percept("score", new Numeral(percept.score)));
+
+        percept.things.forEach(thing -> ret.add(new Percept("thing",
+                new Numeral(thing.x), new Numeral(thing.y), new Identifier(thing.type), new Identifier(thing.details))));
+        percept.taskInfo.forEach(task -> {
+            ParameterList tasks = new ParameterList();
+            task.requirements.forEach(req -> tasks.add(new Function("req", new Numeral(req.x), new Numeral(req.y),
+                    new Identifier(req.type))));
+            ret.add(new Percept("task", new Identifier(task.name), new Numeral(task.deadline), tasks));
+        });
 
         return ret;
     }

@@ -10,7 +10,6 @@ import massim.simulation.game.environment.Grid;
 import massim.util.RNG;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +31,7 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public Map<String, RequestActionMessage> preStep(int step) {
-        return state.prepare(step);
+        return state.prepareStep(step);
     }
 
     @Override

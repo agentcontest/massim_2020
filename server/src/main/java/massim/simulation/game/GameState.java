@@ -116,22 +116,7 @@ class GameState {
         return result;
     }
 
-    Map<String, SimEndMessage> getFinalPercepts() {
-        Map<String, SimEndMessage> result = new HashMap<>();
-        List<Team> teamsSorted = new ArrayList<>(teams.values());
-        teamsSorted.sort((t1, t2) -> (int) (t2.getScore() - t1.getScore()));
-        Map<Team, Integer> rankings = new HashMap<>();
-        for (int i = 0; i < teamsSorted.size(); i++) {
-            rankings.put(teamsSorted.get(i), i + 1);
-        }
-        for (Entity e: entityToAgent.keySet()) {
-            Team team = teams.get(e.getTeamName());
-            result.put(e.getAgentName(), new SimEndMessage(team.getScore(), rankings.get(team)));
-        }
-        return result;
-    }
-
-    Map<String, RequestActionMessage> prepare(int step) {
+    Map<String, RequestActionMessage> prepareStep(int step) {
         this.step = step;
         Map<String, RequestActionMessage> result = new HashMap<>();
         Set<TaskInfo> allTasks = tasks.values().stream()
@@ -153,6 +138,21 @@ class GameState {
             }
             result.put(agent, new StepPercept(teams.get(entity.getTeamName()).getScore(), visibleThings, allTasks,
                     entity.getLastAction(), entity.getLastActionResult()));
+        }
+        return result;
+    }
+
+    Map<String, SimEndMessage> getFinalPercepts() {
+        Map<String, SimEndMessage> result = new HashMap<>();
+        List<Team> teamsSorted = new ArrayList<>(teams.values());
+        teamsSorted.sort((t1, t2) -> (int) (t2.getScore() - t1.getScore()));
+        Map<Team, Integer> rankings = new HashMap<>();
+        for (int i = 0; i < teamsSorted.size(); i++) {
+            rankings.put(teamsSorted.get(i), i + 1);
+        }
+        for (Entity e: entityToAgent.keySet()) {
+            Team team = teams.get(e.getTeamName());
+            result.put(e.getAgentName(), new SimEndMessage(team.getScore(), rankings.get(team)));
         }
         return result;
     }
