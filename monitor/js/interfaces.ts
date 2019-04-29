@@ -22,7 +22,7 @@ export interface Grid {
   cells: Terrain[][]
 }
 
-type Terrain = 0 | 1
+type Terrain = 0 | 1 | 2
 
 export interface DynamicWorld {
   entities: Agent[]

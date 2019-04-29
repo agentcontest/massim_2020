@@ -37,6 +37,10 @@ function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, 
           continue;
         case 1: // GOAL
           ctx.fillStyle = 'red';
+          break;
+        case 2: // OBSTABLE
+          ctx.fillStyle = '#333';
+          break;
       }
       ctx.beginPath();
       ctx.rect(x * GRID, y * GRID, GRID, GRID);
