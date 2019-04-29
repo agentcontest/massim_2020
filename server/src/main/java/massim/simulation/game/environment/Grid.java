@@ -24,6 +24,14 @@ public class Grid {
         collisionMap = new String[dimX][dimY];
         terrainMap = new Terrain[dimX][dimY];
         for (Terrain[] col : terrainMap) Arrays.fill(col, Terrain.EMPTY);
+        for (int x = 0; x < dimX; x++) {
+            terrainMap[x][0] = Terrain.OBSTACLE;
+            terrainMap[x][dimY - 1] = Terrain.OBSTACLE;
+        }
+        for (int y = 0; y < dimY; y++) {
+            terrainMap[0][y] = Terrain.OBSTACLE;
+            terrainMap[dimX - 1][y] = Terrain.OBSTACLE;
+        }
     }
 
     public Entity createEntity(Position xy, String agentName, String teamName) {
@@ -48,7 +56,7 @@ public class Grid {
 
     public boolean insert(String id, Position pos) {
         if (outOfBounds(pos)) return false;
-        if (collisionMap[pos.x][pos.y] != null) return false;
+        if (!isFree(pos)) return false;
         collisionMap[pos.x][pos.y] = id;
         return true;
     }
@@ -132,8 +140,7 @@ public class Grid {
             int distance = rotatedPosition.distanceTo(anchor.getPosition());
             for (int rotations = 0; rotations < distance; rotations++) {
                 rotatedPosition = rotatedPosition.rotatedOneStep(anchor.getPosition(), clockwise);
-                String collidable = getCollidable(rotatedPosition);
-                if (collidable != null && !attachableIDs.contains(collidable)) return null;
+                if(!isFree(rotatedPosition, attachableIDs)) return null;
             }
             newPositions.put(a, rotatedPosition);
         }
@@ -146,8 +153,7 @@ public class Grid {
         for (Attachable a : attachables) {
             for (int i = 1; i <= distance; i++) {
                 Position newPos = a.getPosition().moved(direction, i);
-                String collidable = getCollidable(newPos);
-                if (collidable != null && !attachableIDs.contains(collidable)) return null;
+                if(!isFree(newPos, attachableIDs)) return null;
             }
             newPositions.put(a, a.getPosition().moved(direction, distance));
         }
@@ -187,7 +193,7 @@ public class Grid {
         int y = RNG.nextInt(dimY);
         final int startX = x;
         final int startY = y;
-        while (collisionMap[x][y] != null) {
+        while (!isFree(Position.of(x,y))) {
             if (++x >= dimX) {
                 x = 0;
                 if (++y >= dimY) y = 0;
@@ -197,11 +203,20 @@ public class Grid {
                 return null;
             }
         }
-        return new Position(x, y);
+        return Position.of(x, y);
     }
 
+    /**
+     * @return true if the cell is in the grid and there is no other collidable and the terrain is not an obstacle.
+     */
     public boolean isFree(Position xy) {
-        return !outOfBounds(xy) && collisionMap[xy.x][xy.y] == null;
+        return isFree(xy, Collections.emptySet());
+    }
+
+    private boolean isFree(Position xy, Set<String> excludedObjects) {
+        return !outOfBounds(xy)
+                && (collisionMap[xy.x][xy.y] == null || excludedObjects.contains(collisionMap[xy.x][xy.y]))
+                && terrainMap[xy.x][xy.y] != Terrain.OBSTACLE;
     }
 
     public void setTerrain(Position pos, Terrain terrainType) {
