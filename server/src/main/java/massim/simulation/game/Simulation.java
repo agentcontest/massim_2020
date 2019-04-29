@@ -7,6 +7,7 @@ import massim.protocol.messages.SimEndMessage;
 import massim.protocol.messages.SimStartMessage;
 import massim.simulation.AbstractSimulation;
 import massim.simulation.game.environment.Grid;
+import massim.simulation.game.environment.Position;
 import massim.util.RNG;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -68,7 +69,7 @@ public class Simulation extends AbstractSimulation {
         for (int y = 0; y < state.getGrid().getDimY(); y++) {
             var row = new JSONArray();
             for (int x = 0; x < state.getGrid().getDimX(); x++) {
-                row.put(0);
+                row.put(state.getGrid().getTerrain(Position.of(x, y)).id);
             }
             cells.put(row);
         }
