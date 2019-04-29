@@ -236,6 +236,7 @@ class GameState {
         Task task = tasks.get(taskName);
         if (task == null || task.isCompleted()) return false;
         Position ePos = e.getPosition();
+        if (grid.getTerrain(ePos) != Terrain.GOAL) return false;
         Set<Attachable> attachedBlocks = grid.getAllAttached(e);
         for (Map.Entry<Position, String> entry : task.getRequirements().entrySet()) {
             Position pos = entry.getKey();

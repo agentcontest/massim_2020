@@ -122,7 +122,6 @@ Always required are the fields
 "match" : [
   {
     "id" : "2018-Sim-1of1",
-    "scenarioClass" : "city.CitySimulation",
     "steps" : 1000
   }
 ]
@@ -131,7 +130,6 @@ Always required are the fields
 where
 
 * __id__ is an identifier for the simulation,
-* __scenarioClass__ is the path of the scenario's main class, and
 * __steps__ is the number of steps the simulation will last.
 
 For the remaining scenario-dependent items we refer to [scenario.md](scenario.md).

@@ -12,7 +12,7 @@
       "steps" : 10,
       "randomSeed" : 17,
       "randomFail" : 1,
-      "entities" : [{"standard" : 2}],
+      "entities" : [{"standard" : 10}],
       "grid" : {
         "height" : 20,
         "width" : 20

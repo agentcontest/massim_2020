@@ -209,4 +209,9 @@ public class Grid {
             terrainMap[pos.x][pos.y] = terrainType;
         }
     }
+
+    public Terrain getTerrain(Position pos) {
+        if (outOfBounds(pos)) return Terrain.EMPTY;
+        return terrainMap[pos.x][pos.y];
+    }
 }
