@@ -95,6 +95,10 @@ class GameState {
         return this.randomFail;
     }
 
+    public Grid getGrid() {
+        return grid;
+    }
+
     /**
      * @return the agent entity of the given name or null if it does not exist
      */

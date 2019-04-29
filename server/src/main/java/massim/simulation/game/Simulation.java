@@ -9,6 +9,7 @@ import massim.simulation.AbstractSimulation;
 import massim.simulation.game.environment.Grid;
 import massim.util.RNG;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import java.util.List;
 import java.util.Map;
@@ -63,8 +64,23 @@ public class Simulation extends AbstractSimulation {
 
     @Override
     public JSONObject getStaticData() {
-        // TODO
-        return new JSONObject();
+        var cells = new JSONArray();
+        for (int y = 0; y < state.getGrid().getDimY(); y++) {
+            var row = new JSONArray();
+            for (int x = 0; x < state.getGrid().getDimX(); x++) {
+                row.put(0);
+            }
+            cells.put(row);
+        }
+
+        var grid = new JSONObject();
+        grid.put("width", state.getGrid().getDimX());
+        grid.put("height", state.getGrid().getDimY());
+        grid.put("cells", cells);
+
+        var world = new JSONObject();
+        world.put("grid", grid);
+        return world;
     }
 
     @Override
