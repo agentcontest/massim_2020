@@ -1,5 +1,6 @@
 package massim.simulation.game.environment;
 
+import massim.protocol.data.Position;
 import massim.simulation.game.Entity;
 import massim.util.Log;
 import massim.util.RNG;

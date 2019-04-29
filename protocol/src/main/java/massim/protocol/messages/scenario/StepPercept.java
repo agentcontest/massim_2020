@@ -1,18 +1,22 @@
 package massim.protocol.messages.scenario;
 
+import massim.protocol.data.Position;
 import massim.protocol.messages.RequestActionMessage;
-import massim.protocol.messages.scenario.data.TaskInfo;
-import massim.protocol.messages.scenario.data.Thing;
+import massim.protocol.data.TaskInfo;
+import massim.protocol.data.Thing;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class StepPercept extends RequestActionMessage {
 
     public Set<Thing> things = new HashSet<>();
     public Set<TaskInfo> taskInfo = new HashSet<>();
+    public Map<String, Set<Position>> terrain = new HashMap<>();
     public long score;
     public String lastAction;
     public String lastActionResult;
@@ -22,13 +26,14 @@ public class StepPercept extends RequestActionMessage {
         parsePercept(content.getJSONObject("percept"));
     }
 
-    public StepPercept(long score, Set<Thing> things, Set<TaskInfo> taskInfo, String action, String result) {
+    public StepPercept(long score, Set<Thing> things, Map<String, Set<Position>> terrain, Set<TaskInfo> taskInfo, String action, String result) {
         super(System.currentTimeMillis(), -1, -1); // id and deadline are updated later
         this.score = score;
         this.things.addAll(things);
         this.taskInfo.addAll(taskInfo);
         this.lastAction = action;
         this.lastActionResult = result;
+        this.terrain = terrain;
     }
 
     @Override
@@ -36,11 +41,18 @@ public class StepPercept extends RequestActionMessage {
         JSONObject percept = new JSONObject();
         JSONArray jsonThings = new JSONArray();
         JSONArray jsonTasks = new JSONArray();
+        JSONObject jsonTerrain = new JSONObject();
         percept.put("score", score);
         percept.put("things", jsonThings);
         percept.put("tasks", jsonTasks);
+        percept.put("terrain", jsonTerrain);
         things.forEach(t -> jsonThings.put(t.toJSON()));
         taskInfo.forEach(t -> jsonTasks.put(t.toJSON()));
+        terrain.forEach((t, positions) -> {
+            JSONArray jsonPositions = new JSONArray();
+            positions.forEach(p -> jsonPositions.put(p.toJSON()));
+            jsonTerrain.put(t, jsonPositions);
+        });
         percept.put("lastAction", lastAction);
         percept.put("lastActionResult", lastActionResult);
         return percept;
@@ -60,5 +72,14 @@ public class StepPercept extends RequestActionMessage {
         }
         lastAction = percept.getString("lastAction");
         lastActionResult = percept.getString("lastActionResult");
+        JSONObject jsonTerrain = percept.getJSONObject("terrain");
+        jsonTerrain.keys().forEachRemaining(t -> {
+            Set<Position> positions = new HashSet<>();
+            JSONArray jsonPositions = jsonTerrain.getJSONArray(t);
+            for (int i = 0; i < jsonPositions.length(); i++) {
+                positions.add(Position.fromJSON(jsonPositions.getJSONArray(i)));
+            }
+            terrain.put(t, positions);
+        });
     }
 }

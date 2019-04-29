@@ -1,9 +1,9 @@
 package massim.simulation.game;
 
 import massim.protocol.messages.ActionMessage;
-import massim.protocol.messages.scenario.data.Thing;
+import massim.protocol.data.Thing;
 import massim.simulation.game.environment.Attachable;
-import massim.simulation.game.environment.Position;
+import massim.protocol.data.Position;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,7 +63,8 @@ public class Entity extends Attachable {
     }
 
     @Override
-    public Thing toPercept() {
-        return new Thing(getPosition().x, getPosition().y, Thing.TYPE_ENTITY, "");
+    public Thing toPercept(Position origin) {
+        Position localPosition = origin.toLocal(origin);
+        return new Thing(localPosition.x, localPosition.y, Thing.TYPE_ENTITY, "");
     }
 }
