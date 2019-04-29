@@ -194,44 +194,27 @@ class GameState {
         return grid.detach(entity, a);
     }
 
-    boolean connectEntities(Entity entity, Entity partnerEntity) {
-        Position ePos = entity.getPosition();
-        Position partnerPos = partnerEntity.getPosition();
-        if (ePos.distanceTo(partnerPos) < 3) return false;
+    boolean connectEntities(Entity entity, Position blockPos, Entity partnerEntity, Position partnerBlockPos) {
+        Attachable block1 = getAttachable(blockPos.translate(entity.getPosition()));
+        Attachable block2 = getAttachable(partnerBlockPos.translate(partnerEntity.getPosition()));
 
-        String direction = ePos.directionTo(partnerPos);
-        if (direction == null) return false;
+        if(!(block1 instanceof Block) || !(block2 instanceof Block)) return false;
+        if(block1.getPosition().distanceTo(block2.getPosition()) != 1) return false;
 
         Set<Attachable> attachables = grid.getAllAttached(entity);
         if (attachables.contains(partnerEntity)) return false;
-        Set<Attachable> partnerAttachables = grid.getAllAttached(partnerEntity);
+        if (!attachables.contains(block1)) return false;
+        if (attachables.contains(block2)) return false;
 
-        Position p = ePos;
-        Block block = null;
-        Block partnerBlock = null;
-        while (true) {
-            p = p.moved(direction, 1);
-            Attachable attachable = getAttachable(p);
-            if (attachable instanceof Block && attachables.contains(attachable)) {
-                block = (Block) attachable;
-            }
-            else {
-                break;
-            }
-        }
-        direction = Position.oppositeDirection(direction);
-        p = partnerPos;
-        while (true) {
-            p = p.moved(direction, 1);
-            Attachable attachable = getAttachable(p);
-            if (attachable instanceof Block && partnerAttachables.contains(attachable)) {
-                partnerBlock = (Block) attachable;
-            }
-            else {
-                break;
-            }
-        }
-        return grid.attach(block, partnerBlock);
+        Set<Attachable> partnerAttachables = grid.getAllAttached(partnerEntity);
+        if (!partnerAttachables.contains(block2)) return false;
+        if (partnerAttachables.contains(block1)) return false;
+
+        Set<Attachable> combinedAttachables = new HashSet<>(attachables);
+        combinedAttachables.addAll(partnerAttachables);
+        if (combinedAttachables.size() > attachLimit) return false;
+
+        return grid.attach(block1, block2);
     }
 
     boolean requestBlock(Entity entity, String direction) {
