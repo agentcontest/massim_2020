@@ -12,6 +12,7 @@ import massim.util.RNG;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,6 +93,7 @@ public class Simulation extends AbstractSimulation {
      */
     private void handleActions(Map<String, ActionMessage> actions) {
         List<Entity> entities = actions.keySet().stream().map(ag -> state.getEntityByName(ag)).collect(Collectors.toList());
+        Map<Entity, Position> connections = new HashMap<>();
         RNG.shuffle(entities);
         for (Entity entity : entities) {
             entity.setNewAction(actions.get(entity.getAgentName()));
@@ -178,23 +180,25 @@ public class Simulation extends AbstractSimulation {
                     continue;
 
                 case CONNECT:
-                    if (params.size() != 1) {
+                    if (params.size() != 3) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
                     }
                     String entityName = params.get(0);
+                    Integer x = getIntParam(params, 1);
+                    Integer y = getIntParam(params, 2);
                     Entity partnerEntity = state.getEntityByName(entityName);
-                    if (partnerEntity == null) {
+                    if (partnerEntity == null || x == null || y == null) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
                     }
-                    if (!partnerEntity.getLastAction().equals("connect")
+                    if (!partnerEntity.getLastAction().equals(CONNECT)
                             || partnerEntity.getLastActionResult().equals(ActionMessage.RESULT_F_RANDOM)) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARTNER);
                         continue;
                     }
                     if (partnerEntity.getLastActionResult().equals(ActionMessage.RESULT_PENDING)) {
-                        if (state.connectEntities(entity, partnerEntity)) {
+                        if (state.connectEntities(entity, Position.of(x, y), partnerEntity, connections.get(partnerEntity))) {
                             entity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
                             partnerEntity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
                         }
@@ -202,6 +206,7 @@ public class Simulation extends AbstractSimulation {
                             entity.setLastActionResult(ActionMessage.RESULT_F_PARTNER);
                         }
                     } else { // handle action when it's the other agent's turn
+                        connections.put(entity, Position.of(x,y));
                         entity.setLastActionResult(ActionMessage.RESULT_PENDING);
                     }
                     continue;
@@ -240,6 +245,14 @@ public class Simulation extends AbstractSimulation {
                 default:
                     entity.setLastActionResult(ActionMessage.UNKNOWN_ACTION);
             }
+        }
+    }
+
+    private Integer getIntParam(List<String> params, int index) {
+        try {
+            return Integer.parseInt(params.get(index));
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 }
