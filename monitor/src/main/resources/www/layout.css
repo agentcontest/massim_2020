@@ -1,13 +1,13 @@
 body {
   margin: 0;
   padding: 0;
-  background: #eee;
+  background: black;
 }
 
 canvas {
-  width: 500px;
-  height: 100px;
-  background: white;
-  margin: auto;
-  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #eee;
 }

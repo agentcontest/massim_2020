@@ -4,12 +4,25 @@ type ConnectionState = 'offline' | 'online' | 'connecting' | 'error'
 
 export interface ViewModel {
   state: ConnectionState
+  static?: StaticWorld
   dynamic?: DynamicWorld
 }
 
 export interface Ctrl {
   vm: ViewModel
 }
+
+export interface StaticWorld {
+  grid: Grid
+}
+
+export interface Grid {
+  width: number
+  height: number
+  cells: Terrain[][]
+}
+
+type Terrain = 0 | 1
 
 export interface DynamicWorld {
   entities: Agent[]
