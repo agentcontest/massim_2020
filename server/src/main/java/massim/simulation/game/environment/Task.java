@@ -49,17 +49,16 @@ public class Task {
         Position lastPosition = Position.of(0, 1);
         task.addRequiredBlock(lastPosition, blockTypes.get(RNG.nextInt(blockTypes.size())));
         for (int i = 0; i < size - 1; i++) {
-            lastPosition = lastPosition.copy();
             int index = RNG.nextInt(blockTypes.size());
             double direction = RNG.nextDouble();
             if (direction <= .3) {
-                lastPosition.x -= 1;
+                lastPosition = lastPosition.translate(-1, 0);
             }
             else if (direction <= .6) {
-                lastPosition.x += 1;
+                lastPosition = lastPosition.translate(1, 0);
             }
             else {
-                lastPosition.y += 1;
+                lastPosition = lastPosition.translate(0, 1);
             }
             task.addRequiredBlock(lastPosition, blockTypes.get(index));
         }

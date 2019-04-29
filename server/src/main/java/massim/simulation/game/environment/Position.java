@@ -2,18 +2,14 @@ package massim.simulation.game.environment;
 
 import java.util.Objects;
 
-public class Position {
+public final class Position {
 
-    public int x;
-    public int y;
+    public final int x;
+    public final int y;
 
     public Position(int x, int y) {
         this.x = x;
         this.y = y;
-    }
-
-    Position copy() {
-        return new Position(x, y);
     }
 
     public int distanceTo(Position other) {
@@ -104,5 +100,9 @@ public class Position {
 
     public Position translate(Position other) {
         return Position.of(other.x + x, other.y + y);
+    }
+
+    public Position translate(int x, int y) {
+        return Position.of(this.x + x, this.y + y);
     }
 }
