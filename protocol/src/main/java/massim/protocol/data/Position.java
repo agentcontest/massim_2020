@@ -1,4 +1,6 @@
-package massim.simulation.game.environment;
+package massim.protocol.data;
+
+import org.json.JSONArray;
 
 import java.util.Objects;
 
@@ -104,5 +106,20 @@ public final class Position {
 
     public Position translate(int x, int y) {
         return Position.of(this.x + x, this.y + y);
+    }
+
+    public Position toLocal(Position origin) {
+        return Position.of(x - origin.x, y - origin.y);
+    }
+
+    public JSONArray toJSON() {
+        JSONArray result = new JSONArray();
+        result.put(x);
+        result.put(y);
+        return result;
+    }
+
+    public static Position fromJSON(JSONArray json) {
+        return Position.of(json.getInt(0), json.getInt(1));
     }
 }

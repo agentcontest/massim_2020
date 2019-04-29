@@ -1,4 +1,4 @@
-package massim.protocol.messages.scenario.data;
+package massim.protocol.data;
 
 import org.json.JSONObject;
 

@@ -1,6 +1,7 @@
 package massim.simulation.game.environment;
 
-import massim.protocol.messages.scenario.data.Thing;
+import massim.protocol.data.Position;
+import massim.protocol.data.Thing;
 
 import java.util.UUID;
 
@@ -12,5 +13,5 @@ public abstract class GameObject {
         return id;
     }
 
-    public abstract Thing toPercept();
+    public abstract Thing toPercept(Position relativeTo);
 }

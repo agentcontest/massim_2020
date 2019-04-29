@@ -1,0 +1,27 @@
+package massim.simulation.game.environment;
+
+public enum Terrain {
+<<<<<<< HEAD
+    EMPTY(0),
+    GOAL(1);
+
+    public final int id;
+
+    Terrain(int id) {
+        this.id = id;
+=======
+    EMPTY("empty"),
+    GOAL("goal"),
+    OBSTACLE("obstacle");
+
+    private String name;
+
+    Terrain(String name){
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+>>>>>>> origin/master
+    }
+}

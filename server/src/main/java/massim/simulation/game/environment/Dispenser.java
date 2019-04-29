@@ -1,6 +1,7 @@
 package massim.simulation.game.environment;
 
-import massim.protocol.messages.scenario.data.Thing;
+import massim.protocol.data.Position;
+import massim.protocol.data.Thing;
 
 public class Dispenser extends Positionable {
 
@@ -16,7 +17,8 @@ public class Dispenser extends Positionable {
     }
 
     @Override
-    public Thing toPercept() {
+    public Thing toPercept(Position entityPosition) {
+
         return new Thing(getPosition().x, getPosition().y, Thing.TYPE_DISPENSER, blockType);
     }
 }

@@ -1,6 +1,7 @@
 package massim.simulation.game.environment;
 
-import massim.protocol.messages.scenario.data.Thing;
+import massim.protocol.data.Position;
+import massim.protocol.data.Thing;
 
 public class Block extends Attachable {
 
@@ -18,7 +19,8 @@ public class Block extends Attachable {
     }
 
     @Override
-    public Thing toPercept() {
-        return new Thing(getPosition().x, getPosition().y, Thing.TYPE_BLOCK, blockType);
+    public Thing toPercept(Position entityPosition) {
+        Position relativePosition = getPosition().toLocal(entityPosition);
+        return new Thing(relativePosition.x, relativePosition.y, Thing.TYPE_BLOCK, blockType);
     }
 }

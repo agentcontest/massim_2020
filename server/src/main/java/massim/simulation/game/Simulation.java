@@ -1,13 +1,13 @@
 package massim.simulation.game;
 
 import massim.config.TeamConfig;
+import massim.protocol.data.Position;
 import massim.protocol.messages.ActionMessage;
 import massim.protocol.messages.RequestActionMessage;
 import massim.protocol.messages.SimEndMessage;
 import massim.protocol.messages.SimStartMessage;
 import massim.simulation.AbstractSimulation;
 import massim.simulation.game.environment.Grid;
-import massim.simulation.game.environment.Position;
 import massim.util.RNG;
 import org.json.JSONObject;
 import org.json.JSONArray;

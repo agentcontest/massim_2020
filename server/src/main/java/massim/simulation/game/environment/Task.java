@@ -1,7 +1,8 @@
 package massim.simulation.game.environment;
 
-import massim.protocol.messages.scenario.data.TaskInfo;
-import massim.protocol.messages.scenario.data.Thing;
+import massim.protocol.data.Position;
+import massim.protocol.data.TaskInfo;
+import massim.protocol.data.Thing;
 import massim.util.RNG;
 
 import java.util.*;

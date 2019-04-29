@@ -1,5 +1,7 @@
 package massim.simulation.game.environment;
 
+import massim.protocol.data.Position;
+
 public abstract class Positionable  extends GameObject {
 
     private Position position;

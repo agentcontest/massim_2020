@@ -1,13 +1,14 @@
 package massim.simulation.game;
 
 import massim.config.TeamConfig;
+import massim.protocol.data.Position;
 import massim.protocol.messages.RequestActionMessage;
 import massim.protocol.messages.SimEndMessage;
 import massim.protocol.messages.SimStartMessage;
 import massim.protocol.messages.scenario.InitialPercept;
 import massim.protocol.messages.scenario.StepPercept;
-import massim.protocol.messages.scenario.data.TaskInfo;
-import massim.protocol.messages.scenario.data.Thing;
+import massim.protocol.data.TaskInfo;
+import massim.protocol.data.Thing;
 import massim.simulation.game.environment.*;
 import massim.util.Log;
 import org.json.JSONArray;
@@ -122,6 +123,10 @@ class GameState {
 
     Map<String, RequestActionMessage> prepareStep(int step) {
         this.step = step;
+        return getStepPercepts();
+    }
+
+    private Map<String, RequestActionMessage> getStepPercepts(){
         Map<String, RequestActionMessage> result = new HashMap<>();
         Set<TaskInfo> allTasks = tasks.values().stream()
                 .filter(t -> !t.isCompleted())
@@ -132,16 +137,23 @@ class GameState {
             int vision = entity.getVision();
             Position pos = entity.getPosition();
             Set<Thing> visibleThings = new HashSet<>();
+            Map<String, Set<Position>> visibleTerrain = new HashMap<>();
             for (int dy = -vision; dy <= vision ; dy++) {
                 int y = pos.y + dy;
                 int visionLeft = vision - Math.abs(dy);
                 for (int x = pos.x - visionLeft ; x <= pos.x + visionLeft; x++) {
-                    GameObject go = getGameObject(Position.of(x, y));
-                    if (go != null) visibleThings.add(go.toPercept());
+                    Position currentPos = Position.of(x, y);
+                    GameObject go = getGameObject(currentPos);
+                    if (go != null) visibleThings.add(go.toPercept(entity.getPosition()));
+                    Terrain terrain = grid.getTerrain(pos);
+                    if (terrain != Terrain.EMPTY) {
+                        visibleTerrain.computeIfAbsent(terrain.name,
+                                t -> new HashSet<>()).add(currentPos.toLocal(entity.getPosition()));
+                    }
                 }
             }
-            result.put(agent, new StepPercept(teams.get(entity.getTeamName()).getScore(), visibleThings, allTasks,
-                    entity.getLastAction(), entity.getLastActionResult()));
+            result.put(agent, new StepPercept(teams.get(entity.getTeamName()).getScore(), visibleThings, visibleTerrain,
+                    allTasks, entity.getLastAction(), entity.getLastActionResult()));
         }
         return result;
     }

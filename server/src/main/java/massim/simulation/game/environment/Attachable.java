@@ -1,5 +1,7 @@
 package massim.simulation.game.environment;
 
+import massim.protocol.data.Position;
+
 import java.util.HashSet;
 import java.util.Set;
 
