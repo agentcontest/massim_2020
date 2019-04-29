@@ -201,7 +201,6 @@ class GameState {
         Attachable block2 = getAttachable(partnerBlockPos.translate(partnerEntity.getPosition()));
 
         if(!(block1 instanceof Block) || !(block2 instanceof Block)) return false;
-        if(block1.getPosition().distanceTo(block2.getPosition()) != 1) return false;
 
         Set<Attachable> attachables = grid.getAllAttached(entity);
         if (attachables.contains(partnerEntity)) return false;
@@ -211,10 +210,6 @@ class GameState {
         Set<Attachable> partnerAttachables = grid.getAllAttached(partnerEntity);
         if (!partnerAttachables.contains(block2)) return false;
         if (partnerAttachables.contains(block1)) return false;
-
-        Set<Attachable> combinedAttachables = new HashSet<>(attachables);
-        combinedAttachables.addAll(partnerAttachables);
-        if (combinedAttachables.size() > attachLimit) return false;
 
         return grid.attach(block1, block2);
     }

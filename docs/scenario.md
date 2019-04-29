@@ -114,9 +114,18 @@ failed | One of the things attached to the agent cannot rotate to its target pos
 
 ### connect
 
-Two agents can use this action to connect things attached to them.
+Two agents can use this action to connect things attached to them. They have to specify their partner and the block they want to connect. Both blocks are connected (i.e. attached to each other) if they are next to each other and the connection would not violate any other conditions.
 
-(TODO)
+No | Parameter | Meaning
+--- | --- | ---
+0 | agent | The agent to cooperate with.
+1/2 | x/y | The local coordinates of the block to connect.
+
+Failure Code | Reason
+--- | ---
+failed_parameter | Not exactly 3 parameters given OR first parameter is not an agent of the same team OR x and y cannot be parsed to valid integers.
+failed_partner | The partner's action is not connect OR failed randomly.
+failed | There are no blocks at the given coordinates OR the given positions are too far apart OR one of the blocks is already connected to the other agent OR one agent is already attached to the other (recursively), or connecting both blocks would violate the size limit for connected structures.
 
 ### request
 

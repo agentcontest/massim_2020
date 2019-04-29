@@ -184,10 +184,10 @@ public class Simulation extends AbstractSimulation {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
                     }
-                    String entityName = params.get(0);
-                    Integer x = getIntParam(params, 1);
-                    Integer y = getIntParam(params, 2);
-                    Entity partnerEntity = state.getEntityByName(entityName);
+                    var entityName = params.get(0);
+                    var x = getIntParam(params, 1);
+                    var y = getIntParam(params, 2);
+                    var partnerEntity = state.getEntityByName(entityName);
                     if (partnerEntity == null || x == null || y == null) {
                         entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
                         continue;
@@ -203,7 +203,8 @@ public class Simulation extends AbstractSimulation {
                             partnerEntity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
                         }
                         else {
-                            entity.setLastActionResult(ActionMessage.RESULT_F_PARTNER);
+                            entity.setLastActionResult(ActionMessage.RESULT_F);
+                            partnerEntity.setLastActionResult(ActionMessage.RESULT_F);
                         }
                     } else { // handle action when it's the other agent's turn
                         connections.put(entity, Position.of(x,y));
