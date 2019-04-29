@@ -62,27 +62,25 @@ class GameState {
         grid = new Grid(gridX, gridY, attachLimit);
 
         // create entities
-        JSONArray entities = config.optJSONArray("entities");
-        if(entities != null){
-            for (int i = 0; i < entities.length(); i++) {
-                JSONObject entityConf = entities.optJSONObject(i);
-                if (entityConf != null){
-                    String roleName = entityConf.keys().next();
-                    int amount = entityConf.optInt(roleName, 0);
-                    for (int j = 0; j < amount; j++){
-                        Position position = grid.findRandomFreePosition(); // entities from the same team start on the same spot
-                        for (TeamConfig team: matchTeams) {
-                            String agentName;
-                            if(team.getAgentNames().size() > i) {
-                                agentName = team.getAgentNames().get(i);
-                            }
-                            else {
-                                agentName = team.getName() + "-unconfigured-" + i;
-                                Log.log(Log.Level.ERROR, "Too few agents configured for team " + team.getName()
-                                        + ", using agent name " + agentName + ".");
-                            }
-                            createEntity(position, agentName, team.getName());
+        JSONArray entities = config.getJSONArray("entities");
+        for (var type = 0; type < entities.length(); type++) {
+            JSONObject entityConf = entities.optJSONObject(type);
+            if (entityConf != null){
+                String roleName = entityConf.keys().next();
+                int amount = entityConf.optInt(roleName, 0);
+                for (var n = 0; n < amount; n++){
+                    Position position = grid.findRandomFreePosition(); // entities from the same team start on the same spot
+                    for (TeamConfig team: matchTeams) {
+                        String agentName;
+                        if(n < team.getAgentNames().size()) {
+                            agentName = team.getAgentNames().get(n);
                         }
+                        else {
+                            agentName = team.getName() + "-unconfigured-" + n;
+                            Log.log(Log.Level.ERROR, "Too few agents configured for team " + team.getName()
+                                    + ", using agent name " + agentName + ".");
+                        }
+                        createEntity(position, agentName, team.getName());
                     }
                 }
             }

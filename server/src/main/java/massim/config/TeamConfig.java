@@ -52,11 +52,4 @@ public class TeamConfig {
     public Vector<String> getAgentNames(){
         return new Vector<>(agents);
     }
-
-    /**
-     * @return the number of agents in this team
-     */
-    public int getSize(){
-        return agents.size();
-    }
 }
