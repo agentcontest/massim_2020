@@ -46,6 +46,9 @@ Tasks have to be completed to get score points. They appear randomly during the 
 * __name__: an identifier for the task
 * __deadline__: the last step in which the task can be submitted
 * __reward__: the number of score points that can be earned by completing the task
+* __requirements__: each requirement describes a block that has to be attached to the agent
+  * __x/y__: the coordinates of the block (the agent being (0,0))
+  * __type__: the required type of the block
 
 ## Actions
 
