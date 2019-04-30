@@ -26,8 +26,8 @@ public class StepPercept extends RequestActionMessage {
         parsePercept(content.getJSONObject("percept"));
     }
 
-    public StepPercept(long score, Set<Thing> things, Map<String, Set<Position>> terrain, Set<TaskInfo> taskInfo, String action, String result) {
-        super(System.currentTimeMillis(), -1, -1); // id and deadline are updated later
+    public StepPercept(int step, long score, Set<Thing> things, Map<String, Set<Position>> terrain, Set<TaskInfo> taskInfo, String action, String result) {
+        super(System.currentTimeMillis(), -1, -1, step); // id and deadline are updated later
         this.score = score;
         this.things.addAll(things);
         this.taskInfo.addAll(taskInfo);

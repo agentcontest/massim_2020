@@ -10,17 +10,20 @@ public abstract class RequestActionMessage extends Message {
     private long time;
     private long id;
     private long deadline;
+    private int step;
 
     public RequestActionMessage(JSONObject content) {
         this.time = content.optLong("time");
         this.id = content.optLong("id", -1);
         this.deadline = content.optLong("deadline", -1);
+        this.step = content.optInt("step", -1);
     }
 
-    public RequestActionMessage(long time, long id, long deadline) {
+    public RequestActionMessage(long time, long id, long deadline, int step) {
         this.time = time;
         this.id = id;
         this.deadline = deadline;
+        this.step = step;
     }
 
     @Override
