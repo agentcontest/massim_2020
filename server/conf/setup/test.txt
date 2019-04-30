@@ -1,0 +1,6 @@
+# simple setup file for testing
+move 3 3 agentA1
+move 6 3 agentA2
+add 4 3 dispenser b1
+add 5 3 dispenser b2
+add 3 5 block b1

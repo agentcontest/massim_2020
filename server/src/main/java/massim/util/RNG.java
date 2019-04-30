@@ -46,4 +46,8 @@ public abstract class RNG {
     public static synchronized void shuffle(List<?> list){
         Collections.shuffle(list, random);
     }
+
+    public static synchronized int betweenClosed(int lower, int upper){
+        return lower + nextInt(upper - lower + 1);
+    }
 }

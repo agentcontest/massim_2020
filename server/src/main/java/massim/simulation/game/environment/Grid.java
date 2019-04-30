@@ -50,6 +50,7 @@ public class Grid {
     }
 
     public Block createBlock(Position xy, String type) {
+        if(!isFree(xy)) return null;
         Block b = new Block(xy, type);
         insert(b.getID(), b.getPosition());
         return b;
@@ -80,6 +81,17 @@ public class Grid {
             Position newPos = newPositions.get(a);
             collisionMap[newPos.x][newPos.y] = a.getID();
             a.setPosition(newPos);
+        }
+    }
+
+    /**
+     * Moves an Attachable to a given position.
+     * Only works if target is free and attachable has nothing attached.
+     */
+    public void move(Attachable a, Position pos) {
+        if(isFree(pos) && a.getAttachments().size() == 0) {
+            collisionMap[pos.x][pos.y] = a.getID();
+            a.setPosition(pos);
         }
     }
 

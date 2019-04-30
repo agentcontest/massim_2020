@@ -11,13 +11,14 @@ import massim.protocol.messages.scenario.InitialPercept;
 import massim.protocol.messages.scenario.StepPercept;
 import massim.simulation.game.environment.*;
 import massim.util.Log;
+import massim.util.RNG;
+import massim.util.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ class GameState {
     private Map<String, GameObject> gameObjects = new HashMap<>();
     private Map<Position, Dispenser> dispensers = new HashMap<>();
     private Map<String, Task> tasks = new HashMap<>();
-    private List<String> blockTypes = new ArrayList<>();
+    private Set<String> blockTypes = new TreeSet<>();
 
     GameState(JSONObject config, Set<TeamConfig> matchTeams) {
         // parse simulation config
@@ -49,11 +50,14 @@ class GameState {
         Log.log(Log.Level.NORMAL, "config.randomFail: " + randomFail);
         attachLimit = config.getInt("attachLimit");
         Log.log(Log.Level.NORMAL, "config.attachLimit: " + attachLimit);
-        int numberOfBlockTypes = config.optInt("blockTypes");
-        Log.log(Log.Level.NORMAL, "config.blockTypes: " + numberOfBlockTypes);
+        var blockTypeBounds = config.getJSONArray("blockTypes");
+        var numberOfBlockTypes = RNG.betweenClosed(blockTypeBounds.getInt(0), blockTypeBounds.getInt(1));
+        Log.log(Log.Level.NORMAL, "config.blockTypes: " + blockTypeBounds + " -> " + numberOfBlockTypes);
         for (int i = 0; i < numberOfBlockTypes; i++) {
             blockTypes.add("b" + i);
         }
+        var dispenserBounds = config.getJSONArray("dispensers");
+        Log.log(Log.Level.NORMAL, "config.dispensersBounds: " + dispenserBounds);
 
         // create teams
         agentNames = new ArrayList<>();
@@ -64,19 +68,19 @@ class GameState {
 
         // create grid environment
         JSONObject gridConf = config.getJSONObject("grid");
-        int gridX = gridConf.getInt("width");
-        int gridY = gridConf.getInt("height");
+        var gridX = gridConf.getInt("width");
+        var gridY = gridConf.getInt("height");
         grid = new Grid(gridX, gridY, attachLimit);
 
         // read bitmap if available
         String mapFilePath = gridConf.optString("file");
         if (!mapFilePath.equals("")){
-            File mapFile = new File(mapFilePath);
+            var mapFile = new File(mapFilePath);
             if (mapFile.exists()) {
                 try {
                     BufferedImage img = ImageIO.read(mapFile);
-                    int width = Math.min(gridX, img.getWidth());
-                    int height = Math.min(gridY, img.getHeight());
+                    var width = Math.min(gridX, img.getWidth());
+                    var height = Math.min(gridY, img.getHeight());
                     for (int x = 0; x < width; x++) { for (int y = 0; y < height; y++) {
                         grid.setTerrain(x, y, terrainColors.getOrDefault(img.getRGB(x, y), Terrain.EMPTY));
                     }}
@@ -90,12 +94,12 @@ class GameState {
         // create entities
         JSONArray entities = config.getJSONArray("entities");
         for (var type = 0; type < entities.length(); type++) {
-            JSONObject entityConf = entities.optJSONObject(type);
+            var entityConf = entities.optJSONObject(type);
             if (entityConf != null){
-                String roleName = entityConf.keys().next();
-                int amount = entityConf.optInt(roleName, 0);
+                var roleName = entityConf.keys().next();
+                var amount = entityConf.optInt(roleName, 0);
                 for (var n = 0; n < amount; n++){
-                    Position position = grid.findRandomFreePosition(); // entities from the same team start on the same spot
+                    var position = grid.findRandomFreePosition(); // entities from the same team start on the same spot
                     for (TeamConfig team: matchTeams) {
                         String agentName;
                         if(n < team.getAgentNames().size()) {
@@ -110,6 +114,66 @@ class GameState {
                     }
                 }
             }
+        }
+
+        // create env. things
+        for (var block : blockTypes) {
+            var numberOfDispensers = RNG.betweenClosed(dispenserBounds.getInt(0), dispenserBounds.getInt(1));
+            for (var i = 0; i < numberOfDispensers; i++) {
+                createDispenser(grid.findRandomFreePosition(), block);
+            }
+        }
+
+        // check for setup file
+        var setupFilePath = config.optString("setup");
+        if (!setupFilePath.equals("")){
+            Log.log(Log.Level.NORMAL, "Running setup actions");
+            try {
+                var b = new BufferedReader(new FileReader(setupFilePath));
+                var line = "";
+                while ((line = b.readLine()) != null) {
+                    if (line.startsWith("#")) continue;
+                    handleCommand(line.split(" "));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    void handleCommand(String[] command) {
+        switch (command[0]) {
+            case "move":
+                if (command.length != 4) break;
+                var x = Util.tryParseInt(command[1]);
+                var y = Util.tryParseInt(command[2]);
+                var entity = agentToEntity.get(command[3]);
+
+                if (entity == null || x == null || y == null) break;
+                Log.log(Log.Level.NORMAL, "Setup: Try to move " + command[3] + " to (" + x +", " + y + ")");
+                grid.move(entity, Position.of(x, y));
+                break;
+
+            case "add":
+                if (command.length != 5) break;
+                x = Util.tryParseInt(command[1]);
+                y = Util.tryParseInt(command[2]);
+                if (x == null || y == null) break;
+                switch (command[3]) {
+                    case "block":
+                        var blockType = command[4];
+                        createBlock(Position.of(x, y), blockType);
+                        break;
+                    case "dispenser":
+                        blockType = command[4];
+                        createDispenser(Position.of(x, y), blockType);
+                        break;
+                    default:
+                        Log.log(Log.Level.ERROR, "Cannot add " + command[3]);
+                }
+                break;
+            default:
+                Log.log(Log.Level.ERROR, "Cannot handle command " + Arrays.toString(command));
         }
     }
 
@@ -278,12 +342,12 @@ class GameState {
 
     Task createTask() {
         // TODO use more config parameters
-        Task t = Task.generate("task" + tasks.values().size(), step + 200, 5, blockTypes);
+        Task t = Task.generate("task" + tasks.values().size(), step + 200, 5, new ArrayList<>(blockTypes));
         tasks.put(t.getName(), t);
         return t;
     }
 
-    Entity createEntity(Position xy, String name, String teamName) {
+    private Entity createEntity(Position xy, String name, String teamName) {
         Entity e = grid.createEntity(xy, name, teamName);
         registerGameObject(e);
         agentToEntity.put(name, e);
@@ -291,13 +355,16 @@ class GameState {
         return e;
     }
 
-    Block createBlock(Position xy, String blockType) {
+    private Block createBlock(Position xy, String blockType) {
+        if (!blockTypes.contains(blockType)) return null;
         Block b = grid.createBlock(xy, blockType);
+        if (b == null) return null;
         registerGameObject(b);
         return b;
     }
 
-    void createDispenser(Position xy, String blockType) {
+    private void createDispenser(Position xy, String blockType) {
+        if (!blockTypes.contains(blockType)) return;
         Dispenser d = new Dispenser(xy, blockType);
         registerGameObject(d);
         dispensers.put(xy, d);
@@ -324,7 +391,7 @@ class GameState {
         return !e1.getTeamName().equals(e2.getTeamName());
     }
 
-    public JSONObject takeSnapshot() {
+    JSONObject takeSnapshot() {
         JSONObject snapshot = new JSONObject();
         JSONArray entities = new JSONArray();
         snapshot.put("entities", entities);
@@ -379,7 +446,7 @@ class GameState {
         return snapshot;
     }
 
-    public JSONObject getResult() {
+    JSONObject getResult() {
         JSONObject result =  new JSONObject();
         teams.values().forEach(t -> {
             JSONObject teamResult = new JSONObject();

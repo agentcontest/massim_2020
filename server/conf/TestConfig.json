@@ -14,11 +14,12 @@
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
       "grid" : {
-        "height" : 40,
-        "width" : 40,
-        "file" : "conf/maps/test40x40.bmp"
+        "height" : 20,
+        "width" : 20,
+        "file" : "conf/maps/test.bmp"
       },
-      "attachLimit" : 10,
+      "setup" : "conf/setup/test.txt",
+      "attachLimit" : 3,
       "blockTypes" : [3, 3],
       "dispensers" : [2, 3]
     }
