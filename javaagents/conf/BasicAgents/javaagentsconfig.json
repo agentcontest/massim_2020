@@ -9,24 +9,6 @@
     "agentA7" : {"entity" : "connectionA7", "team" : "A", "class" : "BasicAgent"},
     "agentA8" : {"entity" : "connectionA8", "team" : "A", "class" : "BasicAgent"},
     "agentA9" : {"entity" : "connectionA9", "team" : "A", "class" : "BasicAgent"},
-    "agentA10" : {"entity" : "connectionA10", "team" : "A", "class" : "BasicAgent"},
-    "agentA11" : {"entity" : "connectionA11", "team" : "A", "class" : "BasicAgent"},
-    "agentA12" : {"entity" : "connectionA12", "team" : "A", "class" : "BasicAgent"},
-    "agentA13" : {"entity" : "connectionA13", "team" : "A", "class" : "BasicAgent"},
-    "agentA14" : {"entity" : "connectionA14", "team" : "A", "class" : "BasicAgent"},
-    "agentA15" : {"entity" : "connectionA15", "team" : "A", "class" : "BasicAgent"},
-    "agentA16" : {"entity" : "connectionA16", "team" : "A", "class" : "BasicAgent"},
-    "agentA17" : {"entity" : "connectionA17", "team" : "A", "class" : "BasicAgent"},
-    "agentA18" : {"entity" : "connectionA18", "team" : "A", "class" : "BasicAgent"},
-    "agentA19" : {"entity" : "connectionA19", "team" : "A", "class" : "BasicAgent"},
-    "agentA20" : {"entity" : "connectionA20", "team" : "A", "class" : "BasicAgent"},
-    "agentA21" : {"entity" : "connectionA21", "team" : "A", "class" : "BasicAgent"},
-    "agentA22" : {"entity" : "connectionA22", "team" : "A", "class" : "BasicAgent"},
-    "agentA23" : {"entity" : "connectionA23", "team" : "A", "class" : "BasicAgent"},
-    "agentA24" : {"entity" : "connectionA24", "team" : "A", "class" : "BasicAgent"},
-    "agentA25" : {"entity" : "connectionA25", "team" : "A", "class" : "BasicAgent"},
-    "agentA26" : {"entity" : "connectionA26", "team" : "A", "class" : "BasicAgent"},
-    "agentA27" : {"entity" : "connectionA27", "team" : "A", "class" : "BasicAgent"},
-    "agentA28" : {"entity" : "connectionA28", "team" : "A", "class" : "BasicAgent"}
+    "agentA10" : {"entity" : "connectionA10", "team" : "A", "class" : "BasicAgent"}
   }
 }
