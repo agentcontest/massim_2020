@@ -60,11 +60,11 @@ public class ActionMessage extends Message{
     @Override
     public JSONObject makeContent() {
         JSONObject content = new JSONObject();
-        content.append("type", actionType);
-        content.append("id", id);
+        content.put("type", actionType);
+        content.put("id", id);
         JSONArray params = new JSONArray();
         this.params.forEach(params::put);
-        content.append("p", params);
+        content.put("p", params);
         return content;
     }
 }

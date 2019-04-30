@@ -28,7 +28,7 @@ public class AuthResponseMessage extends Message {
     @Override
     public JSONObject makeContent() {
         JSONObject content = new JSONObject();
-        content.append("result", result);
+        content.put("result", result);
         return content;
     }
 

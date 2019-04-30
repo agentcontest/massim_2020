@@ -31,9 +31,9 @@ public abstract class RequestActionMessage extends Message {
     @Override
     public JSONObject makeContent() {
         JSONObject content = new JSONObject();
-        content.append("id", id);
-        content.append("deadline", deadline);
-        content.append("percept", makePercept());
+        content.put("id", id);
+        content.put("deadline", deadline);
+        content.put("percept", makePercept());
         return content;
     }
 

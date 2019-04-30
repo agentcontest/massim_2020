@@ -25,8 +25,8 @@ public class AuthRequestMessage extends Message {
     @Override
     public JSONObject makeContent() {
         JSONObject content = new JSONObject();
-        content.append("user", username);
-        content.append("pw", password);
+        content.put("user", username);
+        content.put("pw", password);
         return content;
     }
 

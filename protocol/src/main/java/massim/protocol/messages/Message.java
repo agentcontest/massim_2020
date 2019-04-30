@@ -20,8 +20,8 @@ public abstract class Message {
 
     public JSONObject toJson() {
         JSONObject message = new JSONObject();
-        message.append("type", getMessageType());
-        message.append("content", makeContent());
+        message.put("type", getMessageType());
+        message.put("content", makeContent());
         return message;
     }
 
