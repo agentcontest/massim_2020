@@ -228,10 +228,8 @@ public class Grid {
                 && terrainMap[xy.x][xy.y] != Terrain.OBSTACLE;
     }
 
-    public void setTerrain(Position pos, Terrain terrainType) {
-        if (!outOfBounds(pos)) {
-            terrainMap[pos.x][pos.y] = terrainType;
-        }
+    public void setTerrain(int x, int y, Terrain terrainType) {
+        terrainMap[x][y] = terrainType;
     }
 
     public Terrain getTerrain(Position pos) {

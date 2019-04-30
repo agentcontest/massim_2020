@@ -14,8 +14,9 @@
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
       "grid" : {
-        "height" : 20,
-        "width" : 20
+        "height" : 40,
+        "width" : 40,
+        "file" : "conf/maps/test40x40.bmp"
       },
       "attachLimit" : 10,
       "blockTypes" : 3

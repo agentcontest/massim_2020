@@ -2,18 +2,22 @@ package massim.simulation.game;
 
 import massim.config.TeamConfig;
 import massim.protocol.data.Position;
+import massim.protocol.data.TaskInfo;
+import massim.protocol.data.Thing;
 import massim.protocol.messages.RequestActionMessage;
 import massim.protocol.messages.SimEndMessage;
 import massim.protocol.messages.SimStartMessage;
 import massim.protocol.messages.scenario.InitialPercept;
 import massim.protocol.messages.scenario.StepPercept;
-import massim.protocol.data.TaskInfo;
-import massim.protocol.data.Thing;
 import massim.simulation.game.environment.*;
 import massim.util.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,6 +25,9 @@ import java.util.stream.Collectors;
  * State of the game.
  */
 class GameState {
+
+    private static Map<Integer, Terrain> terrainColors =
+            Map.of(-16777216, Terrain.OBSTACLE, -1, Terrain.EMPTY, -65536, Terrain.GOAL);
 
     private int randomFail;
     private int attachLimit;
@@ -61,6 +68,25 @@ class GameState {
         int gridY = gridConf.getInt("height");
         grid = new Grid(gridX, gridY, attachLimit);
 
+        // read bitmap if available
+        String mapFilePath = gridConf.optString("file");
+        if (!mapFilePath.equals("")){
+            File mapFile = new File(mapFilePath);
+            if (mapFile.exists()) {
+                try {
+                    BufferedImage img = ImageIO.read(mapFile);
+                    int width = Math.min(gridX, img.getWidth());
+                    int height = Math.min(gridY, img.getHeight());
+                    for (int x = 0; x < width; x++) { for (int y = 0; y < height; y++) {
+                        grid.setTerrain(x, y, terrainColors.getOrDefault(img.getRGB(x, y), Terrain.EMPTY));
+                    }}
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else Log.log(Log.Level.ERROR, "File " + mapFile.getAbsolutePath() + " not found.");
+        }
+
         // create entities
         JSONArray entities = config.getJSONArray("entities");
         for (var type = 0; type < entities.length(); type++) {
@@ -85,9 +111,6 @@ class GameState {
                 }
             }
         }
-
-        // create goal area
-        grid.setTerrain(Position.of(gridX/2, gridY/2), Terrain.GOAL);
     }
 
     int getRandomFail() {
