@@ -1,6 +1,6 @@
 # MASSim Protocol Documentation
 
-The MASSim protocol defines sequences of XML messages which are exchanged between the agents and the MASSim server. Agents communicate with the server using standard TCP sockets.
+The MASSim protocol defines sequences of JSON messages which are exchanged between the agents and the MASSim server. Agents communicate with the server using standard TCP sockets.
 
 ## Sequence
 
@@ -23,7 +23,7 @@ If an agent loses the connection to the server, it may reconnect using the stand
 
 ## Message formats
 
-__Each message is terminated by a separate `0 byte`.__ The server buffers everything up to the 0 byte and tries to parse an XML string from that.
+__Each message is terminated by a separate `0 byte`.__ The server buffers everything up to the 0 byte and tries to parse a JSON string from that.
 
 ### AUTH-REQUEST
 

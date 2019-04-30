@@ -9,6 +9,7 @@ import massim.protocol.messages.SimStartMessage;
 import massim.simulation.AbstractSimulation;
 import massim.simulation.game.environment.Grid;
 import massim.util.RNG;
+import massim.util.Util;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
@@ -250,10 +251,6 @@ public class Simulation extends AbstractSimulation {
     }
 
     private Integer getIntParam(List<String> params, int index) {
-        try {
-            return Integer.parseInt(params.get(index));
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return Util.tryParseInt(params.get(index));
     }
 }
