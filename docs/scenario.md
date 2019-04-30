@@ -22,7 +22,7 @@ __Tournament points__ are distributed according to the score of a team at the en
 
 ## Environment
 
-The environment is a rectangular grid. The dimensions are not known to the agents.
+The environment is a rectangular grid. The dimensions are not known to the agents. Agents only perceive positions relative to their own. The x-axis goes from left to right (or eastwards) and the y-axis from top to bottom (southwards).
 
 ### Things
 
@@ -36,8 +36,9 @@ There are number of __things__ that can inhabit a cell of the grid:
 
 Each cell of the grid has a specific terrain type.
 
-* __Regular__: If nothing else is specified, a cell is *just a cell*.
-* __Goal__: Agents have to be on a __goal__ cell in order to be allowed to submit a task.
+* __empty__: If nothing else is specified, a cell is *just a cell*.
+* __goal__: Agents have to be on a __goal__ cell in order to be allowed to submit a task.
+* __obstacle__: Obstacle cells are not traversable, i.e. they block movement and rotations that would involve the cell.
 
 ## Tasks
 
@@ -176,30 +177,83 @@ Complete Example (with bogus values):
 
 ```JSON
 {
-  "TODO" : true
+  "type": "sim-start",
+  "content": {
+    "time": 1556638383203,
+    "percept": {
+      "name": "agentA1",
+      "team": "A",
+      "steps": 700
+    }
+  }
 }
 ```
 
-#### Simulation details
-
-The `simulation` tag has attributes for the simulation `id`, the name of the `map` that is used and its `bounds`, the `seed capital`, the number of simulation `steps` to be played and the name of the agent's `team`.
-
-#### Role details
-
-The percept also contains the agent's `role` and its details; the name and base and max values for speed, load, battery, vision and skill.
+* __name__: the agent's name
+* __team__: the name of the agent's team
+* __steps__: the sim's total number of steps
 
 ### Step percept
 
 This percept contains information about the simulation state at the beginning of each step.
 
-Example:
+Agents perceive the state of a cell depending on their vision. E.g. if they have a vision of 5, they can sense all cells that are up to 5 steps away.
 
-```XML
-<message timestamp="1518532127931" type="request-action">
-...
+Example (complete request-action message):
+
+```json
+{
+   "type": "request-action",
+   "content": {
+      "id": 1,
+      "time": 1556636930397,
+      "deadline": 1556636934400,
+      "percept": {
+         "score": 0,
+         "lastAction": "move",
+         "lastActionResult": "success",
+         "things": [
+            {
+               "x": 0,
+               "y": 0,
+               "details": "",
+               "type": "entity"
+            },
+            {
+               "x": 0,
+               "y": 0,
+               "details": "",
+               "type": "entity"
+            },
+            {
+               "x": 0,
+               "y": 0,
+               "details": "",
+               "type": "entity"
+            },
+            {
+               "x": 0,
+               "y": 0,
+               "details": "",
+               "type": "entity"
+            }
+         ],
+         "terrain": {},
+         "tasks": []
+      }
+   }
+}
 ```
 
-The information is contained in the `percept` element within the message. This element contains an arbitrary number of child nodes, each representing an element of the simulation.
+* __score__: the current team score
+* __lastAction__: the last action submitted by the agent
+* __lastActionResult__: the result of that action
+* __things__: things in the simulation visible to the agent
+  * __x/y__: position of the thing _relative_ to the agent
+  * __type__: the type of the thing (entity, block, dispenser, ...)
+  * __details__: details about the thing (the block-type for blocks and dispensers)
+* __terrain__: the terrain around the agent (if no value is given for a visible cell, the terrain is just *empty*)
+* __task__:
 
 ## Configuration
 
@@ -209,20 +263,28 @@ Example:
 
 ```JSON
 {
-  "id" : "2019-SampleSimulation",
-  "steps" : 1000,
-  "randomSeed" : 17,
-  "randomFail" : 1,
+  "id": "2019-SampleSimulation",
+  "steps": 700,
+  "randomSeed": 17,
+  "randomFail": 1,
+
+  "attachLimit": 10,
+  "blockTypes": [3, 3],
+  "dispensers": [2, 3],
 
   "entities" : [
-    {"standard" : 10}
+    {"standard": 10}
   ],
 
-  "generate" : {}
+  "grid": {
+    "height": 40,
+    "width": 40,
+    "file": "conf/maps/test.bmp"
+  },
+
+  "setup" : "conf/setup/test.txt"
 }
 ```
-
-The `generate` block will be subject of the [Random generation](#random-generation) section.
 
 For each simulation, the following parameters may be specified:
 
@@ -230,13 +292,19 @@ For each simulation, the following parameters may be specified:
 * __steps__: the number of steps the simulation will take
 * __randomSeed__: the random seed that is used for map generation and action execution
 * __randomFail__: the probability for any action to fail (in %)
-
-The number of agents per role is defined in the `entities` array. Each object may have only one key (the name of the role). The value for the key is the number of agents for that role.
+* __attachLimit__: the maximum number of things that can be attached to each other
+* __blockTypes__: upper and lower bounds for the number of block types
+* __dispensers__: upper and lower bounds for the number of dispenser per block type
+* __entities__: the number of entities (i.e. agents) per type
+* __grid__:
+  * __height/width__: dimensions of the environment
+  * __file__: a bitmap file describing the map layout (see examples for more information)
+* __setup__: a file describing additional steps to be performed before the simulation starts
+  * might be useful for testing & debugging
+  * see examples for more information
 
 Currently, there is only one standard agent role.
 
-## Random generation
-
 ## Commands
 
-[Currently, no special scenario commands are available.]
+Currently, no special scenario commands are available. You may use a simulation [setup file](#configuration) instead.

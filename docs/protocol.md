@@ -19,113 +19,151 @@ An agent should respond with an `ACTION` message to all `REQUEST-ACTION` message
 
 ## Reconnection
 
-If an agent loses the connection to the server, it may reconnect using the standard `AUTH-REQUEST` message. Auhtentication proceeds as before. If authentication was successful and the agent reconnects into a running simulation, the `SIM-START` message is sent again. If it coincides with a new simulation step, the order of `SIM-START` and `REQUEST-ACTION` messages is not guaranteed however.
+If an agent loses the connection to the server, it may reconnect using the standard `AUTH-REQUEST` message. Auhtentication proceeds as before. If authentication was successful and the agent reconnects into a running simulation, the `SIM-START` message is sent again. If it coincides with a new simulation step, the order of `SIM-START` and `REQUEST-ACTION` messages is not guaranteed.
 
 ## Message formats
 
 __Each message is terminated by a separate `0 byte`.__ The server buffers everything up to the 0 byte and tries to parse a JSON string from that.
 
-### AUTH-REQUEST
+Each message is a JSON object following the base format
 
-Used by agents to initiate communication with the server.
-
-```XML
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<message type="auth-request">
-  <auth-request username="agentA1" password="1"/>
-</message>
+```json
+{
+   "type": "some-type",
+   "content": {...}
+}
 ```
 
-All messages are enclosed in `<message>` tags and have a `type` attribute describing what kind of protocol message they represent.
+where value of `type` denotes the type of the message. The JSON object under the `content` key depends on the message type.
 
-This message has one `<auth-request>` element with the attributes `username` and `password`.
+### AUTH-REQUEST
+
+* Who? - Agents
+* Why? - Initiate communication with the server.
+
+```json
+{
+  "type": "auth-request",
+  "content": {
+    "user": "agentA1",
+    "pw": "1"
+  }
+}
+```
+
+* __user__: username of the agent that is configured in the server
+* __pw__: the agent's password to authenticate with
 
 ### AUTH-RESPONSE
 
-Sent by the server in reply to `AUTH-REQUEST` messages.
+* Who? - Server
+* Why? - Tell agent the result of authentication after an `AUTH-REQUEST` message.
 
-```XML
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<message timestamp="1489514144783" type="auth-response">
-  <auth-response result="ok"/>
-</message>
+```json
+{
+  "type": "auth-response",
+  "content": {"result": "ok"}
+}
 ```
 
-* __timestamp__: is the server time of when the message was created (in ms since 1970)
-* __result__: the result of the authentication; either __ok__ or __fail__
+* __result__: the result of the authentication; either __"ok"__ or __"fail"__
 
 ### SIM-START
 
-```XML
-<message timestamp="1489514141992" type="sim-start">
-  <simulation id="2017-TestSim-1of1" steps="1000" team="A">
-    ...
-  </simulation>
-</message>
+* Who? - Server
+* Why? - Indicate that a simulation has started or is currently running.
+
+```json
+{
+  "type": "sim-start",
+  "content": {
+    "time": 1489514146201,
+    "percept": {
+      ...
+    }
+  }
+}
 ```
 
-Also contains a timestamp. The content of the simulation element, as well as further attributes, depend on the scenario (see Percepts section of [scenario.md](scenario.md)).
+* __time__: when the message was created
+* __percept__: static simulation info
+
+The contents of the percept object depend on the scenario (see Percepts section of [scenario.md](scenario.md)).
 
 ### REQUEST-ACTION
 
-```XML
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<message timestamp="1489514146201" type="request-action">
-  <percept deadline="1489514150201" id="1">
-    <simulation step="1"/>
-    ...
-  </percept>
-</message>
+* Who? - Server
+* Why? - Indicate a new simulation step, convey simulation state and request an action.
+
+```json
+{
+  "type": "request-action",
+  "content": {
+    "id": 2,
+    "time": 1556636930397,
+    "deadline": 1556636934400,
+    "step": 27,
+    "percept": {
+      ...
+    }
+  }
+}
 ```
 
-A `REQUEST-ACTION` message also contains a server timestamp and its type as attribute. The main element is `<percept>`, containing the current simulation state as perceived by the agent (i.e. its percepts).
+* __deadline__: the time by which the server expects an `ACTION` message
+* __id__: the action-id; this id must be used in the `ACTION` message so that it can be associated with the correct request (which prevents older actions from being executed if they arrive too late)
+* __step__: the current simulation step
+* __percept__: the current simulation state
 
-* __deadline__: the time at which the server stops waiting for an `ACTION` message; the time between __timestamp__ and __deadline__ should be the timeout specified in the server config
-*  __id__: the action-id; this id must be used in the `ACTION` message so that it can be associated with the correct request (which prevents older actions from being executed if they arrive too late); in case multiple actions are sent for the same action-id, the first action is processed
-* __simulation__: contains global simulation information
-  * __step__: the current simulation step
-
-The remaining content of the percept element, as well as further attributes, depend on the scenario (see Percepts section of [scenario.md](scenario.md)).
+The contents of the percept object depend on the scenario (see Percepts section of [scenario.md](scenario.md)).
 
 ### ACTION
 
-The response to a `REQUEST-ACTION` message; sent by agents to the server.
+* Who? - Agent
+* Why? - Respond to `REQUEST-ACTION` message
 
-```XML
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<message type="action">
-  <action id="0" type="goto">
-    <p>51.6</p>
-    <p>11.4</p>
-  </action>
-</message>
+```json
+{
+  "type": "action",
+  "content": {
+    "id": 2,
+    "type": "move",
+    "p": ["n"]
+  }
+}
 ```
 
-* __id__: the action-id that the agent received in the `REQUEST-ACTION` message
-* __type__: the type of the action; depends on the current scenario
-* __p__: a number of parameters for the action, which depend on the action that is used
+* __id__: the action-id that was received in the `REQUEST-ACTION` message
+* __type__: the type of action to use
+* __p__: an array of parameters for the action
 
 ### SIM-END
 
-Contains the result of 1 simulation for the team.
+Who? - Server
+Why? - Indicate that a simulation ended and give results.
 
-```XML
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<message timestamp="1489575032814" type="sim-end">
-  <sim-result ranking="1" score="50000"/>
-</message>
+```json
+{
+  "type": "sim-end",
+  "content": {
+    "score": 9001,
+    "ranking": 1,
+    "time": 1556638423323
+   }
+}
 ```
 
 * __ranking__: the team's rank at the end of the simulation
-* __score__: the score the team achieved in the simulation
+* __score__: the team's final score
 
 ### BYE
 
-This message indicates that the server has run all simulations it was configured for and will close the socket afterwards.
+Who? - Server
+Why? - Indicate that all simulations have finished and the sockets will be closed.
 
-```XML
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<message timestamp="1489575049861" type="bye">
-  <bye/>
-</message>
+```json
+{
+  "type": "bye",
+  "content": {}
+}
 ```
