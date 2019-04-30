@@ -1,5 +1,6 @@
 package massim.protocol.messages;
 
+import massim.protocol.messages.scenario.Actions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -8,24 +9,12 @@ import java.util.List;
 
 public class ActionMessage extends Message{
 
-    public final static String NO_ACTION = "no_action";
-    public final static String UNKNOWN_ACTION = "unknown_action";
-
-    public final static String RESULT_UNPROCESSED = "unprocessed";
-    public final static String RESULT_PENDING = "pending";
-    public final static String RESULT_SUCCESS = "success";
-    public final static String RESULT_F = "failed";
-    public final static String RESULT_F_RANDOM = "failed_random";
-    public final static String RESULT_F_PARAMETER = "failed_parameter";
-    public final static String RESULT_F_PATH = "failed_path";
-    public final static String RESULT_F_PARTNER = "failed_partner";
-
     private String actionType;
     private long id;
     private List<String> params;
 
     public ActionMessage(JSONObject content) {
-        this.actionType = content.optString("type", UNKNOWN_ACTION);
+        this.actionType = content.optString("type", Actions.UNKNOWN_ACTION);
         this.id = content.optLong("id", -1);
         JSONArray p = content.optJSONArray("p");
         this.params = new ArrayList<>();

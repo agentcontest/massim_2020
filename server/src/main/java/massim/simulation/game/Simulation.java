@@ -99,90 +99,95 @@ public class Simulation extends AbstractSimulation {
         for (Entity entity : entities) {
             entity.setNewAction(actions.get(entity.getAgentName()));
             if (RNG.nextInt(100) < state.getRandomFail()) {
-                entity.setLastActionResult(ActionMessage.RESULT_F_RANDOM);
+                entity.setLastActionResult(RESULT_F_RANDOM);
             }
         }
         for (Entity entity : entities) {
-            if (entity.getLastActionResult().equals(ActionMessage.RESULT_F_RANDOM)) continue;
+            if (entity.getLastActionResult().equals(RESULT_F_RANDOM)) continue;
             List<String> params = entity.getLastActionParams();
             switch(entity.getLastAction()) {
+
+                case NO_ACTION:
+                    entity.setLastActionResult(RESULT_SUCCESS);
+                    continue;
+
                 case MOVE:
                     if (params.size() != 1) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
                     String direction = params.get(0);
                     if (!Grid.DIRECTIONS.contains(direction)) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     } else {
                         if (state.move(entity, direction)) {
-                            entity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
+                            entity.setLastActionResult(RESULT_SUCCESS);
                         }
                         else {
-                            entity.setLastActionResult(ActionMessage.RESULT_F_PATH);
+                            entity.setLastActionResult(RESULT_F_PATH);
                         }
                     }
                     continue;
 
                 case ATTACH:
                     if (params.size() != 1) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
                     direction = params.get(0);
                     if (!Grid.DIRECTIONS.contains(direction)) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                     } else {
                         if (state.attach(entity, direction)){
-                            entity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
+                            entity.setLastActionResult(RESULT_SUCCESS);
                         }
                         else {
-                            entity.setLastActionResult(ActionMessage.RESULT_F);
+                            entity.setLastActionResult(RESULT_F);
                         }
                     }
                     continue;
 
                 case DETACH:
                     if (params.size() != 1) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
                     direction = params.get(0);
                     if (!Grid.DIRECTIONS.contains(direction)) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                     } else {
                         if (state.detach(entity, direction)){
-                            entity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
+                            entity.setLastActionResult(RESULT_SUCCESS);
                         }
                         else {
-                            entity.setLastActionResult(ActionMessage.RESULT_F);
+                            entity.setLastActionResult(RESULT_F);
                         }
                     }
                     continue;
 
                 case ROTATE:
                     if (params.size() != 1) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
                     direction = params.get(0);
                     if (!direction.equalsIgnoreCase("cw") && !direction.equalsIgnoreCase("ccw")) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
                     boolean clockwise = direction.equals("cw");
                     if (state.rotate(entity, clockwise)) {
-                        entity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
+                        entity.setLastActionResult(RESULT_SUCCESS);
                     }
                     else{
-                        entity.setLastActionResult(ActionMessage.RESULT_F);
+                        entity.setLastActionResult(RESULT_F);
                     }
                     continue;
 
                 case CONNECT:
                     if (params.size() != 3) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
                     var entityName = params.get(0);
@@ -190,62 +195,62 @@ public class Simulation extends AbstractSimulation {
                     var y = getIntParam(params, 2);
                     var partnerEntity = state.getEntityByName(entityName);
                     if (partnerEntity == null || x == null || y == null) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
                     if (!partnerEntity.getLastAction().equals(CONNECT)
-                            || partnerEntity.getLastActionResult().equals(ActionMessage.RESULT_F_RANDOM)) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARTNER);
+                            || partnerEntity.getLastActionResult().equals(RESULT_F_RANDOM)) {
+                        entity.setLastActionResult(RESULT_F_PARTNER);
                         continue;
                     }
-                    if (partnerEntity.getLastActionResult().equals(ActionMessage.RESULT_PENDING)) {
+                    if (partnerEntity.getLastActionResult().equals(RESULT_PENDING)) {
                         if (state.connectEntities(entity, Position.of(x, y), partnerEntity, connections.get(partnerEntity))) {
-                            entity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
-                            partnerEntity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
+                            entity.setLastActionResult(RESULT_SUCCESS);
+                            partnerEntity.setLastActionResult(RESULT_SUCCESS);
                         }
                         else {
-                            entity.setLastActionResult(ActionMessage.RESULT_F);
-                            partnerEntity.setLastActionResult(ActionMessage.RESULT_F);
+                            entity.setLastActionResult(RESULT_F);
+                            partnerEntity.setLastActionResult(RESULT_F);
                         }
                     } else { // handle action when it's the other agent's turn
                         connections.put(entity, Position.of(x,y));
-                        entity.setLastActionResult(ActionMessage.RESULT_PENDING);
+                        entity.setLastActionResult(RESULT_PENDING);
                     }
                     continue;
 
                 case REQUEST:
                     if (params.size() != 1) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
                     direction = params.get(0);
                     if (!Grid.DIRECTIONS.contains(direction)) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                     } else {
                         if (state.requestBlock(entity, direction)){
-                            entity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
+                            entity.setLastActionResult(RESULT_SUCCESS);
                         }
                         else {
-                            entity.setLastActionResult(ActionMessage.RESULT_F);
+                            entity.setLastActionResult(RESULT_F);
                         }
                     }
                     continue;
 
                 case SUBMIT:
                     if (params.size() != 1) {
-                        entity.setLastActionResult(ActionMessage.RESULT_F_PARAMETER);
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
                     String taskName = params.get(0);
                     if (state.submitTask(entity, taskName)){
-                        entity.setLastActionResult(ActionMessage.RESULT_SUCCESS);
+                        entity.setLastActionResult(RESULT_SUCCESS);
                     }
                     else {
-                        entity.setLastActionResult(ActionMessage.RESULT_F);
+                        entity.setLastActionResult(RESULT_F);
                     }
                     continue;
                 default:
-                    entity.setLastActionResult(ActionMessage.UNKNOWN_ACTION);
+                    entity.setLastActionResult(UNKNOWN_ACTION);
             }
         }
     }

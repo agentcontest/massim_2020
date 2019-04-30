@@ -2,6 +2,7 @@ package massim;
 
 import massim.config.TeamConfig;
 import massim.protocol.messages.*;
+import massim.protocol.messages.scenario.Actions;
 import massim.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -173,7 +174,7 @@ class AgentManager {
          * Creates a request-action message and sends it to the agent.
          * Should be called within a new thread, as it blocks up to {@link #agentTimeout} milliseconds.
          * @param percept the step percept to forward
-         * @return the action that was received by the agent (or {@link ActionMessage#NO_ACTION})
+         * @return the action that was received by the agent (or {@link Actions#NO_ACTION})
          */
         ActionMessage requestAction(RequestActionMessage percept) {
             long id = messageCounter.getAndIncrement();
@@ -193,7 +194,7 @@ class AgentManager {
             } catch (TimeoutException e) {
                 Log.log(Log.Level.NORMAL, "No valid action available in time for agent " + name + ".");
             }
-            return new ActionMessage(ActionMessage.NO_ACTION, id, new ArrayList<>());
+            return new ActionMessage(Actions.NO_ACTION, id, new ArrayList<>());
         }
 
         /**

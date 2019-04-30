@@ -1,9 +1,10 @@
 package massim.simulation.game;
 
-import massim.protocol.messages.ActionMessage;
-import massim.protocol.data.Thing;
-import massim.simulation.game.environment.Attachable;
 import massim.protocol.data.Position;
+import massim.protocol.data.Thing;
+import massim.protocol.messages.ActionMessage;
+import massim.protocol.messages.scenario.Actions;
+import massim.simulation.game.environment.Attachable;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +43,7 @@ public class Entity extends Attachable {
 
     void setNewAction(ActionMessage action) {
         this.lastAction = action.getActionType();
-        this.lastActionResult = ActionMessage.RESULT_UNPROCESSED;
+        this.lastActionResult = Actions.RESULT_UNPROCESSED;
         this.lastActionParams = action.getParams();
     }
 
