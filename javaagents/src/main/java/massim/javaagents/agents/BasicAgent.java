@@ -35,6 +35,6 @@ public class BasicAgent extends Agent {
                     Parameter param = p.getParameters().getFirst();
                     if(param instanceof Identifier) say("Step " + ((Identifier) param).getValue());
         });
-        return new Action("skip");
+        return new Action("move", new Identifier("n"));
     }
 }

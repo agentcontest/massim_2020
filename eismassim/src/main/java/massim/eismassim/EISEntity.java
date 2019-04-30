@@ -435,7 +435,7 @@ public abstract class EISEntity implements Runnable{
         osw.write(json.toString());
         osw.write(0);
         osw.flush();
-        if (useJSON) log(json.toString(3) + "\nsent");
+        if (useJSON) log(json.toString(3) + "\tsent");
     }
 
     /**
