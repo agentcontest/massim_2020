@@ -5,6 +5,7 @@ import massim.protocol.messages.*;
 import massim.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -225,18 +226,18 @@ class AgentManager {
         }
 
         /**
-         * Reads XML documents (0-terminated) from the socket. If any "packet" is bigger than
+         * Reads JSON objects (0-terminated) from the socket. If any "packet" is bigger than
          * {@link #maxPacketLength}, the read bytes are immediately discarded until the next 0 byte.
          */
         private void receive() {
             InputStream in;
             try {
                 in = new BufferedInputStream(socket.getInputStream());
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream(maxPacketLength);
-                int readBytes = 0;
-                boolean skipping = false;
+                var buffer = new ByteArrayOutputStream(maxPacketLength);
+                var readBytes = 0;
+                var skipping = false;
                 while (!disconnecting){
-                    int b = in.read();
+                    var b = in.read();
                     if (!skipping && b != 0) buffer.write(b);
                     if(b == -1) break; // stream ended
                     if (b == 0){
@@ -294,11 +295,12 @@ class AgentManager {
                 if (disconnecting && sendQueue.isEmpty()) { // we can stop when everything is sent (e.g. the bye message)
                     break;
                 }
-                try (OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)) {
-                    JSONObject msg = sendQueue.take();
-                    out.write(msg.toString());
-                    out.write(0);
-                    out.flush();
+                try {
+                    var osw = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8);
+                    var msg = sendQueue.take();
+                    osw.write(msg.toString());
+                    osw.write(0);
+                    osw.flush();
                 } catch (IOException | InterruptedException e){
                     Log.log(Log.Level.DEBUG, name + ": Error writing to socket. Stop sending now.");
                     break;
@@ -312,7 +314,7 @@ class AgentManager {
         private void close() {
             sendMessage(new ByeMessage(System.currentTimeMillis()));
             try {
-                if(sendThread!=null)
+                if(sendThread != null)
                     sendThread.join(5000); // give bye-message some time to be sent (but not too much)
             } catch (InterruptedException e) {
                 Log.log(Log.Level.ERROR, "Interrupted while waiting for disconnection.");

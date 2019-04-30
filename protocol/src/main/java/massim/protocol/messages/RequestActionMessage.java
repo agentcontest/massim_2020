@@ -32,6 +32,7 @@ public abstract class RequestActionMessage extends Message {
     public JSONObject makeContent() {
         JSONObject content = new JSONObject();
         content.put("id", id);
+        content.put("time" , time);
         content.put("deadline", deadline);
         content.put("percept", makePercept());
         return content;

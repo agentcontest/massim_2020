@@ -172,13 +172,13 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
             EISEntity entity = new ScenarioEntity(name, host, port, username, password);
 
-            if(jsonEntity.optBoolean("json", true)){
+            if(jsonEntity.optBoolean("print-json", true)){
                 entity.enableJSON();
-                Log.log("Enable JSON for entity " + entity.getName());
+                Log.log("Enable JSON printing for entity " + entity.getName());
             }
-            if(jsonEntity.optBoolean("iilang", true)){
+            if(jsonEntity.optBoolean("print-iilang", true)){
                 entity.enableIILang();
-                Log.log("Enable IILang for entity " + entity.getName());
+                Log.log("Enable IILang printing for entity " + entity.getName());
             }
 
             if(entities.put(entity.getName(), entity) != null){

@@ -28,6 +28,7 @@ public class SimEndMessage extends Message {
     @Override
     public JSONObject makeContent() {
         JSONObject json = new JSONObject();
+        json.put("time", time);
         json.put("score", score);
         json.put("ranking", ranking);
         return json;

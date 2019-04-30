@@ -22,6 +22,7 @@ public abstract class SimStartMessage extends Message {
     @Override
     public JSONObject makeContent() {
         JSONObject content = new JSONObject();
+        content.put("time", time);
         content.put("percept", makePercept());
         return content;
     }

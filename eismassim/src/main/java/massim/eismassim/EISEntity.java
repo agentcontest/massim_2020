@@ -445,16 +445,15 @@ public abstract class EISEntity implements Runnable{
      */
     private JSONObject receiveMessage() throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        int read = in.read();
-        while (read != 0) {
+        int read;
+        while ((read = in.read()) != 0) {
             if (read == -1) throw new IOException();
             buffer.write(read);
-            read = in.read();
         }
         String message = buffer.toString(StandardCharsets.UTF_8);
         try {
             JSONObject json = new JSONObject(message);
-            if (useJSON) log(json.toString(3) + "\nreceived");
+            if (useJSON) log(json.toString(3) + "\treceived");
             return json;
         } catch(JSONException e){
             log("Invalid object: " + message);
