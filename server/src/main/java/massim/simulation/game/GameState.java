@@ -43,6 +43,11 @@ class GameState {
     private Map<Position, Dispenser> dispensers = new HashMap<>();
     private Map<String, Task> tasks = new HashMap<>();
     private Set<String> blockTypes = new TreeSet<>();
+    private double pNewTask;
+    private int taskDurationMin;
+    private int taskDurationMax;
+    private int taskSizeMin;
+    private int taskSizeMax;
 
     GameState(JSONObject config, Set<TeamConfig> matchTeams) {
         // parse simulation config
@@ -58,6 +63,18 @@ class GameState {
         }
         var dispenserBounds = config.getJSONArray("dispensers");
         Log.log(Log.Level.NORMAL, "config.dispensersBounds: " + dispenserBounds);
+
+        var taskConfig = config.getJSONObject("tasks");
+        var taskDurationBounds = taskConfig.getJSONArray("duration");
+        Log.log(Log.Level.NORMAL, "config.tasks.duration: " + taskDurationBounds);
+        taskDurationMin = taskDurationBounds.getInt(0);
+        taskDurationMax = taskDurationBounds.getInt(1);
+        var taskSizeBounds = taskConfig.getJSONArray("size");
+        Log.log(Log.Level.NORMAL, "config.tasks.size: " + taskSizeBounds);
+        taskSizeMin = taskSizeBounds.getInt(0);
+        taskSizeMax = taskSizeBounds.getInt(1);
+        pNewTask = taskConfig.getInt("probability");
+        Log.log(Log.Level.NORMAL, "config.tasks.probability: " + pNewTask);
 
         // create teams
         agentNames = new ArrayList<>();
@@ -208,6 +225,12 @@ class GameState {
 
     Map<String, RequestActionMessage> prepareStep(int step) {
         this.step = step;
+
+        //handle tasks
+        if (RNG.nextDouble() < pNewTask) {
+            createTask(RNG.betweenClosed(taskDurationMin, taskDurationMax), RNG.betweenClosed(taskSizeMin, taskSizeMax));
+        }
+
         return getStepPercepts();
     }
 
@@ -340,9 +363,9 @@ class GameState {
         return true;
     }
 
-    Task createTask() {
-        // TODO use more config parameters
-        Task t = Task.generate("task" + tasks.values().size(), step + 200, 5, new ArrayList<>(blockTypes));
+    Task createTask(int duration, int size) {
+        if (size < 1) return null;
+        Task t = Task.generate("task" + tasks.values().size(), step + duration, size, new ArrayList<>(blockTypes));
         tasks.put(t.getName(), t);
         return t;
     }

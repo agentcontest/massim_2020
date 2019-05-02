@@ -221,25 +221,47 @@ Example (complete request-action message):
             },
             {
                "x": 0,
-               "y": 0,
+               "y": -5,
                "details": "",
                "type": "entity"
             },
             {
-               "x": 0,
-               "y": 0,
-               "details": "",
-               "type": "entity"
-            },
-            {
-               "x": 0,
-               "y": 0,
-               "details": "",
-               "type": "entity"
+               "x": 2,
+               "y": -1,
+               "details": "b1",
+               "type": "block"
             }
          ],
-         "terrain": {},
-         "tasks": []
+         "terrain": {
+            "goal": [[-4,-1],[-4,0],[-5,0]],
+            "obstacle": [[4,-1],[4,0],[4,1]]
+         },
+         "tasks": [
+          {
+              "name": "task2",
+              "deadline": 188,
+              "requirements": [
+                  {
+                     "x": 1,
+                     "y": 1,
+                     "details": "",
+                     "type": "b0"
+                  },
+                  {
+                     "x": 0,
+                     "y": 1,
+                     "details": "",
+                     "type": "b1"
+                  },
+                  {
+                     "x": 0,
+                     "y": 2,
+                     "details": "",
+                     "type": "b1"
+                  }
+               ]
+            },
+         ]
       }
    }
 }
@@ -253,7 +275,13 @@ Example (complete request-action message):
   * __type__: the type of the thing (entity, block, dispenser, ...)
   * __details__: details about the thing (the block-type for blocks and dispensers)
 * __terrain__: the terrain around the agent (if no value is given for a visible cell, the terrain is just *empty*)
-* __task__:
+* __task__: a task taht is currently active
+  * __name__: the task's identifier
+  * __deadline__: the last step during which the task can be completed
+  * __requirements__: the relative positions in which blocks have to be attached to the agent (the agent being (0,0))
+    * __x/y__: the relative position of the required block
+    * __type__: the type of the required block
+    * __details__: currently not used
 
 ## Configuration
 

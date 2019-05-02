@@ -21,7 +21,12 @@
       "setup" : "conf/setup/test.txt",
       "attachLimit" : 3,
       "blockTypes" : [3, 3],
-      "dispensers" : [2, 3]
+      "dispensers" : [2, 3],
+      "tasks" : {
+        "size" : [2, 4],
+        "duration" : [100, 200],
+        "probability" : 1
+      }
     }
   ],
 
