@@ -65,7 +65,7 @@ public class Entity extends Attachable {
 
     @Override
     public Thing toPercept(Position origin) {
-        Position localPosition = origin.toLocal(origin);
+        Position localPosition = getPosition().toLocal(origin);
         return new Thing(localPosition.x, localPosition.y, Thing.TYPE_ENTITY, "");
     }
 }
