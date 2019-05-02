@@ -32,4 +32,9 @@ public class Thing {
     public static Thing fromJson(JSONObject jsonThing) {
         return new Thing(jsonThing.getInt("x"), jsonThing.getInt("y"), jsonThing.getString("type"), jsonThing.getString("details"));
     }
+
+    @Override
+    public String toString() {
+        return String.format("Thing((%d,%d), %s, %s)", x, y, type, details);
+    }
 }
