@@ -3,9 +3,11 @@ package massim.simulation.game.environment;
 import massim.protocol.data.Position;
 import massim.protocol.data.TaskInfo;
 import massim.protocol.data.Thing;
-import massim.util.RNG;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Task {
@@ -15,9 +17,10 @@ public class Task {
     private int deadline;
     private boolean completed = false;
 
-    private Task(String name, int deadline) {
+    public Task(String name, int deadline, Map<Position, String> requirements) {
         this.name = name;
         this.deadline = deadline;
+        this.requirements = requirements;
     }
 
     public String getName() {
@@ -38,32 +41,6 @@ public class Task {
 
     public Map<Position, String> getRequirements() {
         return requirements;
-    }
-
-    private void addRequiredBlock(Position position, String blockType) {
-        requirements.put(position, blockType);
-    }
-
-    public static Task generate(String name, int deadline, int size, List<String> blockTypes) {
-        Task task = new Task(name, deadline);
-        // TODO improve task generation
-        Position lastPosition = Position.of(0, 1);
-        task.addRequiredBlock(lastPosition, blockTypes.get(RNG.nextInt(blockTypes.size())));
-        for (int i = 0; i < size - 1; i++) {
-            int index = RNG.nextInt(blockTypes.size());
-            double direction = RNG.nextDouble();
-            if (direction <= .3) {
-                lastPosition = lastPosition.translate(-1, 0);
-            }
-            else if (direction <= .6) {
-                lastPosition = lastPosition.translate(1, 0);
-            }
-            else {
-                lastPosition = lastPosition.translate(0, 1);
-            }
-            task.addRequiredBlock(lastPosition, blockTypes.get(index));
-        }
-        return task;
     }
 
     @Override

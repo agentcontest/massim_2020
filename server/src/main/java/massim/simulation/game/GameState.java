@@ -18,7 +18,10 @@ import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -187,6 +190,26 @@ class GameState {
                         break;
                     default:
                         Log.log(Log.Level.ERROR, "Cannot add " + command[3]);
+                }
+                break;
+
+            case "create":
+                if (command.length != 5) break;
+                if (command[1].equals("task")) {
+                    var name = command[2];
+                    var duration = Util.tryParseInt(command[3]);
+                    var requirements = command[4].split(";");
+                    if (duration == null) break;
+                    var requireMap = new HashMap<Position, String>();
+                    Arrays.stream(requirements).map(req -> req.split(",")).forEach(req -> {
+                        var bx = Util.tryParseInt(req[0]);
+                        var by = Util.tryParseInt(req[1]);
+                        var blockType = req[2];
+                        if (bx != null && by != null) {
+                            requireMap.put(Position.of(bx, by), blockType);
+                        }
+                    });
+                    createTask(name, duration, requireMap);
                 }
                 break;
             default:
@@ -365,7 +388,33 @@ class GameState {
 
     Task createTask(int duration, int size) {
         if (size < 1) return null;
-        Task t = Task.generate("task" + tasks.values().size(), step + duration, size, new ArrayList<>(blockTypes));
+        var name = "task" + tasks.values().size();
+        var requirements = new HashMap<Position, String>();
+        var blockList = new ArrayList<>(blockTypes);
+        Position lastPosition = Position.of(0, 1);
+        requirements.put(lastPosition, blockList.get(RNG.nextInt(blockList.size())));
+        for (int i = 0; i < size - 1; i++) {
+            int index = RNG.nextInt(blockTypes.size());
+            double direction = RNG.nextDouble();
+            if (direction <= .3) {
+                lastPosition = lastPosition.translate(-1, 0);
+            }
+            else if (direction <= .6) {
+                lastPosition = lastPosition.translate(1, 0);
+            }
+            else {
+                lastPosition = lastPosition.translate(0, 1);
+            }
+            requirements.put(lastPosition, blockList.get(index));
+        }
+        Task t = new Task(name, step + duration, requirements);
+        tasks.put(t.getName(), t);
+        return t;
+    }
+
+    Task createTask(String name, int duration, Map<Position, String> requirements) {
+        if (requirements.size() == 0) return null;
+        Task t = new Task(name, step + duration, requirements);
         tasks.put(t.getName(), t);
         return t;
     }
