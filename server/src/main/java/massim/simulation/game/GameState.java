@@ -395,6 +395,7 @@ class GameState {
             }
         });
         teams.get(e.getTeamName()).addScore(task.getReward());
+        task.complete();
         return true;
     }
 
