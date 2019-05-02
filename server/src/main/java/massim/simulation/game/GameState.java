@@ -212,6 +212,19 @@ class GameState {
                     createTask(name, duration, requireMap);
                 }
                 break;
+
+            case "attach":
+                if (command.length != 5) break;
+                var x1 = Util.tryParseInt(command[1]);
+                var y1 = Util.tryParseInt(command[2]);
+                var x2 = Util.tryParseInt(command[3]);
+                var y2 = Util.tryParseInt(command[4]);
+                if (x1 == null || x2 == null || y1 == null || y2 == null) break;
+                Attachable a1 = getAttachable(Position.of(x1, y1));
+                Attachable a2 = getAttachable(Position.of(x2, y2));
+                if (a1 == null || a2 == null) break;
+                grid.attach(a1, a2);
+                break;
             default:
                 Log.log(Log.Level.ERROR, "Cannot handle command " + Arrays.toString(command));
         }
@@ -315,8 +328,7 @@ class GameState {
     boolean attach(Entity entity, String direction) {
         Position target = entity.getPosition().moved(direction, 1);
         if (target == null) return false;
-        String collidableID = grid.getCollidable(target);
-        GameObject gameObject = gameObjects.get(collidableID);
+        GameObject gameObject = getGameObject(target);
         if (!(gameObject instanceof Attachable)) return false;
         Attachable a = (Attachable) gameObject;
         return !attachedToOpponent(a, entity) && grid.attach(entity, a);

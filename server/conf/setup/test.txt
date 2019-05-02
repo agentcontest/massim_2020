@@ -4,5 +4,10 @@ move 6 3 agentA2
 add 4 3 dispenser b1
 add 5 3 dispenser b2
 add 3 5 block b1
-create task test 100 1,0,b1
+
 # create task test 100 1,0,b1;2,0,b2
+
+create task test 100 1,0,b1
+move 10 10 agentA3
+add 11 10 block b1
+attach 10 10 11 10
