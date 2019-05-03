@@ -7,6 +7,7 @@ import massim.protocol.data.Thing;
 import massim.protocol.messages.RequestActionMessage;
 import massim.protocol.messages.SimEndMessage;
 import massim.protocol.messages.SimStartMessage;
+import massim.protocol.messages.scenario.Actions;
 import massim.protocol.messages.scenario.InitialPercept;
 import massim.protocol.messages.scenario.StepPercept;
 import massim.simulation.game.environment.*;
@@ -317,63 +318,78 @@ class GameState {
         return result;
     }
 
-    boolean move(Entity entity, String direction) {
-        return grid.moveWithAttached(entity, direction, 1);
+    String handleMoveAction(Entity entity, String direction) {
+        if (grid.moveWithAttached(entity, direction, 1)) {
+            return Actions.RESULT_SUCCESS;
+        }
+        return Actions.RESULT_F_PATH;
     }
 
-    boolean rotate(Entity entity, boolean clockwise) {
-        return grid.rotateWithAttached(entity, clockwise);
+    String handleRotateAction(Entity entity, boolean clockwise) {
+        if (grid.rotateWithAttached(entity, clockwise)) {
+            return Actions.RESULT_SUCCESS;
+        }
+        return Actions.RESULT_F;
     }
 
-    boolean attach(Entity entity, String direction) {
+    String handleAttachAction(Entity entity, String direction) {
         Position target = entity.getPosition().moved(direction, 1);
-        if (target == null) return false;
+        if (target == null) return Actions.RESULT_F_TARGET;
         GameObject gameObject = getGameObject(target);
-        if (!(gameObject instanceof Attachable)) return false;
+        if (!(gameObject instanceof Attachable)) return Actions.RESULT_F;
         Attachable a = (Attachable) gameObject;
-        return !attachedToOpponent(a, entity) && grid.attach(entity, a);
+        if(!attachedToOpponent(a, entity) && grid.attach(entity, a)) {
+            return Actions.RESULT_SUCCESS;
+        }
+        return Actions.RESULT_F;
     }
 
-    boolean detach(Entity entity, String direction) {
+    String handleDetachAction(Entity entity, String direction) {
         Position target = entity.getPosition().moved(direction, 1);
         Attachable a = getAttachable(target);
-        if (a == null) return false;
-        return grid.detach(entity, a);
+        if (a == null) return Actions.RESULT_F_TARGET;
+        if (grid.detach(entity, a)){
+            return Actions.RESULT_SUCCESS;
+        }
+        return Actions.RESULT_F;
     }
 
-    boolean connectEntities(Entity entity, Position blockPos, Entity partnerEntity, Position partnerBlockPos) {
+    String handleConnectAction(Entity entity, Position blockPos, Entity partnerEntity, Position partnerBlockPos) {
         Attachable block1 = getAttachable(blockPos.translate(entity.getPosition()));
         Attachable block2 = getAttachable(partnerBlockPos.translate(partnerEntity.getPosition()));
 
-        if(!(block1 instanceof Block) || !(block2 instanceof Block)) return false;
+        if(!(block1 instanceof Block) || !(block2 instanceof Block)) return Actions.RESULT_F_TARGET;
 
         Set<Attachable> attachables = grid.getAllAttached(entity);
-        if (attachables.contains(partnerEntity)) return false;
-        if (!attachables.contains(block1)) return false;
-        if (attachables.contains(block2)) return false;
+        if (attachables.contains(partnerEntity)) return Actions.RESULT_F;
+        if (!attachables.contains(block1)) return Actions.RESULT_F_TARGET;
+        if (attachables.contains(block2)) return Actions.RESULT_F_TARGET;
 
         Set<Attachable> partnerAttachables = grid.getAllAttached(partnerEntity);
-        if (!partnerAttachables.contains(block2)) return false;
-        if (partnerAttachables.contains(block1)) return false;
+        if (!partnerAttachables.contains(block2)) return Actions.RESULT_F_TARGET;
+        if (partnerAttachables.contains(block1)) return Actions.RESULT_F_TARGET;
 
-        return grid.attach(block1, block2);
+        if(grid.attach(block1, block2)){
+            return Actions.RESULT_SUCCESS;
+        }
+        return Actions.RESULT_F;
     }
 
-    boolean requestBlock(Entity entity, String direction) {
+    String handleRequestAction(Entity entity, String direction) {
         Position requestPosition = entity.getPosition().moved(direction, 1);
         Dispenser dispenser = dispensers.get(requestPosition);
         if (dispenser != null && grid.isFree(requestPosition)){
             createBlock(requestPosition, dispenser.getBlockType());
-            return true;
+            return Actions.RESULT_SUCCESS;
         }
-        return false;
+        return Actions.RESULT_F;
     }
 
-    boolean submitTask(Entity e, String taskName) {
+    String handleSubmitAction(Entity e, String taskName) {
         Task task = tasks.get(taskName);
-        if (task == null || task.isCompleted()) return false;
+        if (task == null || task.isCompleted()) return Actions.RESULT_F_TARGET;
         Position ePos = e.getPosition();
-        if (grid.getTerrain(ePos) != Terrain.GOAL) return false;
+        if (grid.getTerrain(ePos) != Terrain.GOAL) return Actions.RESULT_F;
         Set<Attachable> attachedBlocks = grid.getAllAttached(e);
         for (Map.Entry<Position, String> entry : task.getRequirements().entrySet()) {
             Position pos = entry.getKey();
@@ -385,7 +401,7 @@ class GameState {
                 && attachedBlocks.contains(actualBlock)) {
                 continue;
             }
-            return false;
+            return Actions.RESULT_F;
         }
         task.getRequirements().keySet().forEach(pos -> {
             Attachable a = getAttachable(pos.translate(e.getPosition()));
@@ -396,7 +412,7 @@ class GameState {
         });
         teams.get(e.getTeamName()).addScore(task.getReward());
         task.complete();
-        return true;
+        return Actions.RESULT_SUCCESS;
     }
 
     Task createTask(int duration, int size) {

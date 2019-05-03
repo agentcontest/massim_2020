@@ -19,11 +19,11 @@ public abstract class Actions {
             MOVE, ATTACH, DETACH, ROTATE, CONNECT, REQUEST, SUBMIT);
 
     public final static String RESULT_UNPROCESSED = "unprocessed";
-    public final static String RESULT_PENDING = "pending";
     public final static String RESULT_SUCCESS = "success";
     public final static String RESULT_F = "failed";
     public final static String RESULT_F_RANDOM = "failed_random";
     public final static String RESULT_F_PARAMETER = "failed_parameter";
     public final static String RESULT_F_PATH = "failed_path";
     public final static String RESULT_F_PARTNER = "failed_partner";
+    public final static String RESULT_F_TARGET = "failed_target";
 }

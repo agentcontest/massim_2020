@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 public class Grid {
 
     public static final Set<String> DIRECTIONS = Set.of("n", "s", "e", "w");
+    public static final Set<String> ROTATION_DIRECTIONS = Set.of("cw", "ccw");
 
     private int dimX;
     private int dimY;

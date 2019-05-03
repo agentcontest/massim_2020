@@ -69,7 +69,7 @@ No | Parameter | Meaning
 
 Failure Code | Reason
 --- | ---
-failed_parameter | Not exactly 1 parameter given, or parameter is not a direction.
+failed_parameter | Parameter is not a direction.
 failed_path | Cannot move to the target location because the agent or one of its attached things are blocked.
 
 ### attach
@@ -82,8 +82,9 @@ No | Parameter | Meaning
 
 Failure Code | Reason
 --- | ---
-failed_parameter | Not exactly 1 parameter given, or parameter is not a direction.
-failed | The thing could not be attached, because their was no attachable thing OR the agent already has too many things attached OR the thing is already attached to an agent of another team.
+failed_parameter | Parameter is not a direction.
+failed_target | There is nothing to attach in the given direction
+failed | The thing could not be attached because the agent already has too many things attached OR the thing is already attached to an agent of another team.
 
 ### detach
 
@@ -95,8 +96,9 @@ No | Parameter | Meaning
 
 Failure Code | Reason
 --- | ---
-failed_parameter | Not exactly 1 parameter given, or parameter is not a direction.
-failed | There was no thing in the given direction attached to the agent.
+failed_parameter | Parameter is not a direction.
+failed_target | There was no attachment to detach in the given direction.
+failed | There was a thing but not attached to the agent.
 
 ### rotate
 
@@ -110,7 +112,7 @@ No | Parameter | Meaning
 
 Failure Code | Reason
 --- | ---
-failed_parameter | Not exactly 1 parameter given, or parameter is not a (rotation) direction.
+failed_parameter | Parameter is not a (rotation) direction.
 failed | One of the things attached to the agent cannot rotate to its target position OR the agent is currently attached to another agent.
 
 ### connect
@@ -124,9 +126,10 @@ No | Parameter | Meaning
 
 Failure Code | Reason
 --- | ---
-failed_parameter | Not exactly 3 parameters given OR first parameter is not an agent of the same team OR x and y cannot be parsed to valid integers.
-failed_partner | The partner's action is not connect OR failed randomly.
-failed | There are no blocks at the given coordinates OR the given positions are too far apart OR one of the blocks is already connected to the other agent OR one agent is already attached to the other (recursively), or connecting both blocks would violate the size limit for connected structures.
+failed_parameter | First parameter is not an agent of the same team OR x and y cannot be parsed to valid integers.
+failed_partner | The partner's action is not `connect` OR failed randomly OR has wrong parameters.
+failed_target | At least one of the specified blocks is not at the given position or not attached to the agent or already attached to the other agent.
+failed | The given positions are too far apart OR one agent is already attached to the other (or through other blocks), or connecting both blocks would violate the size limit for connected structures.
 
 ### request
 
@@ -138,7 +141,7 @@ No | Parameter | Meaning
 
 Failure Code | Reason
 --- | ---
-failed_parameter | Not exactly 1 parameter given, or parameter is not a direction.
+failed_parameter | Parameter is not a direction.
 failed | There is no dispenser in the specific position OR the position is currently blocked by another agent or thing.
 
 ### submit
@@ -151,8 +154,8 @@ No | Parameter | Meaning
 
 Failure Code | Reason
 --- | ---
-failed_parameter | Not exactly 1 parameter given.
-failed | There is no such task active OR one or more of the requested blocks are missing OR the agent is not on a goal terrain.
+failed_target | No _active_ task could be associated with first parameter.
+failed | One or more of the requested blocks are missing OR the agent is not on a goal terrain.
 
 ### all actions
 

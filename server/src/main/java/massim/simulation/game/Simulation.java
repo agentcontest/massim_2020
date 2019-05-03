@@ -10,10 +10,9 @@ import massim.simulation.AbstractSimulation;
 import massim.simulation.game.environment.Grid;
 import massim.util.RNG;
 import massim.util.Util;
-import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,7 +93,6 @@ public class Simulation extends AbstractSimulation {
      */
     private void handleActions(Map<String, ActionMessage> actions) {
         List<Entity> entities = actions.keySet().stream().map(ag -> state.getEntityByName(ag)).collect(Collectors.toList());
-        Map<Entity, Position> connections = new HashMap<>();
         RNG.shuffle(entities);
         for (Entity entity : entities) {
             entity.setNewAction(actions.get(entity.getAgentName()));
@@ -103,7 +101,7 @@ public class Simulation extends AbstractSimulation {
             }
         }
         for (Entity entity : entities) {
-            if (entity.getLastActionResult().equals(RESULT_F_RANDOM)) continue;
+            if (!entity.getLastActionResult().equals(RESULT_UNPROCESSED)) continue;
             List<String> params = entity.getLastActionParams();
             switch(entity.getLastAction()) {
 
@@ -112,57 +110,29 @@ public class Simulation extends AbstractSimulation {
                     continue;
 
                 case MOVE:
-                    if (params.size() != 1) {
-                        entity.setLastActionResult(RESULT_F_PARAMETER);
-                        continue;
-                    }
-                    String direction = params.get(0);
+                    String direction = getStringParam(params, 0);
                     if (!Grid.DIRECTIONS.contains(direction)) {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
-                        continue;
                     } else {
-                        if (state.move(entity, direction)) {
-                            entity.setLastActionResult(RESULT_SUCCESS);
-                        }
-                        else {
-                            entity.setLastActionResult(RESULT_F_PATH);
-                        }
+                        entity.setLastActionResult(state.handleMoveAction(entity, direction));
                     }
                     continue;
 
                 case ATTACH:
-                    if (params.size() != 1) {
-                        entity.setLastActionResult(RESULT_F_PARAMETER);
-                        continue;
-                    }
-                    direction = params.get(0);
+                    direction = getStringParam(params, 0);
                     if (!Grid.DIRECTIONS.contains(direction)) {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
                     } else {
-                        if (state.attach(entity, direction)){
-                            entity.setLastActionResult(RESULT_SUCCESS);
-                        }
-                        else {
-                            entity.setLastActionResult(RESULT_F);
-                        }
+                        entity.setLastActionResult(state.handleAttachAction(entity, direction));
                     }
                     continue;
 
                 case DETACH:
-                    if (params.size() != 1) {
-                        entity.setLastActionResult(RESULT_F_PARAMETER);
-                        continue;
-                    }
-                    direction = params.get(0);
+                    direction = getStringParam(params, 0);
                     if (!Grid.DIRECTIONS.contains(direction)) {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
                     } else {
-                        if (state.detach(entity, direction)){
-                            entity.setLastActionResult(RESULT_SUCCESS);
-                        }
-                        else {
-                            entity.setLastActionResult(RESULT_F);
-                        }
+                        entity.setLastActionResult(state.handleDetachAction(entity, direction));
                     }
                     continue;
 
@@ -171,83 +141,54 @@ public class Simulation extends AbstractSimulation {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
-                    direction = params.get(0);
-                    if (!direction.equalsIgnoreCase("cw") && !direction.equalsIgnoreCase("ccw")) {
+                    direction = getStringParam(params, 0);
+                    if (!Grid.ROTATION_DIRECTIONS.contains(direction)) {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
-                    boolean clockwise = direction.equals("cw");
-                    if (state.rotate(entity, clockwise)) {
-                        entity.setLastActionResult(RESULT_SUCCESS);
-                    }
-                    else{
-                        entity.setLastActionResult(RESULT_F);
-                    }
+                    entity.setLastActionResult(state.handleRotateAction(entity, "cw".equals(direction)));
                     continue;
 
                 case CONNECT:
-                    if (params.size() != 3) {
-                        entity.setLastActionResult(RESULT_F_PARAMETER);
-                        continue;
-                    }
-                    var entityName = params.get(0);
+                    var partnerEntityName = getStringParam(params, 0);
+                    var partnerEntity = state.getEntityByName(partnerEntityName);
                     var x = getIntParam(params, 1);
                     var y = getIntParam(params, 2);
-                    var partnerEntity = state.getEntityByName(entityName);
                     if (partnerEntity == null || x == null || y == null) {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
+                    var partnerParams = actions.get(partnerEntityName).getParams();
+                    var px = getIntParam(partnerParams, 1);
+                    var py = getIntParam(partnerParams, 2);
                     if (!partnerEntity.getLastAction().equals(CONNECT)
-                            || partnerEntity.getLastActionResult().equals(RESULT_F_RANDOM)) {
+                            || partnerEntity.getLastActionResult().equals(RESULT_F_RANDOM)
+                            || !entity.getAgentName().equals(getStringParam(partnerParams, 0))) {
                         entity.setLastActionResult(RESULT_F_PARTNER);
                         continue;
                     }
-                    if (partnerEntity.getLastActionResult().equals(RESULT_PENDING)) {
-                        if (state.connectEntities(entity, Position.of(x, y), partnerEntity, connections.get(partnerEntity))) {
-                            entity.setLastActionResult(RESULT_SUCCESS);
-                            partnerEntity.setLastActionResult(RESULT_SUCCESS);
-                        }
-                        else {
-                            entity.setLastActionResult(RESULT_F);
-                            partnerEntity.setLastActionResult(RESULT_F);
-                        }
-                    } else { // handle action when it's the other agent's turn
-                        connections.put(entity, Position.of(x,y));
-                        entity.setLastActionResult(RESULT_PENDING);
+                    if (px == null || py == null) {
+                        entity.setLastActionResult(RESULT_F_PARTNER);
+                        partnerEntity.setLastActionResult(RESULT_F_PARAMETER);
+                        continue;
                     }
+                    String result = state.handleConnectAction(entity, Position.of(x, y), partnerEntity, Position.of(px, py));
+                    entity.setLastActionResult(result);
+                    partnerEntity.setLastActionResult(result);
                     continue;
 
                 case REQUEST:
-                    if (params.size() != 1) {
-                        entity.setLastActionResult(RESULT_F_PARAMETER);
-                        continue;
-                    }
-                    direction = params.get(0);
+                    direction = getStringParam(params, 0);
                     if (!Grid.DIRECTIONS.contains(direction)) {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
                     } else {
-                        if (state.requestBlock(entity, direction)){
-                            entity.setLastActionResult(RESULT_SUCCESS);
-                        }
-                        else {
-                            entity.setLastActionResult(RESULT_F);
-                        }
+                        entity.setLastActionResult(state.handleRequestAction(entity, direction));
                     }
                     continue;
 
                 case SUBMIT:
-                    if (params.size() != 1) {
-                        entity.setLastActionResult(RESULT_F_PARAMETER);
-                        continue;
-                    }
-                    String taskName = params.get(0);
-                    if (state.submitTask(entity, taskName)){
-                        entity.setLastActionResult(RESULT_SUCCESS);
-                    }
-                    else {
-                        entity.setLastActionResult(RESULT_F);
-                    }
+                    String taskName = getStringParam(params, 0);
+                    entity.setLastActionResult(state.handleSubmitAction(entity, taskName));
                     continue;
                 default:
                     entity.setLastActionResult(UNKNOWN_ACTION);
@@ -257,5 +198,13 @@ public class Simulation extends AbstractSimulation {
 
     private Integer getIntParam(List<String> params, int index) {
         return Util.tryParseInt(params.get(index));
+    }
+
+    private String getStringParam(List<String> params, int index) {
+        try {
+            return params.get(index);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 }
