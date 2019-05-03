@@ -34,12 +34,9 @@ class GameState {
     private static Map<Integer, Terrain> terrainColors =
             Map.of(-16777216, Terrain.OBSTACLE, -1, Terrain.EMPTY, -65536, Terrain.GOAL);
 
-    private int randomFail;
-    private int attachLimit;
     private Map<String, Team> teams = new HashMap<>();
     private Map<String, Entity> agentToEntity = new HashMap<>();
     private Map<Entity, String> entityToAgent = new HashMap<>();
-    private List<String> agentNames;
 
     private int step = -1;
     private Grid grid;
@@ -47,6 +44,9 @@ class GameState {
     private Map<Position, Dispenser> dispensers = new HashMap<>();
     private Map<String, Task> tasks = new HashMap<>();
     private Set<String> blockTypes = new TreeSet<>();
+
+    // config parameters
+    private int randomFail;
     private double pNewTask;
     private int taskDurationMin;
     private int taskDurationMax;
@@ -57,7 +57,7 @@ class GameState {
         // parse simulation config
         randomFail = config.getInt("randomFail");
         Log.log(Log.Level.NORMAL, "config.randomFail: " + randomFail);
-        attachLimit = config.getInt("attachLimit");
+        int attachLimit = config.getInt("attachLimit");
         Log.log(Log.Level.NORMAL, "config.attachLimit: " + attachLimit);
         var blockTypeBounds = config.getJSONArray("blockTypes");
         var numberOfBlockTypes = RNG.betweenClosed(blockTypeBounds.getInt(0), blockTypeBounds.getInt(1));
@@ -81,11 +81,7 @@ class GameState {
         Log.log(Log.Level.NORMAL, "config.tasks.probability: " + pNewTask);
 
         // create teams
-        agentNames = new ArrayList<>();
-        matchTeams.forEach(team -> {
-            agentNames.addAll(team.getAgentNames());
-            teams.put(team.getName(), new Team(team.getName()));
-        });
+        matchTeams.forEach(team -> teams.put(team.getName(), new Team(team.getName())));
 
         // create grid environment
         JSONObject gridConf = config.getJSONObject("grid");
@@ -277,8 +273,7 @@ class GameState {
                 .filter(t -> !t.isCompleted())
                 .map(Task::toPercept)
                 .collect(Collectors.toSet());
-        for (String agent : agentNames) {
-            Entity entity = getEntityByName(agent);
+        for (Entity entity : entityToAgent.keySet()) {
             int vision = entity.getVision();
             Position pos = entity.getPosition();
             Set<Thing> visibleThings = new HashSet<>();
@@ -297,8 +292,8 @@ class GameState {
                     }
                 }
             }
-            result.put(agent, new StepPercept(step, teams.get(entity.getTeamName()).getScore(), visibleThings, visibleTerrain,
-                    allTasks, entity.getLastAction(), entity.getLastActionResult()));
+            result.put(entity.getAgentName(), new StepPercept(step, teams.get(entity.getTeamName()).getScore(),
+                    visibleThings, visibleTerrain, allTasks, entity.getLastAction(), entity.getLastActionResult()));
         }
         return result;
     }
