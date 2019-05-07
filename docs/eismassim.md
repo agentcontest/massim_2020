@@ -2,7 +2,7 @@
 
 _EISMASSim_ is based on the [Environment Interface Standard](https://github.com/eishub/) (EIS), a proposed standard for agent-environment interaction.
 
-It maps the communication between agents and the _MASSim_ server, (i.e. sending and receiving XML-messages), to Java method calls. Also, it automatically establishes and maintains connections to a specified _MASSim_ server.
+It maps the communication between agents and the _MASSim_ server, (i.e. sending and receiving JSON messages), to Java method calls. Also, it automatically establishes and maintains connections to a specified _MASSim_ server.
 
 In other words, _EISMASSim_ is a proxy environment on the client side which handles communication with the _MASSim_ server completely by itself.
 
@@ -104,8 +104,8 @@ Configuration example:
       "name": "connectionA1",
       "username": "agentA1",
       "password": "1",
-      "iilang": false,
-      "xml": true}
+      "print-iilang": false,
+      "print-json": true}
   ]
 }
 ```
@@ -114,7 +114,7 @@ In the above example, only one entity is configured for the sake of readability.
 
 The main entries are:
 
-* __scenario:__ the name of the MAPC scenario to handle (determines how XML messages are translated)
+* __scenario:__ the name of the MAPC scenario to handle
 * __host:__ address of a _MASSim_ server
 * __port:__ port the _MASSim_ server is listening on
 * __scheduling:__ if `true`, an action can only be sent if a valid action-id is available; calls to `performAction` will also block until such an ID becomes available; it is recommended to not disable this
@@ -128,8 +128,8 @@ Further, there is an object for each entity in the `entities` array, containing
 * __name:__ the name of the entity
 * __username:__ the name to authenticate with
 * __password:__ the password to authenticate with (both as configured in the _MASSim_ server)
-* __iilang:__ whether to print the IILang version of received percepts
-* __xml:__ whether to print XML messages sent and received by the interface
+* __print-iilang:__ whether to print the IILang version of received percepts
+* __print-json:__ whether to print JSON messages sent and received by the interface
 
 ## Example usage
 
@@ -166,7 +166,7 @@ Action a = new Action("goto", new Identifier("shop1"));
 
 ### Percepts
 
-The following paragraphs describe how the XML messages described in [protocol.md](protocol.md) and [scenario.md](scenario.md) are translated into __IILang__ percepts.
+The following paragraphs describe how the JSON messages described in [protocol.md](protocol.md) and [scenario.md](scenario.md) are translated into __IILang__ percepts.
 
 `[XYZ, ...]` denotes a _ParameterList_ of arbitrary length
 
