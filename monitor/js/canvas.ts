@@ -49,8 +49,12 @@ function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, 
         case 0: // EMPTY
           continue;
         case 1: // GOAL
-          ctx.fillStyle = 'red';
-          break;
+          ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
+          ctx.strokeStyle = 'red';
+          ctx.beginPath();
+          ctx.rect(x * GRID, y * GRID, GRID, GRID);
+          ctx.fill();
+          continue;
         case 2: // OBSTABLE
           ctx.fillStyle = '#333';
           break;
