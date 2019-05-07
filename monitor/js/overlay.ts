@@ -14,7 +14,7 @@ function teams(world: StaticWorld): VNode[] {
 
 function tasks(world: DynamicWorld): VNode {
   return h('ul', world.tasks.map(t => {
-    return h('li', `${t.reward}$$ for ${t.name} until ${t.deadline}`);
+    return h('li', `${t.reward}$ for ${t.name} until ${t.deadline}`);
   }));
 }
 
