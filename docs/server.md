@@ -121,7 +121,7 @@ Always required are the fields
 ```JSON
 "match" : [
   {
-    "id" : "2018-Sim-1of1",
+    "id" : "Sim-1of1",
     "steps" : 1000
   }
 ]
