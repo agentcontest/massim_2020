@@ -158,6 +158,10 @@ class GameState {
         }
     }
 
+    public Map<String, Team> getTeams() {
+        return this.teams;
+    }
+
     void handleCommand(String[] command) {
         switch (command[0]) {
             case "move":
