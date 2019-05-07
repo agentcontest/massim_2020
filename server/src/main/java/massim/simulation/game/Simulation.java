@@ -87,9 +87,15 @@ public class Simulation extends AbstractSimulation {
             teams.put(entry.getKey(), team);
         }
 
+        var blockTypes = new JSONArray();
+        for (var type: this.state.getBlockTypes()) {
+            blockTypes.put(type);
+        }
+
         var world = new JSONObject();
         world.put("grid", grid);
         world.put("teams", teams);
+        world.put("blockTypes", this.state.getBlockTypes());
         return world;
     }
 

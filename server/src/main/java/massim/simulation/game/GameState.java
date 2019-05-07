@@ -162,6 +162,10 @@ class GameState {
         return this.teams;
     }
 
+    public Set<String> getBlockTypes() {
+        return this.blockTypes;
+    }
+
     void handleCommand(String[] command) {
         switch (command[0]) {
             case "move":

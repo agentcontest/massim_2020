@@ -70,26 +70,26 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
   // blocks
   for (let block of dynamic.blocks) {
     ctx.beginPath();
-    ctx.fillStyle = 'green';
+    ctx.fillStyle = styles.blocks[st.blockTypes.indexOf(block.type) % styles.blocks.length];
     ctx.rect(block.x * GRID, block.y * GRID, GRID, GRID);
     ctx.fill();
 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = 'white';
     ctx.fillText(block.type, (block.x + 0.5) * GRID, (block.y + 0.5) * GRID);
   }
 
   // dispensers
   for (let dispenser of dynamic.dispensers) {
     ctx.beginPath();
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = styles.blocks[st.blockTypes.indexOf(dispenser.type) % styles.blocks.length];
     ctx.rect(dispenser.x * GRID, dispenser.y * GRID, GRID, GRID);
     ctx.fill();
 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = 'white';
     ctx.fillText(dispenser.type, (dispenser.x + 0.5) * GRID, (dispenser.y + 0.5) * GRID);
   }
 

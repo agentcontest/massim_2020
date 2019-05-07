@@ -12,9 +12,12 @@ export interface Ctrl {
   vm: ViewModel
 }
 
+export type BlockType = string
+
 export interface StaticWorld {
   grid: Grid
   teams: { [key: string]: Team }
+  blockTypes: BlockType[]
 }
 
 export interface Team {
@@ -43,8 +46,6 @@ export interface Agent {
   id: string
   team: string
 }
-
-export type BlockType = string
 
 export interface Block {
   x: number
