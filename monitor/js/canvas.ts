@@ -1,6 +1,6 @@
 import { Ctrl, DynamicWorld, StaticWorld } from './interfaces';
 
-const GRID = 20;
+let GRID = 20; // todo: make const
 
 export default function(canvas: HTMLCanvasElement, ctrl: Ctrl) {
   const ctx = canvas.getContext('2d')!;
@@ -16,9 +16,14 @@ export default function(canvas: HTMLCanvasElement, ctrl: Ctrl) {
 }
 
 function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, world: StaticWorld) {
-  // canvas size
-  canvas.width = world.grid.width * GRID;
-  canvas.height = world.grid.height * GRID;
+  canvas.width = window.innerWidth - 350;
+  canvas.height = window.innerHeight;
+
+  GRID = Math.floor(Math.min(canvas.width / world.grid.width, canvas.height / world.grid.height));
+
+  ctx.translate(
+    Math.floor((canvas.width - world.grid.width * GRID) / 2),
+    Math.floor((canvas.height - world.grid.height * GRID) / 2));
 
   // background pattern
   ctx.fillStyle = '#ddd';
