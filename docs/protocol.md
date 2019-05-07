@@ -139,8 +139,8 @@ The contents of the percept object depend on the scenario (see Percepts section 
 
 ### SIM-END
 
-Who? - Server
-Why? - Indicate that a simulation ended and give results.
+* Who? - Server
+* Why? - Indicate that a simulation ended and give results.
 
 ```json
 {
@@ -158,8 +158,8 @@ Why? - Indicate that a simulation ended and give results.
 
 ### BYE
 
-Who? - Server
-Why? - Indicate that all simulations have finished and the sockets will be closed.
+* Who? - Server
+* Why? - Indicate that all simulations have finished and the sockets will be closed.
 
 ```json
 {
