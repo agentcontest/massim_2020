@@ -66,13 +66,41 @@ function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, 
   }
 }
 
+function rect(ctx: CanvasRenderingContext2D, x: number, y: number, margin: number) {
+  return {
+    x1: x * GRID + margin,
+    y1: y * GRID + margin,
+    x2: x * GRID + GRID - margin,
+    y2: y * GRID + GRID - margin,
+    width: GRID - 2 * margin,
+    height: GRID - 2 * margin,
+  };
+}
+
 function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: DynamicWorld) {
   // blocks
   for (let block of dynamic.blocks) {
+    ctx.lineWidth = GRID / 16;
+    const r = rect(ctx, block.x, block.y, ctx.lineWidth / 2);
+
     ctx.beginPath();
     ctx.fillStyle = styles.blocks[st.blockTypes.indexOf(block.type) % styles.blocks.length];
-    ctx.rect(block.x * GRID, block.y * GRID, GRID, GRID);
+    ctx.rect(r.x1, r.y1, r.width, r.height);
     ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(r.x1, r.y2);
+    ctx.lineTo(r.x1, r.y1);
+    ctx.lineTo(r.x2, r.y1);
+    ctx.strokeStyle = '#555';
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(r.x2, r.y1);
+    ctx.lineTo(r.x2, r.y2);
+    ctx.lineTo(r.x1, r.y2);
+    ctx.strokeStyle = '#111';
+    ctx.stroke();
 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
@@ -90,7 +118,7 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillStyle = 'white';
-    ctx.fillText(dispenser.type, (dispenser.x + 0.5) * GRID, (dispenser.y + 0.5) * GRID);
+    ctx.fillText(`[${dispenser.type}]`, (dispenser.x + 0.5) * GRID, (dispenser.y + 0.5) * GRID);
   }
 
   // agents
