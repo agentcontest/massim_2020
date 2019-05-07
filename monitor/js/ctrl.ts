@@ -6,9 +6,8 @@ export default function(redraw: Redraw): Ctrl {
   };
 
   function connect() {
-    //const protocol = document.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    //const ws = new WebSocket(protocol + '//' + document.location.host + '/socket');
-    const ws = new WebSocket('ws://127.0.0.1:8000/socket');
+    const protocol = document.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(protocol + '//' + document.location.host + '/socket');
 
     ws.onmessage = function(msg) {
       const data = JSON.parse(msg.data);
