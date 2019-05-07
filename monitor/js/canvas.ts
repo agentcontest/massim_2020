@@ -113,10 +113,16 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
 
   // dispensers
   for (let dispenser of dynamic.dispensers) {
-    ctx.beginPath();
-    ctx.fillStyle = styles.blocks[st.blockTypes.indexOf(dispenser.type) % styles.blocks.length];
-    ctx.rect(dispenser.x * GRID, dispenser.y * GRID, GRID, GRID);
-    ctx.fill();
+    ctx.lineWidth = GRID / 20;
+    const r1 = rect(ctx, dispenser.x, dispenser.y, ctx.lineWidth / 2);
+    const color = styles.blocks[st.blockTypes.indexOf(dispenser.type) % styles.blocks.length];
+    drawBlock(ctx, r1, color, 'white', 'black');
+
+    const r2 = rect(ctx, dispenser.x, dispenser.y, 4 * ctx.lineWidth / 2);
+    drawBlock(ctx, r2, color, 'white', 'black');
+
+    const r3 = rect(ctx, dispenser.x, dispenser.y, 8 * ctx.lineWidth / 2);
+    drawBlock(ctx, r3, color, 'white', 'black');
 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
