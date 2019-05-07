@@ -130,8 +130,7 @@ public class Monitor {
     }
 
     private boolean isStatic(JSONObject worldData) {
-        //TODO
-        return true;
+        return worldData.has("grid");
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {

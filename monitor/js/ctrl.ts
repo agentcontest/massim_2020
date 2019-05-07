@@ -12,6 +12,7 @@ export default function(redraw: Redraw): Ctrl {
 
     ws.onmessage = function(msg) {
       const data = JSON.parse(msg.data);
+      console.log(data);
       if (data.grid) vm.static = data;
       else vm.dynamic = data;
       redraw();

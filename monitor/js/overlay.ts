@@ -14,12 +14,13 @@ function disconnected(_ctrl: Ctrl): VNode {
 }
 
 export default function(ctrl: Ctrl): VNode {
+  console.log('vm', ctrl.vm);
   if (ctrl.vm.state === 'error') return disconnected(ctrl);
-  if (ctrl.vm.state === 'connecting' || !ctrl.vm.static || !ctrl.vm.dynamic)
+  if (ctrl.vm.state === 'connecting' || !ctrl.vm.dynamic)
     return h('div.box', [
       h('div.loader', 'Loading ...')
     ]);
-  return h('div#overlay', [
-    'Hello world!'
+  return h('div.box', [
+    'Connected.'
   ]);
 }
