@@ -32,4 +32,6 @@ export default function Monitor(overlayTarget: Element, canvas: HTMLCanvasElemen
   ctrl = makeCtrl(redraw);
 
   redraw();
+
+  window.addEventListener('resize', redraw, { passive: true });
 }
