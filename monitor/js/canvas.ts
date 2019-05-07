@@ -25,6 +25,12 @@ function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, 
     Math.floor((canvas.width - world.grid.width * GRID) / 2),
     Math.floor((canvas.height - world.grid.height * GRID) / 2));
 
+  // background
+  ctx.beginPath();
+  ctx.fillStyle = '#eee';
+  ctx.rect(0, 0, world.grid.width * GRID, world.grid.height * GRID);
+  ctx.fill();
+
   // background pattern
   ctx.fillStyle = '#ddd';
   for (let y = 0; y < world.grid.height; y++) {
