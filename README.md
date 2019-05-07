@@ -14,7 +14,7 @@ contest server, receive percepts and send their actions, which are in turn
 executed by _MASSim_.
 
 <p align="center">
-  <img src="https://multiagentcontest.org/2016/banner.jpg">
+  <img src="https://multiagentcontest.org/2019/banner.png">
 </p>
 
 Download
