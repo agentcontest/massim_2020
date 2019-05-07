@@ -20,7 +20,7 @@ executed by _MASSim_.
 Download
 --------
 
-We upload **binary releases** to GitHub: https://github.com/agentcontest/massim/releases
+We upload **binary releases** to GitHub: https://github.com/agentcontest/massim_2019/releases
 
 There also are (potentially unstable) [development snapshots](https://s3-eu-west-1.amazonaws.com/agentcontest/massim/massim-master.tar.gz) built after each commit.
 
