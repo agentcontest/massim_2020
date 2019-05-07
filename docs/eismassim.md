@@ -105,7 +105,9 @@ Configuration example:
       "username": "agentA1",
       "password": "1",
       "print-iilang": false,
-      "print-json": true}
+      "print-json": true
+    },
+    ...
   ]
 }
 ```
@@ -209,6 +211,9 @@ The following percepts might be included in a `REQUEST-ACTION` message. Most of 
   * req : Function - a required block for the task
     * x/y : Numeral - the relative position of the required block
     * type : the type of block required for the task
+* `<terrainType>(x, y)`
+  * `<terrainType>` is one of the possible terrains (`obstacle`, `goal`, ...)
+  * x/y : Numeral - the relative position of the terrain
 
 #### SIM-END percepts
 
