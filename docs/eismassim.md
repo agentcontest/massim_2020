@@ -91,7 +91,7 @@ Configuration example:
 
 ```JSON
 {
-  "scenario": "city2017",
+  "scenario": "assemble2019",
   "host": "localhost",
   "port": 12300,
   "scheduling": true,
