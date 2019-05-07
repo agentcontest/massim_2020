@@ -66,3 +66,12 @@ export interface Task {
   deadline: number
   requirements: Block[]
 }
+
+export interface Rect {
+  x1: number
+  x2: number
+  y1: number
+  y2: number
+  width: number
+  height: number
+}

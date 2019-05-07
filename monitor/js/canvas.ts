@@ -1,4 +1,4 @@
-import { Ctrl, DynamicWorld, StaticWorld } from './interfaces';
+import { Ctrl, DynamicWorld, StaticWorld, Rect } from './interfaces';
 import * as styles from './styles';
 
 let GRID = 20; // todo: make const
@@ -66,7 +66,7 @@ function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, 
   }
 }
 
-function rect(ctx: CanvasRenderingContext2D, x: number, y: number, margin: number) {
+function rect(ctx: CanvasRenderingContext2D, x: number, y: number, margin: number): Rect {
   return {
     x1: x * GRID + margin,
     y1: y * GRID + margin,
@@ -77,30 +77,33 @@ function rect(ctx: CanvasRenderingContext2D, x: number, y: number, margin: numbe
   };
 }
 
+function drawBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light: string, dark: string) {
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.rect(r.x1, r.y1, r.width, r.height);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(r.x1, r.y2);
+  ctx.lineTo(r.x1, r.y1);
+  ctx.lineTo(r.x2, r.y1);
+  ctx.strokeStyle = light;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(r.x2, r.y1);
+  ctx.lineTo(r.x2, r.y2);
+  ctx.lineTo(r.x1, r.y2);
+  ctx.strokeStyle = dark;
+  ctx.stroke();
+}
+
 function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: DynamicWorld) {
   // blocks
   for (let block of dynamic.blocks) {
-    ctx.lineWidth = GRID / 16;
+    ctx.lineWidth = GRID / 20;
     const r = rect(ctx, block.x, block.y, ctx.lineWidth / 2);
-
-    ctx.beginPath();
-    ctx.fillStyle = styles.blocks[st.blockTypes.indexOf(block.type) % styles.blocks.length];
-    ctx.rect(r.x1, r.y1, r.width, r.height);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(r.x1, r.y2);
-    ctx.lineTo(r.x1, r.y1);
-    ctx.lineTo(r.x2, r.y1);
-    ctx.strokeStyle = '#555';
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(r.x2, r.y1);
-    ctx.lineTo(r.x2, r.y2);
-    ctx.lineTo(r.x1, r.y2);
-    ctx.strokeStyle = '#111';
-    ctx.stroke();
+    drawBlock(ctx, r, styles.blocks[st.blockTypes.indexOf(block.type) % styles.blocks.length], 'white', 'black');
 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
