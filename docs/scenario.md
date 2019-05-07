@@ -342,3 +342,13 @@ Currently, there is only one standard agent role.
 ## Commands
 
 Currently, no special scenario commands are available. You may use a simulation [setup file](#configuration) instead.
+
+## Roadmap
+
+A few things are still planned for 2019:
+
+* agents pushing other agents/blocks..
+* more terrain options
+* add-ons (that agents can attach to themselves to unlock further actions)
+* NPCs (entities controlled by the server)
+* 
