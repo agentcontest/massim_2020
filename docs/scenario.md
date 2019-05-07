@@ -211,6 +211,7 @@ Example (complete request-action message):
       "id": 1,
       "time": 1556636930397,
       "deadline": 1556636934400,
+      "step" : 1,
       "percept": {
          "score": 0,
          "lastAction": "move",
