@@ -1,4 +1,5 @@
 import { Ctrl, DynamicWorld, StaticWorld } from './interfaces';
+import * as styles from './styles';
 
 let GRID = 20; // todo: make const
 
@@ -6,7 +7,7 @@ export default function(canvas: HTMLCanvasElement, ctrl: Ctrl) {
   const ctx = canvas.getContext('2d')!;
 
   if (ctrl.vm.static) renderStatic(canvas, ctx, ctrl.vm.static);
-  if (ctrl.vm.dynamic) renderDynamic(ctx, ctrl.vm.dynamic);
+  if (ctrl.vm.static && ctrl.vm.dynamic) renderDynamic(ctx, ctrl.vm.static, ctrl.vm.dynamic);
   /*const ctx = canvas.getContext('2d')!;
 
   ctrl.vm.dynamic.entities.map(agent => {
@@ -61,9 +62,9 @@ function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, 
   }
 }
 
-function renderDynamic(ctx: CanvasRenderingContext2D, world: DynamicWorld) {
+function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: DynamicWorld) {
   // blocks
-  for (let block of world.blocks) {
+  for (let block of dynamic.blocks) {
     ctx.beginPath();
     ctx.fillStyle = 'green';
     ctx.rect(block.x * GRID, block.y * GRID, GRID, GRID);
@@ -76,7 +77,7 @@ function renderDynamic(ctx: CanvasRenderingContext2D, world: DynamicWorld) {
   }
 
   // dispensers
-  for (let dispenser of world.dispensers) {
+  for (let dispenser of dynamic.dispensers) {
     ctx.beginPath();
     ctx.fillStyle = 'blue';
     ctx.rect(dispenser.x * GRID, dispenser.y * GRID, GRID, GRID);
@@ -89,15 +90,17 @@ function renderDynamic(ctx: CanvasRenderingContext2D, world: DynamicWorld) {
   }
 
   // agents
-  for (let agent of world.entities) {
+  const teams = Object.keys(st.teams);
+  teams.sort();
+  for (let agent of dynamic.entities) {
     ctx.beginPath();
-    ctx.fillStyle = 'orange';
+    ctx.fillStyle = styles.teams[teams.indexOf(agent.team)];
     ctx.rect(agent.x * GRID, agent.y * GRID, GRID, GRID);
     ctx.fill();
 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'white';
     ctx.fillText(agent.name.replace('agent', ''), (agent.x + 0.5) * GRID, (agent.y + 0.5) * GRID);
   }
 }

@@ -1,10 +1,15 @@
 import { Ctrl, StaticWorld, DynamicWorld } from './interfaces';
+import  * as styles from './styles';
 
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-function teams(world: StaticWorld): string {
-  return `${world.teams['A'].name} : ${world.teams['B'].name}`;
+function teams(world: StaticWorld): VNode[] {
+  const teamNames = Object.keys(world.teams);
+  teamNames.sort();
+  return teamNames.map((name, i) => h('div.team', {
+    style: { background: styles.teams[i] }
+  }, name));
 }
 
 function tasks(world: DynamicWorld): VNode {
