@@ -14,6 +14,11 @@ export interface Ctrl {
 
 export interface StaticWorld {
   grid: Grid
+  teams: { [key: string]: Team }
+}
+
+export interface Team {
+  name: string
 }
 
 export interface Grid {

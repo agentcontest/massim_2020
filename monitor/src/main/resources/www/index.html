@@ -12,6 +12,7 @@
   </head>
   <body>
     <canvas id="canvas"></canvas>
-    <script>Monitor.default(document.getElementById('canvas'));</script>
+    <div id="overlay"></div>
+    <script>Monitor.default(document.getElementById('overlay'), document.getElementById('canvas'));</script>
   </body>
 </html>
