@@ -31,6 +31,9 @@ type Terrain = 0 | 1 | 2
 
 export interface DynamicWorld {
   entities: Agent[]
+  blocks: Block[]
+  dispensers: Dispenser[]
+  tasks: Task[]
 }
 
 export interface Agent {
@@ -39,4 +42,26 @@ export interface Agent {
   name: string
   id: string
   team: string
+}
+
+export type BlockType = string
+
+export interface Block {
+  x: number
+  y: number
+  type: BlockType
+}
+
+export interface Dispenser {
+  x: number
+  y: number
+  id: string
+  type: BlockType
+}
+
+export interface Task {
+  reward: number
+  name: string
+  deadline: number
+  requirements: Block[]
 }
