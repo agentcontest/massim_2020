@@ -135,9 +135,23 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
   teams.sort();
   for (let agent of dynamic.entities) {
     ctx.beginPath();
-    ctx.fillStyle = styles.teams[teams.indexOf(agent.team)];
-    ctx.rect(agent.x * GRID, agent.y * GRID, GRID, GRID);
-    ctx.fill();
+    ctx.lineWidth = GRID / 8;
+    ctx.moveTo((agent.x + 0.5) * GRID, agent.y * GRID);
+    ctx.lineTo((agent.x + 0.5) * GRID, agent.y * GRID + GRID);
+    ctx.strokeStyle = 'black';
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.lineWidth = GRID / 8;
+    ctx.moveTo(agent.x * GRID, (agent.y + 0.5) * GRID);
+    ctx.lineTo(agent.x * GRID + GRID, (agent.y + 0.5) * GRID);
+    ctx.strokeStyle = 'black';
+    ctx.stroke();
+
+    ctx.lineWidth = GRID / 20;
+    const color = styles.teams[teams.indexOf(agent.team)];
+    const r = rect(ctx, agent.x, agent.y, GRID / 8);
+    drawBlock(ctx, r, color, 'white', 'black');
 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
