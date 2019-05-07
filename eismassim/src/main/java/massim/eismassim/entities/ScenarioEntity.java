@@ -45,6 +45,8 @@ public class ScenarioEntity extends EISEntity {
         ret.add(new Percept("timestamp", new Numeral(percept.getTime())));
         ret.add(new Percept("deadline", new Numeral(percept.getDeadline())));
 
+        ret.add(new Percept("step", new Numeral(percept.getStep())));
+
         ret.add(new Percept("lastAction", new Identifier(percept.lastAction)));
         ret.add(new Percept("lastActionResult", new Identifier(percept.lastActionResult)));
         ret.add(new Percept("score", new Numeral(percept.score)));

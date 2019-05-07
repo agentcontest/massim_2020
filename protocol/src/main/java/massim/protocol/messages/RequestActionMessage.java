@@ -37,6 +37,7 @@ public abstract class RequestActionMessage extends Message {
         content.put("id", id);
         content.put("time" , time);
         content.put("deadline", deadline);
+        content.put("step", step);
         content.put("percept", makePercept());
         return content;
     }
@@ -62,5 +63,9 @@ public abstract class RequestActionMessage extends Message {
 
     public long getDeadline() {
         return deadline;
+    }
+
+    public int getStep() {
+        return step;
     }
 }
