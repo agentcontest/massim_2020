@@ -351,4 +351,3 @@ A few things are still planned for 2019:
 * more terrain options
 * add-ons (that agents can attach to themselves to unlock further actions)
 * NPCs (entities controlled by the server)
-* 
