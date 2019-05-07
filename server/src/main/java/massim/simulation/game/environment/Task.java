@@ -4,7 +4,6 @@ import massim.protocol.data.Position;
 import massim.protocol.data.TaskInfo;
 import massim.protocol.data.Thing;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +12,7 @@ import java.util.stream.Collectors;
 public class Task {
 
     private String name;
-    private Map<Position, String> requirements = new HashMap<>();
+    private Map<Position, String> requirements;
     private int deadline;
     private boolean completed = false;
 
@@ -60,6 +59,6 @@ public class Task {
         requirements.forEach((pos, type) -> {
             reqs.add(new Thing(pos.x, pos.y, type, ""));
         });
-        return new TaskInfo(name, deadline, reqs);
+        return new TaskInfo(name, deadline, getReward(), reqs);
     }
 }

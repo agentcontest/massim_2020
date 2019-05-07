@@ -244,6 +244,7 @@ Example (complete request-action message):
           {
               "name": "task2",
               "deadline": 188,
+              "reward" : 44,
               "requirements": [
                   {
                      "x": 1,
@@ -282,6 +283,7 @@ Example (complete request-action message):
 * __task__: a task taht is currently active
   * __name__: the task's identifier
   * __deadline__: the last step during which the task can be completed
+  * __reward__: the score points rewarded for completing the job
   * __requirements__: the relative positions in which blocks have to be attached to the agent (the agent being (0,0))
     * __x/y__: the relative position of the required block
     * __type__: the type of the required block

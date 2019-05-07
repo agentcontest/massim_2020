@@ -9,18 +9,21 @@ import java.util.Set;
 public class TaskInfo {
     public String name;
     public int deadline;
+    public int reward;
     public Set<Thing> requirements;
 
-    public TaskInfo(String name, int deadline, Set<Thing> requirements) {
+    public TaskInfo(String name, int deadline, int reward, Set<Thing> requirements) {
         this.name = name;
         this.deadline = deadline;
         this.requirements = requirements;
+        this.reward = reward;
     }
 
     public JSONObject toJSON() {
         JSONObject task = new JSONObject();
         task.put("name", name);
         task.put("deadline", deadline);
+        task.put("reward", reward);
         JSONArray jsonReqs = new JSONArray();
         for (Thing requirement : requirements) {
             jsonReqs.put(requirement.toJSON());
@@ -35,6 +38,7 @@ public class TaskInfo {
         for (int i = 0; i < jsonRequirements.length(); i++) {
             requirements.add(Thing.fromJson(jsonRequirements.getJSONObject(i)));
         }
-        return new TaskInfo(jsonTask.getString("name"), jsonTask.getInt("deadline"), requirements);
+        return new TaskInfo(jsonTask.getString("name"), jsonTask.getInt("deadline"),
+                jsonTask.getInt("reward"), requirements);
     }
 }

@@ -205,12 +205,13 @@ The following percepts might be included in a `REQUEST-ACTION` message. Most of 
   * x/y : Numeral - relative position of a thing
   * type : Identifier - the type of the thing
   * details : Identifier - possibly more information about the thing
-* `task(name, deadline, [req(x,y,type),...])`
-  * name : Identifier - the name of the task
+* `task(name, deadline, reward, [req(x,y,type),...])`
+  * name : Identifier
   * deadline : Numeral - the last step the task can be completed
+  * reward : Numeral
   * req : Function - a required block for the task
     * x/y : Numeral - the relative position of the required block
-    * type : the type of block required for the task
+    * type : the type of the block
 * `<terrainType>(x, y)`
   * `<terrainType>` is one of the possible terrains (`obstacle`, `goal`, ...)
   * x/y : Numeral - the relative position of the terrain
