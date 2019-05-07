@@ -1,5 +1,5 @@
-MASSim
-======
+MASSim 2019: Agents Assemble
+============================
 
 [![Build Status](https://travis-ci.org/agentcontest/massim_2019.svg?branch=master)](https://travis-ci.org/agentcontest/massim_2019)
 
