@@ -4,7 +4,7 @@ dist: trusty
 language: java
 
 jdk:
-- oraclejdk8
+- openjdk11
 
 install: true
 script: mvn package
@@ -20,7 +20,7 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    repo: agentcontest/massim
+    repo: agentcontest/massim_2019
     branch: master
 
 addons:

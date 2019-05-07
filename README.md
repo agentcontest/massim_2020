@@ -1,7 +1,7 @@
 MASSim
 ======
 
-[![Build Status](https://travis-ci.org/agentcontest/massim.svg?branch=master)](https://travis-ci.org/agentcontest/massim)
+[![Build Status](https://travis-ci.org/agentcontest/massim_2019.svg?branch=master)](https://travis-ci.org/agentcontest/massim_2019)
 
 _MASSim_ (Multi-Agent Systems Simulation Platform), the simulation (server)
 software used in the
