@@ -39,7 +39,7 @@ Documentation
 
 [scenario.md](docs/scenario.md) contains the description of the current scenario.
 
-[protocol.md](docs/protocol.md) describes the _MASSim_ protocol, i.e. XML message formats for communicating with the _MASSim_ server.
+[protocol.md](docs/protocol.md) describes the _MASSim_ protocol, i.e. message formats for communicating with the _MASSim_ server.
 
 [eismassim.md](docs/eismassim.md) explains _EISMASSim_, a Java library using the Environment Interface Standard (EIS) to communicate with the _MASSim_ server, that can be used with platforms which support the EIS.
 
