@@ -293,6 +293,8 @@ class GameState {
                     Position currentPos = Position.of(x, y);
                     GameObject go = getGameObject(currentPos);
                     if (go != null) visibleThings.add(go.toPercept(entity.getPosition()));
+                    Dispenser d = dispensers.get(currentPos);
+                    if (d != null) visibleThings.add(d.toPercept(entity.getPosition()));
                     Terrain terrain = grid.getTerrain(currentPos);
                     if (terrain != Terrain.EMPTY) {
                         visibleTerrain.computeIfAbsent(terrain.name,
