@@ -77,7 +77,7 @@ class GameState {
         Log.log(Log.Level.NORMAL, "config.tasks.size: " + taskSizeBounds);
         taskSizeMin = taskSizeBounds.getInt(0);
         taskSizeMax = taskSizeBounds.getInt(1);
-        pNewTask = taskConfig.getInt("probability");
+        pNewTask = taskConfig.getDouble("probability");
         Log.log(Log.Level.NORMAL, "config.tasks.probability: " + pNewTask);
 
         // create teams
