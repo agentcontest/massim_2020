@@ -23,6 +23,7 @@ __Tournament points__ are distributed according to the score of a team at the en
 ## Environment
 
 The environment is a rectangular grid. The dimensions are not known to the agents. Agents only perceive positions relative to their own. The x-axis goes from left to right (or eastwards) and the y-axis from top to bottom (southwards).
+Each cell of the grid contains up to one thing that may collide with other things (i.e. agents and blocks for now). Only in the beginning of the simulation, an agent shares *the same* cell with one agent of the other team/s (to ensure fairness). Once one of the agents has moved, they cannot overlap again later.
 
 ### Things
 
