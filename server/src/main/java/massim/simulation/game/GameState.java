@@ -176,7 +176,7 @@ class GameState {
 
                 if (entity == null || x == null || y == null) break;
                 Log.log(Log.Level.NORMAL, "Setup: Try to move " + command[3] + " to (" + x +", " + y + ")");
-                grid.move(entity, Position.of(x, y));
+                grid.moveWithoutAttachments(entity, Position.of(x, y));
                 break;
 
             case "add":
@@ -225,8 +225,8 @@ class GameState {
                 var x2 = Util.tryParseInt(command[3]);
                 var y2 = Util.tryParseInt(command[4]);
                 if (x1 == null || x2 == null || y1 == null || y2 == null) break;
-                Attachable a1 = getAttachable(Position.of(x1, y1));
-                Attachable a2 = getAttachable(Position.of(x2, y2));
+                Attachable a1 = getUniqueAttachable(Position.of(x1, y1));
+                Attachable a2 = getUniqueAttachable(Position.of(x2, y2));
                 if (a1 == null || a2 == null) break;
                 grid.attach(a1, a2);
                 break;
@@ -291,8 +291,7 @@ class GameState {
                 int visionLeft = vision - Math.abs(dy);
                 for (int x = pos.x - visionLeft ; x <= pos.x + visionLeft; x++) {
                     Position currentPos = Position.of(x, y);
-                    GameObject go = getGameObject(currentPos);
-                    if (go != null) visibleThings.add(go.toPercept(entity.getPosition()));
+                    getGameObjects(currentPos).forEach(go -> visibleThings.add(go.toPercept(entity.getPosition())));
                     Dispenser d = dispensers.get(currentPos);
                     if (d != null) visibleThings.add(d.toPercept(entity.getPosition()));
                     Terrain terrain = grid.getTerrain(currentPos);
@@ -340,9 +339,8 @@ class GameState {
     String handleAttachAction(Entity entity, String direction) {
         Position target = entity.getPosition().moved(direction, 1);
         if (target == null) return Actions.RESULT_F_TARGET;
-        GameObject gameObject = getGameObject(target);
-        if (!(gameObject instanceof Attachable)) return Actions.RESULT_F;
-        Attachable a = (Attachable) gameObject;
+        Attachable a = getUniqueAttachable(target);
+        if (a == null) return Actions.RESULT_F;
         if(!attachedToOpponent(a, entity) && grid.attach(entity, a)) {
             return Actions.RESULT_SUCCESS;
         }
@@ -351,7 +349,7 @@ class GameState {
 
     String handleDetachAction(Entity entity, String direction) {
         Position target = entity.getPosition().moved(direction, 1);
-        Attachable a = getAttachable(target);
+        Attachable a = getUniqueAttachable(target);
         if (a == null) return Actions.RESULT_F_TARGET;
         if (grid.detach(entity, a)){
             return Actions.RESULT_SUCCESS;
@@ -360,8 +358,8 @@ class GameState {
     }
 
     String handleConnectAction(Entity entity, Position blockPos, Entity partnerEntity, Position partnerBlockPos) {
-        Attachable block1 = getAttachable(blockPos.translate(entity.getPosition()));
-        Attachable block2 = getAttachable(partnerBlockPos.translate(partnerEntity.getPosition()));
+        Attachable block1 = getUniqueAttachable(blockPos.translate(entity.getPosition()));
+        Attachable block2 = getUniqueAttachable(partnerBlockPos.translate(partnerEntity.getPosition()));
 
         if(!(block1 instanceof Block) || !(block2 instanceof Block)) return Actions.RESULT_F_TARGET;
 
@@ -400,7 +398,7 @@ class GameState {
             Position pos = entry.getKey();
             String reqType = entry.getValue();
             Position checkPos = Position.of(pos.x + ePos.x, pos.y + ePos.y);
-            Attachable actualBlock = getAttachable(checkPos);
+            Attachable actualBlock = getUniqueAttachable(checkPos);
             if (actualBlock instanceof Block
                 && ((Block) actualBlock).getBlockType().equals(reqType)
                 && attachedBlocks.contains(actualBlock)) {
@@ -409,7 +407,7 @@ class GameState {
             return Actions.RESULT_F;
         }
         task.getRequirements().keySet().forEach(pos -> {
-            Attachable a = getAttachable(pos.translate(e.getPosition()));
+            Attachable a = getUniqueAttachable(pos.translate(e.getPosition()));
             if (a != null) {
                 grid.removeAttachable(a);
                 gameObjects.remove(a.getID());
@@ -480,13 +478,21 @@ class GameState {
         this.gameObjects.put(o.getID(), o);
     }
 
-    private Attachable getAttachable(Position position) {
-        GameObject go = getGameObject(position);
-        return (go instanceof Attachable)? (Attachable) go : null;
+    private Attachable getUniqueAttachable(Position pos) {
+        var attachables = getAttachables(pos);
+        if (attachables.size() != 1) return null;
+        return attachables.iterator().next();
     }
 
-    private GameObject getGameObject(Position pos) {
-        return gameObjects.get(grid.getCollidable(pos));
+    private Set<Attachable> getAttachables(Position position) {
+        return getGameObjects(position).stream()
+                .filter(go -> go instanceof Attachable)
+                .map(go -> (Attachable)go)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<GameObject> getGameObjects(Position pos) {
+        return grid.getThings(pos).stream().map(id -> gameObjects.get(id)).collect(Collectors.toSet());
     }
 
     private boolean attachedToOpponent(Attachable a, Entity entity) {

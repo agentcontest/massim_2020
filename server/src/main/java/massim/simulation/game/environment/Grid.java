@@ -16,14 +16,14 @@ public class Grid {
     private int dimX;
     private int dimY;
     private int attachLimit;
-    private String[][] collisionMap;
+    private Map<Position, Set<String>> thingsMap;
     private Terrain[][] terrainMap;
 
     public Grid(int dimX, int dimY, int attachLimit) {
         this.dimX = dimX;
         this.dimY = dimY;
         this.attachLimit = attachLimit;
-        collisionMap = new String[dimX][dimY];
+        thingsMap = new HashMap<>();
         terrainMap = new Terrain[dimX][dimY];
         for (Terrain[] col : terrainMap) Arrays.fill(col, Terrain.EMPTY);
         for (int x = 0; x < dimX; x++) {
@@ -45,14 +45,14 @@ public class Grid {
     }
 
     public Entity createEntity(Position xy, String agentName, String teamName) {
-        Entity e = new Entity(xy, agentName, teamName);
+        var e = new Entity(xy, agentName, teamName);
         insert(e.getID(), e.getPosition());
         return e;
     }
 
     public Block createBlock(Position xy, String type) {
         if(!isFree(xy)) return null;
-        Block b = new Block(xy, type);
+        var b = new Block(xy, type);
         insert(b.getID(), b.getPosition());
         return b;
     }
@@ -60,15 +60,16 @@ public class Grid {
     public void removeAttachable(Attachable a) {
         if (a == null) return;
         a.detachAll();
-        Position pos = a.getPosition();
-        if (outOfBounds(pos)) return;
-        collisionMap[pos.x][pos.y] = null;
+        getThings(a.getPosition()).remove(a.getID());
+    }
+
+    public Set<String> getThings(Position pos) {
+        return thingsMap.computeIfAbsent(pos, kPos -> new HashSet<>());
     }
 
     public boolean insert(String id, Position pos) {
         if (outOfBounds(pos)) return false;
-        if (!isFree(pos)) return false;
-        collisionMap[pos.x][pos.y] = id;
+        getThings(pos).add(id);
         return true;
     }
 
@@ -77,10 +78,10 @@ public class Grid {
     }
 
     private void move(Set<Attachable> attachables, Map<Attachable, Position> newPositions) {
-        attachables.forEach(a -> collisionMap[a.getPosition().x][a.getPosition().y] = null);
+        attachables.forEach(a -> getThings(a.getPosition()).remove(a.getID()));
         for (Attachable a : attachables) {
-            Position newPos = newPositions.get(a);
-            collisionMap[newPos.x][newPos.y] = a.getID();
+            var newPos = newPositions.get(a);
+            insert(a.getID(), newPos);
             a.setPosition(newPos);
         }
     }
@@ -89,10 +90,10 @@ public class Grid {
      * Moves an Attachable to a given position.
      * Only works if target is free and attachable has nothing attached.
      */
-    public void move(Attachable a, Position pos) {
-        if(isFree(pos) && a.getAttachments().size() == 0) {
-            collisionMap[pos.x][pos.y] = a.getID();
-            a.setPosition(pos);
+    public void moveWithoutAttachments(Attachable a, Position pos) {
+        if(isFree(pos) && a.getAttachments().isEmpty()) {
+            removeAttachable(a);
+            insert(a.getID(), a.getPosition());
         }
     }
 
@@ -100,7 +101,7 @@ public class Grid {
         if (a1 == null || a2 == null) return false;
         if (a1.getPosition().distanceTo(a2.getPosition()) != 1) return false;
 
-        Set<Attachable> attachments = getAllAttached(a1);
+        var attachments = getAllAttached(a1);
         attachments.addAll(getAllAttached(a2));
         if (attachments.size() > attachLimit) return false;
 
@@ -116,22 +117,22 @@ public class Grid {
     }
 
     public void print(){
+        var sb = new StringBuilder(dimX * dimY * 3 + dimY);
         for (int row = 0; row < dimY; row++){
-            StringBuilder rowString = new StringBuilder();
             for (int col = 0; col < dimX; col++){
-                rowString.append(collisionMap[col][row] != null ? "[O]" : "[ ]");
+                sb.append("[").append(getThings(Position.of(col, row)).size()).append("]");
             }
-            System.out.println(rowString.toString());
+            sb.append("\n");
         }
-        System.out.println();
+        System.out.println(sb.toString());
     }
 
     /**
      * @return whether the movement succeeded
      */
     public boolean moveWithAttached(Attachable anchor, String direction, int distance) {
-        Set<Attachable> attachables = getAllAttached(anchor);
-        Map<Attachable, Position> newPositions = canMove(attachables, direction, distance);
+        var attachables = getAllAttached(anchor);
+        var newPositions = canMove(attachables, direction, distance);
         if (newPositions == null) return false;
         move(attachables, newPositions);
         return true;
@@ -141,7 +142,7 @@ public class Grid {
      * @return whether the rotation succeeded
      */
     public boolean rotateWithAttached(Attachable anchor, boolean clockwise) {
-        Map<Attachable, Position> newPositions = canRotate(anchor, clockwise);
+        var newPositions = canRotate(anchor, clockwise);
         if (newPositions == null) return false;
         move(newPositions.keySet(), newPositions);
         return true;
@@ -153,12 +154,12 @@ public class Grid {
      * @return a map from the element and all attachments to their new positions after rotation or null if anything is blocked
      */
     private Map<Attachable, Position> canRotate(Attachable anchor, boolean clockwise) {
-        Set<Attachable> attachments = getAllAttached(anchor);
+        var attachments = getAllAttached(anchor);
         if(attachments.stream().anyMatch(a -> a != anchor && a instanceof Entity)) return null;
-        Set<String> attachableIDs = attachments.stream().map(GameObject::getID).collect(Collectors.toSet());
-        Map<Attachable, Position> newPositions = new HashMap<>();
+        var attachableIDs = attachments.stream().map(GameObject::getID).collect(Collectors.toSet());
+        var newPositions = new HashMap<Attachable, Position>();
         for (Attachable a : attachments) {
-            Position rotatedPosition = a.getPosition();
+            var rotatedPosition = a.getPosition();
             int distance = rotatedPosition.distanceTo(anchor.getPosition());
             for (int rotations = 0; rotations < distance; rotations++) {
                 rotatedPosition = rotatedPosition.rotatedOneStep(anchor.getPosition(), clockwise);
@@ -170,11 +171,11 @@ public class Grid {
     }
 
     private Map<Attachable, Position> canMove(Set<Attachable> attachables, String direction, int distance) {
-        Set<String> attachableIDs = attachables.stream().map(GameObject::getID).collect(Collectors.toSet());
-        Map<Attachable, Position> newPositions = new HashMap<>();
+        var attachableIDs = attachables.stream().map(GameObject::getID).collect(Collectors.toSet());
+        var newPositions = new HashMap<Attachable, Position>();
         for (Attachable a : attachables) {
             for (int i = 1; i <= distance; i++) {
-                Position newPos = a.getPosition().moved(direction, i);
+                var newPos = a.getPosition().moved(direction, i);
                 if(!isFree(newPos, attachableIDs)) return null;
             }
             newPositions.put(a, a.getPosition().moved(direction, distance));
@@ -183,7 +184,7 @@ public class Grid {
     }
 
     public Set<Attachable> getAllAttached(Attachable anchor) {
-        Set<Attachable> attachables = new HashSet<>();
+        var attachables = new HashSet<Attachable>();
         attachables.add(anchor);
         Set<Attachable> newAttachables = new HashSet<>(attachables);
         while (!newAttachables.isEmpty()) {
@@ -199,15 +200,6 @@ public class Grid {
             newAttachables = tempAttachables;
         }
         return attachables;
-    }
-
-    /**
-     * @param position the position to check
-     * @return A game object on the collision layer at that position or null if there is none.
-     */
-    public String getCollidable(Position position) {
-        if (outOfBounds(position)) return null;
-        return collisionMap[position.x][position.y];
     }
 
     public Position findRandomFreePosition() {
@@ -236,9 +228,12 @@ public class Grid {
     }
 
     private boolean isFree(Position xy, Set<String> excludedObjects) {
-        return !outOfBounds(xy)
-                && (collisionMap[xy.x][xy.y] == null || excludedObjects.contains(collisionMap[xy.x][xy.y]))
-                && terrainMap[xy.x][xy.y] != Terrain.OBSTACLE;
+        if (outOfBounds(xy)) return false;
+
+        var blockingThings = getThings(xy);
+        blockingThings.removeAll(excludedObjects);
+
+        return blockingThings.isEmpty() && terrainMap[xy.x][xy.y] != Terrain.OBSTACLE;
     }
 
     public void setTerrain(int x, int y, Terrain terrainType) {
