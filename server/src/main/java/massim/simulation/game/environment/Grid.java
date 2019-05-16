@@ -93,7 +93,8 @@ public class Grid {
     public void moveWithoutAttachments(Attachable a, Position pos) {
         if(isFree(pos) && a.getAttachments().isEmpty()) {
             removeAttachable(a);
-            insert(a.getID(), a.getPosition());
+            a.setPosition(pos);
+            insert(a.getID(), pos);
         }
     }
 

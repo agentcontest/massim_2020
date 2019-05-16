@@ -379,8 +379,8 @@ class GameState {
     }
 
     String handleRequestAction(Entity entity, String direction) {
-        Position requestPosition = entity.getPosition().moved(direction, 1);
-        Dispenser dispenser = dispensers.get(requestPosition);
+        var requestPosition = entity.getPosition().moved(direction, 1);
+        var dispenser = dispensers.get(requestPosition);
         if (dispenser != null && grid.isFree(requestPosition)){
             createBlock(requestPosition, dispenser.getBlockType());
             return Actions.RESULT_SUCCESS;

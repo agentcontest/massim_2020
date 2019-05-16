@@ -38,6 +38,9 @@ public class BasicAgent extends Agent {
         if (getName().equals("agentA3")) {
             return new Action("submit", new Identifier("test"));
         }
+        if (getName().equals("agentA1")) {
+            return new Action("request", new Identifier("e"));
+        }
         return new Action("move", new Identifier("n"));
     }
 }
