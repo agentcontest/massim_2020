@@ -5,15 +5,10 @@ let GRID = 20; // todo: make const
 
 export default function(canvas: HTMLCanvasElement, ctrl: Ctrl) {
   const ctx = canvas.getContext('2d')!;
-
+  ctx.save();
   if (ctrl.vm.static) renderStatic(canvas, ctx, ctrl.vm.static);
   if (ctrl.vm.static && ctrl.vm.dynamic) renderDynamic(ctx, ctrl.vm.static, ctrl.vm.dynamic);
-  /*const ctx = canvas.getContext('2d')!;
-
-  ctrl.vm.dynamic.entities.map(agent => {
-    ctx.fillStyle = 'green';
-    ctx.fillRect(agent.x * GRID, agent.y * GRID, GRID, GRID);
-  });a */
+  ctx.restore();
 }
 
 function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, world: StaticWorld) {

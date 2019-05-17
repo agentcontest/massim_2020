@@ -50,6 +50,7 @@ function taskDetails(st: StaticWorld, task: Task): VNode[] {
   const render = function (vnode: VNode) {
     const canvas = vnode.elm as HTMLCanvasElement;
     const ctx = canvas.getContext('2d')!;
+    ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.translate((elementWidth - gridSize) / 2, (elementHeight - gridSize) / 2);
     ctx.beginPath();
@@ -57,6 +58,7 @@ function taskDetails(st: StaticWorld, task: Task): VNode[] {
     ctx.fillStyle = 'red';
     ctx.fill();
     renderBlocks(ctx, st, task.requirements, gridSize);
+    ctx.restore();
   };
   return [h('canvas', {
     props: {
