@@ -6,10 +6,12 @@ export interface ViewModel {
   state: ConnectionState
   static?: StaticWorld
   dynamic?: DynamicWorld
+  taskName?: string
 }
 
 export interface Ctrl {
   vm: ViewModel
+  redraw: Redraw
 }
 
 export type BlockType = string

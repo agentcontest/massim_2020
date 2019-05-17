@@ -12,10 +12,27 @@ function teams(world: StaticWorld): VNode[] {
   }, name));
 }
 
-function tasks(world: DynamicWorld): VNode {
-  return h('ul', world.tasks.map(t => {
-    return h('li', `${t.reward}$ for ${t.name} until ${t.deadline}`);
-  }));
+function tasks(ctrl: Ctrl, world: DynamicWorld): VNode[] {
+  return [h('select', {
+    on: {
+      change: function(e) {
+        console.log('change', e);
+        ctrl.vm.taskName = (e.target as HTMLOptionElement).value;
+        ctrl.redraw();
+      }
+    }
+  }, [
+    h('option', {
+      props: {
+        value: ''
+      },
+    }, `${world.tasks.length} tasks`),
+    ...world.tasks.map(t => h('option', {
+      props: {
+        value: t.name
+      },
+    }, `${t.reward}$ for ${t.name} until ${t.deadline}`))
+  ]), h('span', ctrl.vm.taskName)];
 }
 
 function disconnected(_ctrl: Ctrl): VNode {
@@ -39,6 +56,6 @@ export default function(ctrl: Ctrl): VNode {
       'Connected.'
     ]),
     h('div.box', teams(ctrl.vm.static)),
-    h('div.box', tasks(ctrl.vm.dynamic))
+    h('div.box', tasks(ctrl, ctrl.vm.dynamic))
   ]);
 }

@@ -37,6 +37,7 @@ export default function(redraw: Redraw): Ctrl {
   connect();
 
   return {
-    vm
+    vm,
+    redraw
   }
 }
