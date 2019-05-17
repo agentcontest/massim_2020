@@ -5,6 +5,11 @@ import  * as styles from './styles';
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
+function simplePlural(n: number, singular: string): string {
+  if (n === 1) return '1 ' + singular;
+  else return n + ' ' + singular + 's';
+}
+
 function teams(world: StaticWorld): VNode[] {
   const teamNames = Object.keys(world.teams);
   teamNames.sort();
@@ -28,7 +33,7 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
         props: {
           value: ''
         },
-      }, `${world.tasks.length} tasks`),
+      }, simplePlural(world.tasks.length, 'task')),
       ...world.tasks.map(t => h('option', {
         props: {
           value: t.name
@@ -69,7 +74,7 @@ function taskDetails(st: StaticWorld, task: Task): VNode[] {
       insert: render,
       update: (_, vnode) => render(vnode)
     }
-  }), h('p', `${task.requirements.length} blocks`)];
+  }), h('p', simplePlural(task.requirements.length, 'block'))];
 }
 
 function disconnected(_ctrl: Ctrl): VNode {
