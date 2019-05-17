@@ -1,4 +1,4 @@
-import { Ctrl, StaticWorld, DynamicWorld, Task } from './interfaces';
+import { Ctrl, StaticWorld, DynamicWorld, Task, Block } from './interfaces';
 import { renderBlocks } from './canvas';
 import  * as styles from './styles';
 
@@ -40,15 +40,30 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
 }
 
 function taskDetails(st: StaticWorld, task: Task): VNode {
+  const xs = task.requirements.map(b => b.x);
+  xs.push(0);
+  const ys = task.requirements.map(b => b.y);
+  ys.push(0);
+  const xMin = Math.min(...xs);
+  const yMin = Math.min(...ys);
+  const width = Math.max(...xs) - xMin + 1;
+  const height = Math.max(...ys) - yMin + 1;
+  const elementWidth = 318;
+  const gridSize = Math.floor(elementWidth / width);
   return h('canvas', {
     props: {
-      width: 300,
-      height: 300
+      width: gridSize * width,
+      height: gridSize * height
     },
     hook: {
       insert: function (canvas) {
         const ctx = (canvas.elm as HTMLCanvasElement).getContext('2d')!;
-        renderBlocks(ctx, st, task.requirements, 20);
+        ctx.translate(-gridSize * xMin, -gridSize * yMin);
+        ctx.beginPath();
+        ctx.rect(0, 0, 10, 10);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+        renderBlocks(ctx, st, task.requirements, gridSize);
       }
     }
   });
