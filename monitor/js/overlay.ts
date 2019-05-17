@@ -1,4 +1,5 @@
 import { Ctrl, StaticWorld, DynamicWorld, Task } from './interfaces';
+import { renderBlocks } from './canvas';
 import  * as styles from './styles';
 
 import { h } from 'snabbdom';
@@ -12,7 +13,7 @@ function teams(world: StaticWorld): VNode[] {
   }, name));
 }
 
-function tasks(ctrl: Ctrl, world: DynamicWorld): VNode[] {
+function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
   const selectedTask = world.tasks.filter(t => t.name === ctrl.vm.taskName)[0];
   return [
     h('select', {
@@ -34,11 +35,11 @@ function tasks(ctrl: Ctrl, world: DynamicWorld): VNode[] {
         },
       }, `${t.reward}$ for ${t.name} until ${t.deadline}`))
     ]),
-    ...(selectedTask ? [taskDetails(selectedTask)] : [])
+    ...(selectedTask ? [taskDetails(st, selectedTask)] : [])
   ]
 }
 
-function taskDetails(task: Task): VNode {
+function taskDetails(st: StaticWorld, task: Task): VNode {
   return h('canvas', {
     props: {
       width: 300,
@@ -47,10 +48,7 @@ function taskDetails(task: Task): VNode {
     hook: {
       insert: function (canvas) {
         const ctx = (canvas.elm as HTMLCanvasElement).getContext('2d')!;
-        ctx.beginPath();
-        ctx.rect(0, 0, 10, 10);
-        ctx.fillStyle = 'red';
-        ctx.fill();
+        renderBlocks(ctx, st, task.requirements, 20);
       }
     }
   });
@@ -77,6 +75,6 @@ export default function(ctrl: Ctrl): VNode {
       'Connected.'
     ]),
     h('div.box', teams(ctrl.vm.static)),
-    h('div.box', tasks(ctrl, ctrl.vm.dynamic))
+    h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic))
   ]);
 }

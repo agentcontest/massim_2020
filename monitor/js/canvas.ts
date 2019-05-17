@@ -66,14 +66,14 @@ function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, 
   }
 }
 
-function rect(ctx: CanvasRenderingContext2D, x: number, y: number, margin: number): Rect {
+function rect(ctx: CanvasRenderingContext2D, blockSize: number, x: number, y: number, margin: number): Rect {
   return {
-    x1: x * GRID + margin,
-    y1: y * GRID + margin,
-    x2: x * GRID + GRID - margin,
-    y2: y * GRID + GRID - margin,
-    width: GRID - 2 * margin,
-    height: GRID - 2 * margin,
+    x1: x * blockSize + margin,
+    y1: y * blockSize + margin,
+    x2: x * blockSize + blockSize - margin,
+    y2: y * blockSize + blockSize - margin,
+    width: blockSize - 2 * margin,
+    height: blockSize - 2 * margin,
   };
 }
 
@@ -98,34 +98,34 @@ function drawBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light:
   ctx.stroke();
 }
 
-function renderBlocks(ctx: CanvasRenderingContext2D, st: StaticWorld, blocks: Block[]) {
+export function renderBlocks(ctx: CanvasRenderingContext2D, st: StaticWorld, blocks: Block[], blockSize: number) {
   for (let block of blocks) {
-    ctx.lineWidth = GRID / 20;
-    const r = rect(ctx, block.x, block.y, ctx.lineWidth / 2);
+    ctx.lineWidth = blockSize / 20;
+    const r = rect(ctx, blockSize, block.x, block.y, ctx.lineWidth / 2);
     drawBlock(ctx, r, styles.blocks[st.blockTypes.indexOf(block.type) % styles.blocks.length], 'white', 'black');
 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillStyle = 'white';
-    ctx.fillText(block.type, (block.x + 0.5) * GRID, (block.y + 0.5) * GRID);
+    ctx.fillText(block.type, (block.x + 0.5) * blockSize, (block.y + 0.5) * blockSize);
   }
 }
 
 function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: DynamicWorld) {
   // blocks
-  renderBlocks(ctx, st, dynamic.blocks);
+  renderBlocks(ctx, st, dynamic.blocks, GRID);
 
   // dispensers
   for (let dispenser of dynamic.dispensers) {
     ctx.lineWidth = GRID / 20;
-    const r1 = rect(ctx, dispenser.x, dispenser.y, ctx.lineWidth / 2);
+    const r1 = rect(ctx, GRID, dispenser.x, dispenser.y, ctx.lineWidth / 2);
     const color = styles.blocks[st.blockTypes.indexOf(dispenser.type) % styles.blocks.length];
     drawBlock(ctx, r1, color, 'white', 'black');
 
-    const r2 = rect(ctx, dispenser.x, dispenser.y, 4 * ctx.lineWidth / 2);
+    const r2 = rect(ctx, GRID, dispenser.x, dispenser.y, 4 * ctx.lineWidth / 2);
     drawBlock(ctx, r2, color, 'white', 'black');
 
-    const r3 = rect(ctx, dispenser.x, dispenser.y, 8 * ctx.lineWidth / 2);
+    const r3 = rect(ctx, GRID, dispenser.x, dispenser.y, 8 * ctx.lineWidth / 2);
     drawBlock(ctx, r3, color, 'white', 'black');
 
     ctx.textBaseline = 'middle';
@@ -154,7 +154,7 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
 
     ctx.lineWidth = GRID / 20;
     const color = styles.teams[teams.indexOf(agent.team)];
-    const r = rect(ctx, agent.x, agent.y, GRID / 8);
+    const r = rect(ctx, GRID, agent.x, agent.y, GRID / 8);
     drawBlock(ctx, r, color, 'white', 'black');
 
     ctx.textBaseline = 'middle';
