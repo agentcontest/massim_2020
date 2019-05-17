@@ -1,4 +1,4 @@
-import { Ctrl, DynamicWorld, StaticWorld, Rect } from './interfaces';
+import { Ctrl, DynamicWorld, StaticWorld, Block, Rect } from './interfaces';
 import * as styles from './styles';
 
 let GRID = 20; // todo: make const
@@ -98,9 +98,8 @@ function drawBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light:
   ctx.stroke();
 }
 
-function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: DynamicWorld) {
-  // blocks
-  for (let block of dynamic.blocks) {
+function renderBlocks(ctx: CanvasRenderingContext2D, st: StaticWorld, blocks: Block[]) {
+  for (let block of blocks) {
     ctx.lineWidth = GRID / 20;
     const r = rect(ctx, block.x, block.y, ctx.lineWidth / 2);
     drawBlock(ctx, r, styles.blocks[st.blockTypes.indexOf(block.type) % styles.blocks.length], 'white', 'black');
@@ -110,6 +109,11 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
     ctx.fillStyle = 'white';
     ctx.fillText(block.type, (block.x + 0.5) * GRID, (block.y + 0.5) * GRID);
   }
+}
+
+function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: DynamicWorld) {
+  // blocks
+  renderBlocks(ctx, st, dynamic.blocks);
 
   // dispensers
   for (let dispenser of dynamic.dispensers) {

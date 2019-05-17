@@ -1,4 +1,4 @@
-import { Ctrl, StaticWorld, DynamicWorld } from './interfaces';
+import { Ctrl, StaticWorld, DynamicWorld, Task } from './interfaces';
 import  * as styles from './styles';
 
 import { h } from 'snabbdom';
@@ -13,26 +13,47 @@ function teams(world: StaticWorld): VNode[] {
 }
 
 function tasks(ctrl: Ctrl, world: DynamicWorld): VNode[] {
-  return [h('select', {
-    on: {
-      change: function(e) {
-        console.log('change', e);
-        ctrl.vm.taskName = (e.target as HTMLOptionElement).value;
-        ctrl.redraw();
+  const selectedTask = world.tasks.filter(t => t.name === ctrl.vm.taskName)[0];
+  return [
+    h('select', {
+      on: {
+        change: function(e) {
+          ctrl.vm.taskName = (e.target as HTMLOptionElement).value;
+          ctrl.redraw();
+        }
+      }
+    }, [
+      h('option', {
+        props: {
+          value: ''
+        },
+      }, `${world.tasks.length} tasks`),
+      ...world.tasks.map(t => h('option', {
+        props: {
+          value: t.name
+        },
+      }, `${t.reward}$ for ${t.name} until ${t.deadline}`))
+    ]),
+    ...(selectedTask ? [taskDetails(selectedTask)] : [])
+  ]
+}
+
+function taskDetails(task: Task): VNode {
+  return h('canvas', {
+    props: {
+      width: 300,
+      height: 300
+    },
+    hook: {
+      insert: function (canvas) {
+        const ctx = (canvas.elm as HTMLCanvasElement).getContext('2d')!;
+        ctx.beginPath();
+        ctx.rect(0, 0, 10, 10);
+        ctx.fillStyle = 'red';
+        ctx.fill();
       }
     }
-  }, [
-    h('option', {
-      props: {
-        value: ''
-      },
-    }, `${world.tasks.length} tasks`),
-    ...world.tasks.map(t => h('option', {
-      props: {
-        value: t.name
-      },
-    }, `${t.reward}$ for ${t.name} until ${t.deadline}`))
-  ]), h('span', ctrl.vm.taskName)];
+  });
 }
 
 function disconnected(_ctrl: Ctrl): VNode {
