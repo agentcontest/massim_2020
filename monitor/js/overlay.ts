@@ -35,35 +35,39 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
         },
       }, `${t.reward}$ for ${t.name} until step ${t.deadline}`))
     ]),
-    ...(selectedTask ? [taskDetails(st, selectedTask)] : [])
+    ...(selectedTask ? taskDetails(st, selectedTask) : [])
   ]
 }
 
-function taskDetails(st: StaticWorld, task: Task): VNode {
+function taskDetails(st: StaticWorld, task: Task): VNode[] {
   const xs = task.requirements.map(b => Math.abs(b.x));
   const ys = task.requirements.map(b => Math.abs(b.y));
   const width = 2 * Math.max(...xs) + 1;
   const height = 2 * Math.max(...ys) + 1;
   const elementWidth = 318;
-  const elementHeight = elementWidth * height / width;
   const gridSize = Math.min(Math.floor(elementWidth / width), 50);
-  return h('canvas', {
+  const elementHeight = gridSize * height;
+  const render = function (vnode: VNode) {
+    const canvas = vnode.elm as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d')!;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.translate((elementWidth - gridSize) / 2, (elementHeight - gridSize) / 2);
+    ctx.beginPath();
+    ctx.rect(gridSize * 0.4, gridSize * 0.4, gridSize * 0.2, gridSize * 0.2);
+    ctx.fillStyle = 'red';
+    ctx.fill();
+    renderBlocks(ctx, st, task.requirements, gridSize);
+  };
+  return [h('canvas', {
     props: {
       width: elementWidth,
       height: elementHeight
     },
     hook: {
-      insert: function (canvas) {
-        const ctx = (canvas.elm as HTMLCanvasElement).getContext('2d')!;
-        ctx.translate((elementWidth - gridSize) / 2, (elementHeight - gridSize) / 2);
-        ctx.beginPath();
-        ctx.rect(gridSize * 0.4, gridSize * 0.4, gridSize * 0.2, gridSize * 0.2);
-        ctx.fillStyle = 'red';
-        ctx.fill();
-        renderBlocks(ctx, st, task.requirements, gridSize);
-      }
+      insert: render,
+      update: (_, vnode) => render(vnode)
     }
-  });
+  }), h('p', `${task.requirements.length} blocks`)];
 }
 
 function disconnected(_ctrl: Ctrl): VNode {
