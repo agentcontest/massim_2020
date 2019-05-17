@@ -45,16 +45,17 @@ function taskDetails(st: StaticWorld, task: Task): VNode {
   const width = 2 * Math.max(...xs) + 1;
   const height = 2 * Math.max(...ys) + 1;
   const elementWidth = 318;
-  const gridSize = Math.floor(elementWidth / width);
+  const elementHeight = elementWidth * height / width;
+  const gridSize = Math.min(Math.floor(elementWidth / width), 50);
   return h('canvas', {
     props: {
-      width: gridSize * width,
-      height: gridSize * height
+      width: elementWidth,
+      height: elementHeight
     },
     hook: {
       insert: function (canvas) {
         const ctx = (canvas.elm as HTMLCanvasElement).getContext('2d')!;
-        ctx.translate(gridSize * (width - 1) / 2, gridSize * (height - 1) / 2);
+        ctx.translate((elementWidth - gridSize) / 2, (elementHeight - gridSize) / 2);
         ctx.beginPath();
         ctx.rect(gridSize * 0.4, gridSize * 0.4, gridSize * 0.2, gridSize * 0.2);
         ctx.fillStyle = 'red';
