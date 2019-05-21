@@ -21,4 +21,9 @@ public class Dispenser extends Positionable {
         Position local = getPosition().toLocal(entityPosition);
         return new Thing(local.x, local.y, Thing.TYPE_DISPENSER, blockType);
     }
+
+    @Override
+    public String toString() {
+        return "dispenser(" + getPosition().x + "," + getPosition().y + "," + blockType + ")";
+    }
 }

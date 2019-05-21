@@ -467,11 +467,14 @@ class GameState {
         return b;
     }
 
-    private void createDispenser(Position xy, String blockType) {
-        if (!blockTypes.contains(blockType)) return;
+    public boolean createDispenser(Position xy, String blockType) {
+        if (!blockTypes.contains(blockType)) return false;
+        if (!grid.isFree(xy)) return false;
         Dispenser d = new Dispenser(xy, blockType);
         registerGameObject(d);
         dispensers.put(xy, d);
+        Log.log(Log.Level.NORMAL, "Created " + d);
+        return true;
     }
 
     private void registerGameObject(GameObject o) {
@@ -566,5 +569,15 @@ class GameState {
             result.put(t.getName(), teamResult);
         });
         return result;
+    }
+
+    public boolean teleport(String entityName, Position targetPos) {
+        Entity entity = getEntityByName(entityName);
+        if (entity == null || targetPos == null) return false;
+        if (grid.isFree(targetPos)) {
+            grid.moveWithoutAttachments(entity, targetPos);
+            return true;
+        }
+        return false;
     }
 }
