@@ -177,7 +177,7 @@ public class Simulation extends AbstractSimulation {
                     var px = getIntParam(partnerParams, 1);
                     var py = getIntParam(partnerParams, 2);
                     if (!partnerEntity.getLastAction().equals(CONNECT)
-                            || partnerEntity.getLastActionResult().equals(RESULT_F_RANDOM)
+                            || !partnerEntity.getLastActionResult().equals(RESULT_UNPROCESSED)
                             || !entity.getAgentName().equals(getStringParam(partnerParams, 0))) {
                         entity.setLastActionResult(RESULT_F_PARTNER);
                         continue;
