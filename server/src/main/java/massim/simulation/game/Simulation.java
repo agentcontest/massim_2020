@@ -151,10 +151,6 @@ public class Simulation extends AbstractSimulation {
                     continue;
 
                 case ROTATE:
-                    if (params.size() != 1) {
-                        entity.setLastActionResult(RESULT_F_PARAMETER);
-                        continue;
-                    }
                     direction = getStringParam(params, 0);
                     if (!Grid.ROTATION_DIRECTIONS.contains(direction)) {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
@@ -172,7 +168,12 @@ public class Simulation extends AbstractSimulation {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
-                    var partnerParams = actions.get(partnerEntityName).getParams();
+                    var partnerAction = actions.get(partnerEntityName);
+                    if (partnerAction == null) {
+                        entity.setLastActionResult(RESULT_F_PARTNER);
+                        continue;
+                    }
+                    var partnerParams = partnerAction.getParams();
                     var px = getIntParam(partnerParams, 1);
                     var py = getIntParam(partnerParams, 2);
                     if (!partnerEntity.getLastAction().equals(CONNECT)
@@ -211,10 +212,12 @@ public class Simulation extends AbstractSimulation {
     }
 
     private Integer getIntParam(List<String> params, int index) {
+        if (index >= params.size()) return null;
         return Util.tryParseInt(params.get(index));
     }
 
     private String getStringParam(List<String> params, int index) {
+        if (index >= params.size()) return null;
         try {
             return params.get(index);
         } catch (IndexOutOfBoundsException e) {
