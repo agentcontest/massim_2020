@@ -120,6 +120,11 @@ failed | One of the things attached to the agent cannot rotate to its target pos
 
 Two agents can use this action to connect things attached to them. They have to specify their partner and the block they want to connect. Both blocks are connected (i.e. attached to each other) if they are next to each other and the connection would not violate any other conditions.
 
+#### Example
+
+_agent1_ is on (3,3) and _agent2_ is on (3,7). _agent1_ has a block attached on (3,4) and one attached to that block on (3,5). _agent2_ has a block attached on (3,6). Both agents want to connect their attached blocks, namely those on (3,5) (of _agent1_) and (3,6) (attached to _agent2_).
+Then, _agent1_ has to perform `connect(agent2,0,2)`, while _agent2_ has to perform `connect(agent1,0,-1)` in the same step. If both actions succeed, the blocks will be connected and still attached to both agents.
+
 No | Parameter | Meaning
 --- | --- | ---
 0 | agent | The agent to cooperate with.
@@ -134,7 +139,9 @@ failed | The given positions are too far apart OR one agent is already attached 
 
 ### request
 
-Requests a new block from a dispenser.
+Requests a new block from a dispenser. The agent has to be in a cell adjacent to the dispenser and specify the direction to it.
+
+E.g. if an agent is on (3,3) and a dispenser is on (3,4), the agent can use `request(s)` to make a block appear on (3,4).
 
 No | Parameter | Meaning
 --- | --- | ---
