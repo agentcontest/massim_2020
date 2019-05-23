@@ -50,15 +50,15 @@ public class GameStateTest {
         assert state.teleport("A1", dispenserPos.moved("s", 2));
 
         // too far away -> fail
-        assert !state.handleRequestAction(a1, "n").equals(Actions.RESULT_SUCCESS);
+        assert state.handleRequestAction(a1, "n").equals(Actions.RESULT_F_TARGET);
         //move closer
         assert state.handleMoveAction(a1, "n").equals(Actions.RESULT_SUCCESS);
         // wrong param -> fail
-        assert !state.handleRequestAction(a1, "w").equals(Actions.RESULT_SUCCESS);
+        assert state.handleRequestAction(a1, "w").equals(Actions.RESULT_F_TARGET);
         // everything correct -> success
         assert state.handleRequestAction(a1, "n").equals(Actions.RESULT_SUCCESS);
         // repeat -> fail
-        assert !state.handleRequestAction(a1, "n").equals(Actions.RESULT_SUCCESS);
+        assert state.handleRequestAction(a1, "n").equals(Actions.RESULT_F_BLOCKED);
         // another try
         assert state.createDispenser(a1.getPosition().moved("e", 1), blockTypes.iterator().next());
         assert state.handleRequestAction(a1, "e").equals(Actions.RESULT_SUCCESS);
