@@ -37,9 +37,9 @@ public class ScenarioEntity extends EISEntity {
 
     @Override
     protected Collection<Percept> requestActionToIIL(RequestActionMessage message) {
-        Set<Percept> ret = new HashSet<>();
+        var ret = new HashSet<Percept>();
         if(!(message instanceof StepPercept)) return ret; // percept incompatible with entity
-        StepPercept percept = (StepPercept) message;
+        var percept = (StepPercept) message;
 
         ret.add(new Percept("actionID", new Numeral(percept.getId())));
         ret.add(new Percept("timestamp", new Numeral(percept.getTime())));
@@ -49,13 +49,16 @@ public class ScenarioEntity extends EISEntity {
 
         ret.add(new Percept("lastAction", new Identifier(percept.lastAction)));
         ret.add(new Percept("lastActionResult", new Identifier(percept.lastActionResult)));
+        var params = new ParameterList();
+        percept.lastActionParams.forEach(p -> params.add(new Identifier(p)));
+        ret.add(new Percept("lastActionParams", params));
         ret.add(new Percept("score", new Numeral(percept.score)));
 
         percept.things.forEach(thing -> ret.add(new Percept("thing",
                 new Numeral(thing.x), new Numeral(thing.y), new Identifier(thing.type), new Identifier(thing.details))));
 
         percept.taskInfo.forEach(task -> {
-            ParameterList tasks = new ParameterList();
+            var tasks = new ParameterList();
             task.requirements.forEach(req -> tasks.add(new Function("req", new Numeral(req.x), new Numeral(req.y),
                     new Identifier(req.type))));
             ret.add(new Percept("task", new Identifier(task.name), new Numeral(task.deadline), new Numeral(task.reward), tasks));

@@ -199,6 +199,8 @@ The following percepts might be included in a `REQUEST-ACTION` message. Most of 
   * type : Identifier - name of the last executed action
 * `lastActionResult(result)`
   * result : Identifier - result of the last executed action
+* `lastActionParams([p1, ...])`
+  * p1 : Identifier - first parameter of the last executed action
 * `score(n)`
   * n : Numeral - the team's current score
 * `thing(x, y, type, details)`

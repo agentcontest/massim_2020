@@ -225,6 +225,7 @@ Example (complete request-action message):
          "score": 0,
          "lastAction": "move",
          "lastActionResult": "success",
+         "lastActionParams": ["n"],
          "things": [
             {
                "x": 0,
@@ -284,6 +285,7 @@ Example (complete request-action message):
 * __score__: the current team score
 * __lastAction__: the last action submitted by the agent
 * __lastActionResult__: the result of that action
+* __lastActionParams__: the parameters of that action
 * __things__: things in the simulation visible to the agent
   * __x/y__: position of the thing _relative_ to the agent
   * __type__: the type of the thing (entity, block, dispenser, ...)

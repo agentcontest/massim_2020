@@ -302,7 +302,7 @@ class GameState {
                 }
             }
             result.put(entity.getAgentName(), new StepPercept(step, teams.get(entity.getTeamName()).getScore(),
-                    visibleThings, visibleTerrain, allTasks, entity.getLastAction(), entity.getLastActionResult()));
+                    visibleThings, visibleTerrain, allTasks, entity.getLastAction(), entity.getLastActionParams(), entity.getLastActionResult()));
         }
         return result;
     }

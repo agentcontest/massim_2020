@@ -7,10 +7,7 @@ import massim.protocol.data.Thing;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class StepPercept extends RequestActionMessage {
 
@@ -20,13 +17,15 @@ public class StepPercept extends RequestActionMessage {
     public long score;
     public String lastAction;
     public String lastActionResult;
+    public List<String> lastActionParams = new ArrayList<>();
 
     public StepPercept(JSONObject content) {
         super(content);
         parsePercept(content.getJSONObject("percept"));
     }
 
-    public StepPercept(int step, long score, Set<Thing> things, Map<String, Set<Position>> terrain, Set<TaskInfo> taskInfo, String action, String result) {
+    public StepPercept(int step, long score, Set<Thing> things, Map<String, Set<Position>> terrain,
+                       Set<TaskInfo> taskInfo, String action, List<String> lastActionParams, String result) {
         super(System.currentTimeMillis(), -1, -1, step); // id and deadline are updated later
         this.score = score;
         this.things.addAll(things);
@@ -34,14 +33,15 @@ public class StepPercept extends RequestActionMessage {
         this.lastAction = action;
         this.lastActionResult = result;
         this.terrain = terrain;
+        this.lastActionParams.addAll(lastActionParams);
     }
 
     @Override
     public JSONObject makePercept() {
-        JSONObject percept = new JSONObject();
-        JSONArray jsonThings = new JSONArray();
-        JSONArray jsonTasks = new JSONArray();
-        JSONObject jsonTerrain = new JSONObject();
+        var percept = new JSONObject();
+        var jsonThings = new JSONArray();
+        var jsonTasks = new JSONArray();
+        var jsonTerrain = new JSONObject();
         percept.put("score", score);
         percept.put("things", jsonThings);
         percept.put("tasks", jsonTasks);
@@ -55,6 +55,9 @@ public class StepPercept extends RequestActionMessage {
         });
         percept.put("lastAction", lastAction);
         percept.put("lastActionResult", lastActionResult);
+        var params = new JSONArray();
+        lastActionParams.forEach(params::put);
+        percept.put("lastActionParams", params);
         return percept;
     }
 
@@ -81,5 +84,7 @@ public class StepPercept extends RequestActionMessage {
             }
             terrain.put(t, positions);
         });
+        var params = percept.getJSONArray("lastActionParams");
+        for (int i = 0; i < params.length(); i++) lastActionParams.add(params.getString(i));
     }
 }
