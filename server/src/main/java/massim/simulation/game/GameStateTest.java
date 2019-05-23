@@ -58,6 +58,9 @@ public class GameStateTest {
         // everything correct -> success
         assert state.handleRequestAction(a1, "n").equals(Actions.RESULT_SUCCESS);
         // repeat -> fail
-        assert !state.handleRequestAction(a1, "s").equals(Actions.RESULT_SUCCESS);
+        assert !state.handleRequestAction(a1, "n").equals(Actions.RESULT_SUCCESS);
+        // another try
+        assert state.createDispenser(a1.getPosition().moved("e", 1), blockTypes.iterator().next());
+        assert state.handleRequestAction(a1, "e").equals(Actions.RESULT_SUCCESS);
     }
 }

@@ -26,4 +26,5 @@ public abstract class Actions {
     public final static String RESULT_F_PATH = "failed_path";
     public final static String RESULT_F_PARTNER = "failed_partner";
     public final static String RESULT_F_TARGET = "failed_target";
+    public static final String RESULT_F_BLOCKED = "failed_blocked";
 }

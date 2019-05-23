@@ -381,11 +381,10 @@ class GameState {
     String handleRequestAction(Entity entity, String direction) {
         var requestPosition = entity.getPosition().moved(direction, 1);
         var dispenser = dispensers.get(requestPosition);
-        if (dispenser != null && grid.isFree(requestPosition)){
-            createBlock(requestPosition, dispenser.getBlockType());
-            return Actions.RESULT_SUCCESS;
-        }
-        return Actions.RESULT_F;
+        if (dispenser == null) return Actions.RESULT_F_TARGET;
+        if (!grid.isFree(requestPosition)) return Actions.RESULT_F_BLOCKED;
+        createBlock(requestPosition, dispenser.getBlockType());
+        return Actions.RESULT_SUCCESS;
     }
 
     String handleSubmitAction(Entity e, String taskName) {
@@ -462,7 +461,6 @@ class GameState {
     private Block createBlock(Position xy, String blockType) {
         if (!blockTypes.contains(blockType)) return null;
         Block b = grid.createBlock(xy, blockType);
-        if (b == null) return null;
         registerGameObject(b);
         return b;
     }
@@ -478,6 +476,7 @@ class GameState {
     }
 
     private void registerGameObject(GameObject o) {
+        if (o == null) return;
         this.gameObjects.put(o.getID(), o);
     }
 

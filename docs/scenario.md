@@ -150,7 +150,8 @@ No | Parameter | Meaning
 Failure Code | Reason
 --- | ---
 failed_parameter | Parameter is not a direction.
-failed | There is no dispenser in the specific position OR the position is currently blocked by another agent or thing.
+failed_target | No dispenser was found in the specific position.
+failed_blocked | The dispenser's position is currently blocked by another agent or thing.
 
 ### submit
 
