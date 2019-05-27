@@ -132,9 +132,6 @@ export function renderBlocks(ctx: CanvasRenderingContext2D, st: StaticWorld, blo
 }
 
 function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: DynamicWorld) {
-  // blocks
-  renderBlocks(ctx, st, dynamic.blocks, GRID);
-
   // dispensers
   for (let dispenser of dynamic.dispensers) {
     ctx.lineWidth = GRID / 20;
@@ -153,6 +150,9 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
     ctx.fillStyle = 'white';
     ctx.fillText(`[${dispenser.type}]`, (dispenser.x + 0.5) * GRID, (dispenser.y + 0.5) * GRID);
   }
+
+  // blocks
+  renderBlocks(ctx, st, dynamic.blocks, GRID);
 
   // agents
   const teams = Object.keys(st.teams);
