@@ -93,6 +93,31 @@ function drawBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light:
   ctx.stroke();
 }
 
+function drawRotatedBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light: string, dark: string) {
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.moveTo(r.x1, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y1);
+  ctx.lineTo(r.x2, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y2);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(r.x1, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y1);
+  ctx.lineTo(r.x2, (r.y1 + r.y2) / 2);
+  ctx.strokeStyle = light;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(r.x2, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y2);
+  ctx.lineTo(r.x1, (r.y1 + r.y2) / 2);
+  ctx.strokeStyle = dark;
+  ctx.stroke();
+}
+
 export function renderBlocks(ctx: CanvasRenderingContext2D, st: StaticWorld, blocks: Block[], blockSize: number) {
   for (let block of blocks) {
     ctx.lineWidth = blockSize / 20;
@@ -147,10 +172,17 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
     ctx.strokeStyle = 'black';
     ctx.stroke();
 
-    ctx.lineWidth = GRID / 20;
     const color = styles.teams[teams.indexOf(agent.team)];
-    const r = rect(ctx, GRID, agent.x, agent.y, GRID / 8);
-    drawBlock(ctx, r, color, 'white', 'black');
+    if (teams.indexOf(agent.team) == 0) {
+      ctx.lineWidth = GRID / 20;
+      const margin = GRID * (1 - 15 / 16 / Math.sqrt(2)) / 2;
+      const r = rect(ctx, GRID, agent.x, agent.y, margin);
+      drawBlock(ctx, r, color, 'white', 'black');
+    } else {
+      ctx.lineWidth = GRID / 25;
+      const r = rect(ctx, GRID, agent.x, agent.y, GRID / 16);
+      drawRotatedBlock(ctx, r, color, 'white', 'black');
+    }
 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
