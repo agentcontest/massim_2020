@@ -8,15 +8,15 @@
   "notifications": false,
   "queued": false,
   "entities": [
-    {"name": "connectionA1", "username": "agentA1", "password": "1", "print_iilang": false, "print_json": false},
-    {"name": "connectionA2", "username": "agentA2", "password": "1", "print_iilang": false, "print_json": false},
-    {"name": "connectionA3", "username": "agentA3", "password": "1", "print_iilang": false, "print_json": false},
-    {"name": "connectionA4", "username": "agentA4", "password": "1", "print_iilang": false, "print_json": false},
-    {"name": "connectionA5", "username": "agentA5", "password": "1", "print_iilang": false, "print_json": false},
-    {"name": "connectionA6", "username": "agentA6", "password": "1", "print_iilang": false, "print_json": false},
-    {"name": "connectionA7", "username": "agentA7", "password": "1", "print_iilang": false, "print_json": false},
-    {"name": "connectionA8", "username": "agentA8", "password": "1", "print_iilang": false, "print_json": false},
-    {"name": "connectionA9", "username": "agentA9", "password": "1", "print_iilang": false, "print_json": false},
-    {"name": "connectionA10", "username": "agentA10", "password": "1", "print_iilang": false, "print_json": false}
+    {"name": "connectionA1", "username": "agentA1", "password": "1", "print-iilang": false, "print-json": false},
+    {"name": "connectionA2", "username": "agentA2", "password": "1", "print-iilang": false, "print-json": false},
+    {"name": "connectionA3", "username": "agentA3", "password": "1", "print-iilang": false, "print-json": false},
+    {"name": "connectionA4", "username": "agentA4", "password": "1", "print-iilang": false, "print-json": false},
+    {"name": "connectionA5", "username": "agentA5", "password": "1", "print-iilang": false, "print-json": false},
+    {"name": "connectionA6", "username": "agentA6", "password": "1", "print-iilang": false, "print-json": false},
+    {"name": "connectionA7", "username": "agentA7", "password": "1", "print-iilang": false, "print-json": false},
+    {"name": "connectionA8", "username": "agentA8", "password": "1", "print-iilang": false, "print-json": false},
+    {"name": "connectionA9", "username": "agentA9", "password": "1", "print-iilang": false, "print-json": false},
+    {"name": "connectionA10", "username": "agentA10", "password": "1", "print-iilang": false, "print-json": false}
   ]
 }
