@@ -182,6 +182,8 @@ The following percepts might be included in a `SIM-START` message:
   * s : Identifier - name of the agent's team
 * `steps(n)`
   * n : Numeral - number of steps
+* `vision(n)`
+  * n : Numeral - initial vision of the agent
 
 #### REQUEST-ACTION percepts
 

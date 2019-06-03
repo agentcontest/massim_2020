@@ -31,6 +31,7 @@ public class ScenarioEntity extends EISEntity {
         ret.add(new Percept("name", new Identifier(simStart.agentName)));
         ret.add(new Percept("team", new Identifier(simStart.teamName)));
         ret.add(new Percept("steps", new Numeral(simStart.steps)));
+        ret.add(new Percept("vision", new Numeral(simStart.vision)));
 
         return ret;
     }

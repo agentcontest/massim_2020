@@ -259,7 +259,7 @@ class GameState {
     Map<String, SimStartMessage> getInitialPercepts(int steps) {
         Map<String, SimStartMessage> result = new HashMap<>();
         for (Entity e: entityToAgent.keySet()) {
-            result.put(e.getAgentName(), new InitialPercept(e.getAgentName(), e.getTeamName(), steps));
+            result.put(e.getAgentName(), new InitialPercept(e.getAgentName(), e.getTeamName(), steps, e.getVision()));
         }
         return result;
     }

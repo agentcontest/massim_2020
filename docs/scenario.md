@@ -195,7 +195,8 @@ Complete Example (with bogus values):
     "percept": {
       "name": "agentA1",
       "team": "A",
-      "steps": 700
+      "steps": 700,
+      "vision": 5
     }
   }
 }
