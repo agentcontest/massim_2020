@@ -290,7 +290,9 @@ Example (complete request-action message):
 * __things__: things in the simulation visible to the agent
   * __x/y__: position of the thing _relative_ to the agent
   * __type__: the type of the thing (entity, block, dispenser, ...)
-  * __details__: details about the thing (the block-type for blocks and dispensers)
+  * __details__: details about the thing
+    * for blocks and dispensers: the block type
+    * for entities: the team
 * __terrain__: the terrain around the agent (if no value is given for a visible cell, the terrain is just *empty*)
 * __task__: a task taht is currently active
   * __name__: the task's identifier

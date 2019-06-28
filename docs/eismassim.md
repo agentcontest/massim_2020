@@ -208,7 +208,7 @@ The following percepts might be included in a `REQUEST-ACTION` message. Most of 
 * `thing(x, y, type, details)`
   * x/y : Numeral - relative position of a thing
   * type : Identifier - the type of the thing
-  * details : Identifier - possibly more information about the thing
+  * details : Identifier - possibly more information about the thing (see scenario doc)
 * `task(name, deadline, reward, [req(x,y,type),...])`
   * name : Identifier
   * deadline : Numeral - the last step the task can be completed
