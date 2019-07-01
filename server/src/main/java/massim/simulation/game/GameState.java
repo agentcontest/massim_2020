@@ -340,7 +340,7 @@ class GameState {
         Position target = entity.getPosition().moved(direction, 1);
         if (target == null) return Actions.RESULT_F_TARGET;
         Attachable a = getUniqueAttachable(target);
-        if (a == null) return Actions.RESULT_F;
+        if (a == null) return Actions.RESULT_F_TARGET;
         if(!attachedToOpponent(a, entity) && grid.attach(entity, a)) {
             return Actions.RESULT_SUCCESS;
         }
