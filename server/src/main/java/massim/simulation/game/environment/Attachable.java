@@ -2,6 +2,7 @@ package massim.simulation.game.environment;
 
 import massim.protocol.data.Position;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,7 +29,7 @@ public abstract class Attachable extends Positionable {
     }
 
     void detachAll() {
-        attachments.forEach(this::detach);
+        new ArrayList<>(attachments).forEach(this::detach);
     }
 
 

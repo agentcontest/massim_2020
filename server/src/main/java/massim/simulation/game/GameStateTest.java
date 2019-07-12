@@ -3,9 +3,11 @@ package massim.simulation.game;
 import massim.config.TeamConfig;
 import massim.protocol.data.Position;
 import massim.protocol.messages.scenario.Actions;
+import massim.simulation.game.environment.Terrain;
 import massim.util.RNG;
 import org.json.JSONObject;
 
+import java.util.Map;
 import java.util.Set;
 
 public class GameStateTest {
@@ -62,5 +64,19 @@ public class GameStateTest {
         // another try
         assert state.createDispenser(a1.getPosition().moved("e", 1), blockTypes.iterator().next());
         assert state.handleRequestAction(a1, "e").equals(Actions.RESULT_SUCCESS);
+    }
+
+    @org.junit.Test
+    public void handleSubmitAction() {
+        state.setTerrain(Position.of(15,15), Terrain.GOAL);
+        assert(state.teleport("A1", Position.of(15,15)));
+        String blockType = state.getBlockTypes().iterator().next();
+        assert(state.createBlock(Position.of(15,16), blockType) != null);
+        assert(state.createBlock(Position.of(14,16), blockType) != null);
+        assert(state.createTask("testTask1", 10,
+                Map.of(Position.of(0, 1), blockType, Position.of(-1, 1), blockType)) != null);
+        assert(state.attach(Position.of(15,15), Position.of(15,16)));
+        assert(state.attach(Position.of(15,16), Position.of(14,16)));
+        assert(state.handleSubmitAction(state.getEntityByName("A1"), "testTask1").equals(Actions.RESULT_SUCCESS));
     }
 }

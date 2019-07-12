@@ -458,7 +458,7 @@ class GameState {
         return e;
     }
 
-    private Block createBlock(Position xy, String blockType) {
+    Block createBlock(Position xy, String blockType) {
         if (!blockTypes.contains(blockType)) return null;
         Block b = grid.createBlock(xy, blockType);
         registerGameObject(b);
@@ -570,7 +570,7 @@ class GameState {
         return result;
     }
 
-    public boolean teleport(String entityName, Position targetPos) {
+    boolean teleport(String entityName, Position targetPos) {
         Entity entity = getEntityByName(entityName);
         if (entity == null || targetPos == null) return false;
         if (grid.isFree(targetPos)) {
@@ -578,5 +578,16 @@ class GameState {
             return true;
         }
         return false;
+    }
+
+    void setTerrain(Position p, Terrain terrain) {
+        grid.setTerrain(p.x, p.y, terrain);
+    }
+
+    boolean attach(Position p1, Position p2) {
+        Attachable a1 = getUniqueAttachable(p1);
+        Attachable a2 = getUniqueAttachable(p2);
+        if (a1 == null || a2 == null) return false;
+        return grid.attach(a1, a2);
     }
 }
