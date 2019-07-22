@@ -1,10 +1,10 @@
-package massim.simulation.game;
+package massim.game;
 
+import massim.game.environment.Attachable;
 import massim.protocol.data.Position;
 import massim.protocol.data.Thing;
 import massim.protocol.messages.ActionMessage;
 import massim.protocol.messages.scenario.Actions;
-import massim.simulation.game.environment.Attachable;
 
 import java.util.Collections;
 import java.util.List;

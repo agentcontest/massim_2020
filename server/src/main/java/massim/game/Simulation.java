@@ -1,4 +1,4 @@
-package massim.simulation.game;
+package massim.game;
 
 import massim.config.TeamConfig;
 import massim.protocol.data.Position;
@@ -6,8 +6,7 @@ import massim.protocol.messages.ActionMessage;
 import massim.protocol.messages.RequestActionMessage;
 import massim.protocol.messages.SimEndMessage;
 import massim.protocol.messages.SimStartMessage;
-import massim.simulation.AbstractSimulation;
-import massim.simulation.game.environment.Grid;
+import massim.game.environment.Grid;
 import massim.util.RNG;
 import massim.util.Util;
 import org.json.JSONArray;
@@ -20,12 +19,11 @@ import java.util.stream.Collectors;
 
 import static massim.protocol.messages.scenario.Actions.*;
 
-public class Simulation extends AbstractSimulation {
+public class Simulation {
 
     private String name;
     private GameState state;
 
-    @Override
     public Map<String, SimStartMessage> init(int steps, JSONObject config, Set<TeamConfig> matchTeams) {
         this.state = new GameState(config, matchTeams);
         this.name = System.currentTimeMillis() + "_" + matchTeams.stream()
@@ -34,37 +32,30 @@ public class Simulation extends AbstractSimulation {
         return state.getInitialPercepts(steps);
     }
 
-    @Override
     public Map<String, RequestActionMessage> preStep(int step) {
         return state.prepareStep(step);
     }
 
-    @Override
     public void step(int stepNo, Map<String, ActionMessage> actionMap) {
         handleActions(actionMap);
     }
 
-    @Override
     public Map<String, SimEndMessage> finish() {
         return state.getFinalPercepts();
     }
 
-    @Override
     public JSONObject getResult() {
         return state.getResult();
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public JSONObject getSnapshot() {
         return state.takeSnapshot();
     }
 
-    @Override
     public JSONObject getStaticData() {
         var cells = new JSONArray();
         for (int y = 0; y < this.state.getGrid().getDimY(); y++) {
@@ -99,7 +90,6 @@ public class Simulation extends AbstractSimulation {
         return world;
     }
 
-    @Override
     public void handleCommand(String[] command) {}
 
     /**

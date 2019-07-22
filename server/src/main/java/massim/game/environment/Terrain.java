@@ -1,4 +1,4 @@
-package massim.simulation.game.environment;
+package massim.game.environment;
 
 public enum Terrain {
     EMPTY(0, "empty"),

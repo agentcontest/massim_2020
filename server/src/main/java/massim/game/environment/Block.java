@@ -1,4 +1,4 @@
-package massim.simulation.game.environment;
+package massim.game.environment;
 
 import massim.protocol.data.Position;
 import massim.protocol.data.Thing;

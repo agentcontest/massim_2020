@@ -1,6 +1,7 @@
-package massim.simulation.game;
+package massim.game;
 
 import massim.config.TeamConfig;
+import massim.game.environment.*;
 import massim.protocol.data.Position;
 import massim.protocol.data.TaskInfo;
 import massim.protocol.data.Thing;
@@ -10,7 +11,6 @@ import massim.protocol.messages.SimStartMessage;
 import massim.protocol.messages.scenario.Actions;
 import massim.protocol.messages.scenario.InitialPercept;
 import massim.protocol.messages.scenario.StepPercept;
-import massim.simulation.game.environment.*;
 import massim.util.Log;
 import massim.util.RNG;
 import massim.util.Util;

@@ -1,9 +1,9 @@
-package massim.simulation.game;
+package massim.game;
 
 import massim.config.TeamConfig;
+import massim.game.environment.Terrain;
 import massim.protocol.data.Position;
 import massim.protocol.messages.scenario.Actions;
-import massim.simulation.game.environment.Terrain;
 import massim.util.RNG;
 import org.json.JSONObject;
 

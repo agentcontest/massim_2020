@@ -3,8 +3,7 @@ package massim;
 import massim.config.ServerConfig;
 import massim.config.TeamConfig;
 import massim.monitor.Monitor;
-import massim.simulation.AbstractSimulation;
-import massim.simulation.game.Simulation;
+import massim.game.Simulation;
 import massim.util.IOUtil;
 import massim.util.InputManager;
 import massim.util.Log;
@@ -285,7 +284,7 @@ public class Server {
             Log.log(Log.Level.NORMAL, "Configuring random seed: " + randomSeed);
             RNG.initialize(randomSeed);
             // create and run simulation instance with the given teams
-            AbstractSimulation sim = new Simulation();
+            Simulation sim = new Simulation();
 
             int steps = simConfig.getInt("steps");
 
@@ -318,7 +317,7 @@ public class Server {
      * Takes and processes all inputs from the input manager
      * @param sim the simulation that may receive some of the commands
      */
-    private void handleInputs(AbstractSimulation sim) {
+    private void handleInputs(Simulation sim) {
         boolean paused = false;
         // read inputs if inputs are available or execution is paused
         while(inputManager.hasInput() || paused){
