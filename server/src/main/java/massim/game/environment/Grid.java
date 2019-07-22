@@ -102,8 +102,8 @@ public class Grid {
         if (a1 == null || a2 == null) return false;
         if (a1.getPosition().distanceTo(a2.getPosition()) != 1) return false;
 
-        var attachments = getAllAttached(a1);
-        attachments.addAll(getAllAttached(a2));
+        var attachments = a1.collectAllAttachments();
+        attachments.addAll(a2.collectAllAttachments());
         if (attachments.size() > attachLimit) return false;
 
         a1.attach(a2);
@@ -132,7 +132,7 @@ public class Grid {
      * @return whether the movement succeeded
      */
     public boolean moveWithAttached(Attachable anchor, String direction, int distance) {
-        var attachables = getAllAttached(anchor);
+        var attachables = anchor.collectAllAttachments();
         var newPositions = canMove(attachables, direction, distance);
         if (newPositions == null) return false;
         move(attachables, newPositions);
@@ -155,7 +155,7 @@ public class Grid {
      * @return a map from the element and all attachments to their new positions after rotation or null if anything is blocked
      */
     private Map<Attachable, Position> canRotate(Attachable anchor, boolean clockwise) {
-        var attachments = getAllAttached(anchor);
+        var attachments = anchor.collectAllAttachments();
         if(attachments.stream().anyMatch(a -> a != anchor && a instanceof Entity)) return null;
         var attachableIDs = attachments.stream().map(GameObject::getID).collect(Collectors.toSet());
         var newPositions = new HashMap<Attachable, Position>();
@@ -182,25 +182,6 @@ public class Grid {
             newPositions.put(a, a.getPosition().moved(direction, distance));
         }
         return newPositions;
-    }
-
-    public Set<Attachable> getAllAttached(Attachable anchor) {
-        var attachables = new HashSet<Attachable>();
-        attachables.add(anchor);
-        Set<Attachable> newAttachables = new HashSet<>(attachables);
-        while (!newAttachables.isEmpty()) {
-            Set<Attachable> tempAttachables = new HashSet<>();
-            for (Attachable a : newAttachables) {
-                for (Attachable a2 : a.getAttachments()) {
-                    if (!attachables.contains(a2)) {
-                        attachables.add(a2);
-                        tempAttachables.add(a2);
-                    }
-                }
-            }
-            newAttachables = tempAttachables;
-        }
-        return attachables;
     }
 
     public Position findRandomFreePosition() {

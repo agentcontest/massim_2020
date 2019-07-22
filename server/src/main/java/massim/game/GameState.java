@@ -286,23 +286,29 @@ class GameState {
             Position pos = entity.getPosition();
             Set<Thing> visibleThings = new HashSet<>();
             Map<String, Set<Position>> visibleTerrain = new HashMap<>();
+            Set<Position> attachedThings = new HashSet<>();
             for (int dy = -vision; dy <= vision ; dy++) {
                 int y = pos.y + dy;
                 int visionLeft = vision - Math.abs(dy);
                 for (int x = pos.x - visionLeft ; x <= pos.x + visionLeft; x++) {
                     Position currentPos = Position.of(x, y);
-                    getGameObjects(currentPos).forEach(go -> visibleThings.add(go.toPercept(entity.getPosition())));
+                    getGameObjects(currentPos).forEach(go -> {
+                        visibleThings.add(go.toPercept(pos));
+                        if (go instanceof Attachable && ((Attachable)go).isAttachedToAnotherEntity()){
+                            attachedThings.add(((Attachable) go).getPosition().toLocal(pos));
+                        }
+                    });
                     Dispenser d = dispensers.get(currentPos);
-                    if (d != null) visibleThings.add(d.toPercept(entity.getPosition()));
+                    if (d != null) visibleThings.add(d.toPercept(pos));
                     Terrain terrain = grid.getTerrain(currentPos);
                     if (terrain != Terrain.EMPTY) {
                         visibleTerrain.computeIfAbsent(terrain.name,
-                                t -> new HashSet<>()).add(currentPos.toLocal(entity.getPosition()));
+                                t -> new HashSet<>()).add(currentPos.toLocal(pos));
                     }
                 }
             }
             result.put(entity.getAgentName(), new StepPercept(step, teams.get(entity.getTeamName()).getScore(),
-                    visibleThings, visibleTerrain, allTasks, entity.getLastAction(), entity.getLastActionParams(), entity.getLastActionResult()));
+                    visibleThings, visibleTerrain, allTasks, entity.getLastAction(), entity.getLastActionParams(), entity.getLastActionResult(), attachedThings));
         }
         return result;
     }
@@ -369,12 +375,12 @@ class GameState {
 
         if(!(block1 instanceof Block) || !(block2 instanceof Block)) return Actions.RESULT_F_TARGET;
 
-        Set<Attachable> attachables = grid.getAllAttached(entity);
+        Set<Attachable> attachables = entity.collectAllAttachments();
         if (attachables.contains(partnerEntity)) return Actions.RESULT_F;
         if (!attachables.contains(block1)) return Actions.RESULT_F_TARGET;
         if (attachables.contains(block2)) return Actions.RESULT_F_TARGET;
 
-        Set<Attachable> partnerAttachables = grid.getAllAttached(partnerEntity);
+        Set<Attachable> partnerAttachables = partnerEntity.collectAllAttachments();
         if (!partnerAttachables.contains(block2)) return Actions.RESULT_F_TARGET;
         if (partnerAttachables.contains(block1)) return Actions.RESULT_F_TARGET;
 
@@ -398,7 +404,7 @@ class GameState {
         if (task == null || task.isCompleted()) return Actions.RESULT_F_TARGET;
         Position ePos = e.getPosition();
         if (grid.getTerrain(ePos) != Terrain.GOAL) return Actions.RESULT_F;
-        Set<Attachable> attachedBlocks = grid.getAllAttached(e);
+        Set<Attachable> attachedBlocks = e.collectAllAttachments();
         for (Map.Entry<Position, String> entry : task.getRequirements().entrySet()) {
             Position pos = entry.getKey();
             String reqType = entry.getValue();
@@ -504,7 +510,7 @@ class GameState {
     }
 
     private boolean attachedToOpponent(Attachable a, Entity entity) {
-        return grid.getAllAttached(a).stream().anyMatch(other -> other instanceof Entity && ofDifferentTeams((Entity) other, entity));
+        return a.collectAllAttachments().stream().anyMatch(other -> other instanceof Entity && ofDifferentTeams((Entity) other, entity));
     }
 
     private boolean ofDifferentTeams(Entity e1, Entity e2) {

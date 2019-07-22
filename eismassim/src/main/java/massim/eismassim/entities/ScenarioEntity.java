@@ -68,6 +68,9 @@ public class ScenarioEntity extends EISEntity {
         percept.terrain.forEach((terrain, positions) -> positions.forEach(position ->
                         ret.add(new Percept(terrain, new Numeral(position.x), new Numeral(position.y)))));
 
+        percept.attachedThings.forEach(pos -> ret.add(
+                new Percept("attached", new Numeral(pos.x), new Numeral(pos.y))));
+
         return ret;
     }
 

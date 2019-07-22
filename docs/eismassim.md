@@ -219,6 +219,8 @@ The following percepts might be included in a `REQUEST-ACTION` message. Most of 
 * `<terrainType>(x, y)`
   * `<terrainType>` is one of the possible terrains (`obstacle`, `goal`, ...)
   * x/y : Numeral - the relative position of the terrain
+* `attached(x, y)`
+  * x/y : Numeral - relative position of a thing that is attached to some entity
 
 #### SIM-END percepts
 

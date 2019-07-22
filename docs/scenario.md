@@ -277,7 +277,8 @@ Example (complete request-action message):
                   }
                ]
             },
-         ]
+         ],
+         "attached": [[2,-1]]
       }
    }
 }
@@ -302,6 +303,7 @@ Example (complete request-action message):
     * __x/y__: the relative position of the required block
     * __type__: the type of the required block
     * __details__: currently not used
+* __attached__: an array of position arrays - each position represents a thing that is (directly or indirectly) attached to an entity
 
 ## Configuration
 

@@ -1,5 +1,6 @@
 package massim.game.environment;
 
+import massim.game.Entity;
 import massim.protocol.data.Position;
 
 import java.util.ArrayList;
@@ -39,5 +40,28 @@ public abstract class Attachable extends Positionable {
 
     private void requestDetachment(Attachable requester) {
         attachments.remove(requester);
+    }
+
+    public Set<Attachable> collectAllAttachments() {
+        var attachables = new HashSet<Attachable>();
+        attachables.add(this);
+        Set<Attachable> newAttachables = new HashSet<>(attachables);
+        while (!newAttachables.isEmpty()) {
+            Set<Attachable> tempAttachables = new HashSet<>();
+            for (Attachable a : newAttachables) {
+                for (Attachable a2 : a.getAttachments()) {
+                    if (!attachables.contains(a2)) {
+                        attachables.add(a2);
+                        tempAttachables.add(a2);
+                    }
+                }
+            }
+            newAttachables = tempAttachables;
+        }
+        return attachables;
+    }
+
+    public boolean isAttachedToAnotherEntity() {
+        return collectAllAttachments().stream().anyMatch(a -> a instanceof Entity && a != this);
     }
 }

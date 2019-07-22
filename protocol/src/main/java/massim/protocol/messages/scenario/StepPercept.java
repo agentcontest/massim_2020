@@ -18,6 +18,7 @@ public class StepPercept extends RequestActionMessage {
     public String lastAction;
     public String lastActionResult;
     public List<String> lastActionParams = new ArrayList<>();
+    public Set<Position> attachedThings = new HashSet<>();
 
     public StepPercept(JSONObject content) {
         super(content);
@@ -25,7 +26,8 @@ public class StepPercept extends RequestActionMessage {
     }
 
     public StepPercept(int step, long score, Set<Thing> things, Map<String, Set<Position>> terrain,
-                       Set<TaskInfo> taskInfo, String action, List<String> lastActionParams, String result) {
+                       Set<TaskInfo> taskInfo, String action, List<String> lastActionParams, String result,
+                       Set<Position> attachedThings) {
         super(System.currentTimeMillis(), -1, -1, step); // id and deadline are updated later
         this.score = score;
         this.things.addAll(things);
@@ -34,6 +36,7 @@ public class StepPercept extends RequestActionMessage {
         this.lastActionResult = result;
         this.terrain = terrain;
         this.lastActionParams.addAll(lastActionParams);
+        this.attachedThings = attachedThings;
     }
 
     @Override
@@ -58,6 +61,14 @@ public class StepPercept extends RequestActionMessage {
         var params = new JSONArray();
         lastActionParams.forEach(params::put);
         percept.put("lastActionParams", params);
+        JSONArray attached = new JSONArray();
+        attachedThings.forEach(a -> {
+            JSONArray pos = new JSONArray();
+            pos.put(a.x);
+            pos.put(a.y);
+            attached.put(pos);
+        });
+        percept.put("attached", attached);
         return percept;
     }
 
@@ -86,5 +97,10 @@ public class StepPercept extends RequestActionMessage {
         });
         var params = percept.getJSONArray("lastActionParams");
         for (int i = 0; i < params.length(); i++) lastActionParams.add(params.getString(i));
+        JSONArray jsonAttached = percept.getJSONArray("attached");
+        for (int i = 0; i < jsonAttached.length(); i++) {
+            JSONArray pos = jsonAttached.getJSONArray(i);
+            attachedThings.add(Position.of(pos.getInt(0), pos.getInt(1)));
+        }
     }
 }
