@@ -720,7 +720,7 @@ class GameState {
             for (var dx = -radius; dx <= radius; dx++) {
                 var x = center.x + dx;
                 var dy = radius - dx;
-                for (var y = center.y - dy; y <= center.y + dy; dy++) {
+                for (var y = center.y - dy; y <= center.y + dy; y++) {
                     this.add(Position.of(x, y));
                 }
             }
