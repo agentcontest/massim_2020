@@ -251,6 +251,7 @@ public class Grid {
     }
 
     public void deleteMarkers() {
+        markers.forEach(this::removeThing);
         markers.clear();
     }
 
