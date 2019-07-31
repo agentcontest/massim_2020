@@ -13,23 +13,33 @@
       "randomSeed" : 17,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
+      "clearSteps" : 3,
+      "clearEnergyCost" : 50,
+      "disableDuration" : 4,
+      "maxEnergy" : 300,
+      "attachLimit" : 10,
+
       "grid" : {
         "height" : 40,
         "width" : 40,
         "file" : "conf/maps/test40x40.bmp"
       },
-      "attachLimit" : 10,
+
       "blockTypes" : [3, 3],
       "dispensers" : [2, 3],
+
       "tasks" : {
         "size" : [2, 4],
         "duration" : [100, 200],
         "probability" : 0.05
       },
-      "clearSteps" : 3,
-      "clearEnergyCost" : 50,
-      "disableDuration" : 4,
-      "maxEnergy" : 300
+
+      "events" : {
+        "chance" : 10,
+        "radius" : [3, 8],
+        "warning" : 5,
+        "create" : [5, 10]
+      }
     }
   ],
 

@@ -203,6 +203,16 @@ public class Grid {
         return Position.of(x, y);
     }
 
+    public Position findRandomFreePosition(Position center, int maxDistance) {
+        int x = center.x;
+        int y = center.y;
+        int dx = RNG.nextInt(maxDistance + 1);
+        int dy = maxDistance - dx;
+        x += RNG.nextDouble() < .5? dx : -dx;
+        y += RNG.nextDouble() < .5? dy : -dy;
+        return Position.of(x, y);
+    }
+
     /**
      * @return true if the cell is in the grid and there is no other collidable and the terrain is not an obstacle.
      */
@@ -242,5 +252,9 @@ public class Grid {
 
     public void deleteMarkers() {
         markers.clear();
+    }
+
+    public Position getRandomPosition() {
+        return Position.of(RNG.nextInt(dimX), RNG.nextInt(dimY));
     }
 }

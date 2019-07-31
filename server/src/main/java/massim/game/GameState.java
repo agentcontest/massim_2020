@@ -43,6 +43,7 @@ class GameState {
     private Map<Position, Dispenser> dispensers = new HashMap<>();
     private Map<String, Task> tasks = new HashMap<>();
     private Set<String> blockTypes = new TreeSet<>();
+    private Set<ClearEvent> clearEvents = new HashSet<>();
 
     // config parameters
     private int randomFail;
@@ -52,6 +53,12 @@ class GameState {
     private int taskSizeMin;
     private int taskSizeMax;
     private int clearSteps;
+    private int eventChance;
+    private int eventRadiusMin;
+    private int eventRadiusMax;
+    private int eventWarning;
+    private int eventCreateMin;
+    private int eventCreateMax;
 
     GameState(JSONObject config, Set<TeamConfig> matchTeams) {
         // parse simulation config
@@ -89,6 +96,16 @@ class GameState {
         taskSizeMax = taskSizeBounds.getInt(1);
         pNewTask = taskConfig.getDouble("probability");
         Log.log(Log.Level.NORMAL, "config.tasks.probability: " + pNewTask);
+
+        var eventConfig = config.getJSONObject("events");
+        eventChance = eventConfig.getInt("chance");
+        var eventRadius = eventConfig.getJSONArray("radius");
+        eventRadiusMin = eventRadius.getInt(0);
+        eventRadiusMax = eventRadius.getInt(1);
+        eventWarning = eventConfig.getInt("warning");
+        var eventCreate = eventConfig.getJSONArray("create");
+        eventCreateMin = eventCreate.getInt(0);
+        eventCreateMax = eventCreate.getInt(1);
 
         // create teams
         matchTeams.forEach(team -> teams.put(team.getName(), new Team(team.getName())));
@@ -279,7 +296,38 @@ class GameState {
         //handle entities
         agentToEntity.values().forEach(Entity::preStep);
 
+        //handle (map) events
+        if (RNG.nextInt(100) < eventChance) {
+            clearEvents.add(new ClearEvent(grid.getRandomPosition(), step + eventWarning,
+                    RNG.betweenClosed(eventRadiusMin, eventRadiusMax)));
+        }
+        var processedEvents = new HashSet<ClearEvent>();
+        for (ClearEvent event: clearEvents) {
+            if (event.getStep() == step) {
+                processEvent(event);
+                processedEvents.add(event);
+            }
+            else {
+                for (Position pos: new Area(event.getPosition(), event.getRadius())) {
+                    grid.createMarker(pos, Marker.Type.CLEAR);
+                }
+            }
+        }
+        clearEvents.removeAll(processedEvents);
+
         return getStepPercepts();
+    }
+
+    private void processEvent(ClearEvent event) {
+        var removed = clearArea(event.getPosition(), event.getRadius());
+        var distributeNew = RNG.betweenClosed(eventCreateMin, eventCreateMax) + removed;
+
+        for (var i = 0; i < distributeNew; i++) {
+            var pos = grid.findRandomFreePosition(event.getPosition(),event.getRadius() + 3);
+            if(grid.isInBounds(pos)) {
+                grid.setTerrain(pos.x, pos.y, Terrain.OBSTACLE);
+            }
+        }
     }
 
     private Map<String, RequestActionMessage> getStepPercepts(){
@@ -349,7 +397,6 @@ class GameState {
 
     String handleAttachAction(Entity entity, String direction) {
         Position target = entity.getPosition().moved(direction, 1);
-        if (target == null) return Actions.RESULT_F_TARGET;
         Attachable a = getUniqueAttachable(target);
         if (a == null) return Actions.RESULT_F_TARGET;
         if (a instanceof Entity && ofDifferentTeams(entity, (Entity) a)) {
@@ -464,20 +511,24 @@ class GameState {
         }
     }
 
-    void clearArea(Position center, int radius) {
+    int clearArea(Position center, int radius) {
+        var removed = 0;
         for (Position position : new Area(center, radius)) {
-            getGameObjects(position).forEach(go -> {
+            for (var go : getGameObjects(position)) {
                 if (go instanceof Entity) {
                     ((Entity)go).disable();
                 }
                 else if (go instanceof Block) {
+                    removed++;
                     grid.removeThing((Positionable) go);
                 }
                 else if (grid.getTerrain(position) == Terrain.OBSTACLE) {
+                    removed++;
                     grid.setTerrain(position.x, position.y, Terrain.EMPTY);
                 }
-            });
+            }
         }
+        return removed;
     }
 
     Task createTask(int duration, int size) {
