@@ -486,30 +486,26 @@ class GameState {
     String handleClearAction(Entity entity, Position xy) {
         var target = xy.translate(entity.getPosition());
         if (target.distanceTo(entity.getPosition()) > entity.getVision()) return Actions.RESULT_F_TARGET;
-        if (grid.isInBounds(target)) {
-            if (entity.getEnergy() < Entity.clearEnergyCost) return Actions.RESULT_F_STATUS;
-            var previousPos = entity.getPreviousClearPosition();
+        if (!grid.isInBounds(target)) return Actions.RESULT_F_TARGET;
+        if (entity.getEnergy() < Entity.clearEnergyCost) return Actions.RESULT_F_STATUS;
 
-            if(entity.getPreviousClearStep() != step - 1 || previousPos.x != target.x || previousPos.y != target.y) {
-                entity.resetClearCounter();
-            }
-            var counter = entity.incrementClearCounter();
-            if (counter == clearSteps) {
-                clearArea(target, 1);
-                entity.consumeClearEnergy();
-                entity.resetClearCounter();
-            }
-            else {
-                for (Position position: new Area(target, 1)) {
-                    grid.createMarker(position, Marker.Type.CLEAR);
-                }
-            }
-            entity.recordClearAction(step, target);
-            return Actions.RESULT_SUCCESS;
+        var previousPos = entity.getPreviousClearPosition();
+        if(entity.getPreviousClearStep() != step - 1 || previousPos.x != target.x || previousPos.y != target.y) {
+            entity.resetClearCounter();
         }
-        else{
-            return Actions.RESULT_F_TARGET;
+        var counter = entity.incrementClearCounter();
+        if (counter == clearSteps) {
+            clearArea(target, 1);
+            entity.consumeClearEnergy();
+            entity.resetClearCounter();
         }
+        else {
+            for (Position position: new Area(target, 1)) {
+                grid.createMarker(position, Marker.Type.CLEAR);
+            }
+        }
+        entity.recordClearAction(step, target);
+        return Actions.RESULT_SUCCESS;
     }
 
     int clearArea(Position center, int radius) {

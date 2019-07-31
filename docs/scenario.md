@@ -166,6 +166,27 @@ Failure Code | Reason
 failed_target | No _active_ task could be associated with first parameter.
 failed | One or more of the requested blocks are missing OR the agent is not on a goal terrain.
 
+### clear
+
+Prepare to clear an area (a target position and the 4 adjacent cells). 
+* The area is cleared after a number of consecutive successful clear actions for the same target position.
+* The action consumes a fixed amount of energy.
+
+The effect of clearing a cell depends on the cells content:
+* *obstacle* terrain becomes *normal* terrain
+* *blocks* are destroyed
+* *entities* become disabled
+
+No | Parameter | Meaning
+--- | --- | ---
+0/1 | target | The x/y coordinates of the target position.
+
+Failure Code | Reason
+--- | ---
+failed_parameter | No valid integer coordinates given.
+failed_target | Target location is not within the agent's vision radius or outside the grid.
+failed_status | The agent's energy is too low.
+
 ### all actions
 
 All actions can also have the following failure codes:
