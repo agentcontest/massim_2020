@@ -27,6 +27,7 @@ public abstract class RNG {
     }
 
     /**
+     * (upper bound  exclusive)
      * @see Random#nextInt(int)
      */
     public static synchronized int nextInt(int bound){

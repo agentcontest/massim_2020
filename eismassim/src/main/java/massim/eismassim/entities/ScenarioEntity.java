@@ -71,6 +71,9 @@ public class ScenarioEntity extends EISEntity {
         percept.attachedThings.forEach(pos -> ret.add(
                 new Percept("attached", new Numeral(pos.x), new Numeral(pos.y))));
 
+        ret.add(new Percept("energy", new Numeral(percept.energy)));
+        ret.add(new Percept("disabled", new Identifier(percept.disabled? "true" : "false")));
+
         return ret;
     }
 

@@ -25,7 +25,11 @@
         "size" : [2, 4],
         "duration" : [100, 200],
         "probability" : 0.05
-      }
+      },
+      "clearSteps" : 3,
+      "clearEnergyCost" : 50,
+      "disableDuration" : 4,
+      "maxEnergy" : 300
     }
   ],
 

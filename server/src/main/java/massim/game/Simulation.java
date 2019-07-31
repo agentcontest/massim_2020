@@ -96,17 +96,22 @@ public class Simulation {
      * Executes all actions in random order.
      */
     private void handleActions(Map<String, ActionMessage> actions) {
-        List<Entity> entities = actions.keySet().stream().map(ag -> state.getEntityByName(ag)).collect(Collectors.toList());
+        var entities = actions.keySet().stream().map(ag -> state.getEntityByName(ag)).collect(Collectors.toList());
         RNG.shuffle(entities);
         for (Entity entity : entities) {
-            entity.setNewAction(actions.get(entity.getAgentName()));
+            var action = actions.get(entity.getAgentName());
+            entity.setNewAction(action);
             if (RNG.nextInt(100) < state.getRandomFail()) {
                 entity.setLastActionResult(RESULT_F_RANDOM);
             }
         }
         for (Entity entity : entities) {
+            if (entity.isDisabled()) {
+                entity.setLastActionResult(RESULT_F_STATUS);
+                continue;
+            }
             if (!entity.getLastActionResult().equals(RESULT_UNPROCESSED)) continue;
-            List<String> params = entity.getLastActionParams();
+            var params = entity.getLastActionParams();
             switch(entity.getLastAction()) {
 
                 case NO_ACTION:
@@ -114,7 +119,7 @@ public class Simulation {
                     continue;
 
                 case MOVE:
-                    String direction = getStringParam(params, 0);
+                    var direction = getStringParam(params, 0);
                     if (!Grid.DIRECTIONS.contains(direction)) {
                         entity.setLastActionResult(RESULT_F_PARAMETER);
                     } else {
@@ -177,7 +182,7 @@ public class Simulation {
                         partnerEntity.setLastActionResult(RESULT_F_PARAMETER);
                         continue;
                     }
-                    String result = state.handleConnectAction(entity, Position.of(x, y), partnerEntity, Position.of(px, py));
+                    var result = state.handleConnectAction(entity, Position.of(x, y), partnerEntity, Position.of(px, py));
                     entity.setLastActionResult(result);
                     partnerEntity.setLastActionResult(result);
                     continue;
@@ -192,9 +197,19 @@ public class Simulation {
                     continue;
 
                 case SUBMIT:
-                    String taskName = getStringParam(params, 0);
+                    var taskName = getStringParam(params, 0);
                     entity.setLastActionResult(state.handleSubmitAction(entity, taskName));
                     continue;
+
+                case CLEAR:
+                    x = getIntParam(params, 0);
+                    y = getIntParam(params, 1);
+                    if (x == null || y == null) entity.setLastActionResult(RESULT_F_PARAMETER);
+                    else {
+                        entity.setLastActionResult(state.handleClearAction(entity, Position.of(x, y)));
+                    }
+                    continue;
+
                 default:
                     entity.setLastActionResult(UNKNOWN_ACTION);
             }

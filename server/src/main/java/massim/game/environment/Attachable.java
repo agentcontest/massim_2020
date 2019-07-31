@@ -29,7 +29,7 @@ public abstract class Attachable extends Positionable {
         return new HashSet<>(attachments);
     }
 
-    void detachAll() {
+    protected void detachAll() {
         new ArrayList<>(attachments).forEach(this::detach);
     }
 

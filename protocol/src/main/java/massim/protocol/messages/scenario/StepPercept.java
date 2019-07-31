@@ -19,6 +19,8 @@ public class StepPercept extends RequestActionMessage {
     public String lastActionResult;
     public List<String> lastActionParams = new ArrayList<>();
     public Set<Position> attachedThings = new HashSet<>();
+    public int energy;
+    public boolean disabled;
 
     public StepPercept(JSONObject content) {
         super(content);

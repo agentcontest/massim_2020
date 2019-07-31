@@ -3,7 +3,6 @@ package massim.game;
 import massim.config.TeamConfig;
 import massim.game.environment.*;
 import massim.protocol.data.Position;
-import massim.protocol.data.TaskInfo;
 import massim.protocol.data.Thing;
 import massim.protocol.messages.RequestActionMessage;
 import massim.protocol.messages.SimEndMessage;
@@ -52,6 +51,7 @@ class GameState {
     private int taskDurationMax;
     private int taskSizeMin;
     private int taskSizeMax;
+    private int clearSteps;
 
     GameState(JSONObject config, Set<TeamConfig> matchTeams) {
         // parse simulation config
@@ -59,6 +59,16 @@ class GameState {
         Log.log(Log.Level.NORMAL, "config.randomFail: " + randomFail);
         int attachLimit = config.getInt("attachLimit");
         Log.log(Log.Level.NORMAL, "config.attachLimit: " + attachLimit);
+        clearSteps = config.getInt("clearSteps");
+        Log.log(Log.Level.NORMAL, "config.clearSteps: " + clearSteps);
+
+        Entity.clearEnergyCost = config.getInt("clearEnergyCost");
+        Log.log(Log.Level.NORMAL, "config.clearEnergyCost: " + Entity.clearEnergyCost);
+        Entity.disableDuration = config.getInt("disableDuration");
+        Log.log(Log.Level.NORMAL, "config.disableDuration: " + Entity.disableDuration);
+        Entity.maxEnergy = config.getInt("maxEnergy");
+        Log.log(Log.Level.NORMAL, "config.maxEnergy: " + Entity.maxEnergy);
+
         var blockTypeBounds = config.getJSONArray("blockTypes");
         var numberOfBlockTypes = RNG.betweenClosed(blockTypeBounds.getInt(0), blockTypeBounds.getInt(1));
         Log.log(Log.Level.NORMAL, "config.blockTypes: " + blockTypeBounds + " -> " + numberOfBlockTypes);
@@ -158,7 +168,7 @@ class GameState {
         }
     }
 
-    public Map<String, Team> getTeams() {
+    Map<String, Team> getTeams() {
         return this.teams;
     }
 
@@ -166,7 +176,7 @@ class GameState {
         return this.blockTypes;
     }
 
-    void handleCommand(String[] command) {
+    private void handleCommand(String[] command) {
         switch (command[0]) {
             case "move":
                 if (command.length != 4) break;
@@ -243,15 +253,6 @@ class GameState {
         return grid;
     }
 
-    /**
-     * @return the agent entity of the given name or null if it does not exist
-     */
-    Entity getEntityByID(String goID) {
-        GameObject entity = gameObjects.get(goID);
-        if (!(entity instanceof Entity)) return null;
-        return (Entity) entity;
-    }
-
     Entity getEntityByName(String agentName) {
         return agentToEntity.get(agentName);
     }
@@ -267,24 +268,30 @@ class GameState {
     Map<String, RequestActionMessage> prepareStep(int step) {
         this.step = step;
 
+        //cleanup
+        grid.deleteMarkers();
+
         //handle tasks
         if (RNG.nextDouble() < pNewTask) {
             createTask(RNG.betweenClosed(taskDurationMin, taskDurationMax), RNG.betweenClosed(taskSizeMin, taskSizeMax));
         }
+
+        //handle entities
+        agentToEntity.values().forEach(Entity::preStep);
 
         return getStepPercepts();
     }
 
     private Map<String, RequestActionMessage> getStepPercepts(){
         Map<String, RequestActionMessage> result = new HashMap<>();
-        Set<TaskInfo> allTasks = tasks.values().stream()
+        var allTasks = tasks.values().stream()
                 .filter(t -> !t.isCompleted())
                 .map(Task::toPercept)
                 .collect(Collectors.toSet());
         for (Entity entity : entityToAgent.keySet()) {
-            int vision = entity.getVision();
-            Position pos = entity.getPosition();
-            Set<Thing> visibleThings = new HashSet<>();
+            var vision = entity.getVision();
+            var pos = entity.getPosition();
+            var visibleThings = new HashSet<Thing>();
             Map<String, Set<Position>> visibleTerrain = new HashMap<>();
             Set<Position> attachedThings = new HashSet<>();
             for (int dy = -vision; dy <= vision ; dy++) {
@@ -298,17 +305,21 @@ class GameState {
                             attachedThings.add(((Attachable) go).getPosition().toLocal(pos));
                         }
                     });
-                    Dispenser d = dispensers.get(currentPos);
+                    var d = dispensers.get(currentPos);
                     if (d != null) visibleThings.add(d.toPercept(pos));
-                    Terrain terrain = grid.getTerrain(currentPos);
+                    var terrain = grid.getTerrain(currentPos);
                     if (terrain != Terrain.EMPTY) {
                         visibleTerrain.computeIfAbsent(terrain.name,
                                 t -> new HashSet<>()).add(currentPos.toLocal(pos));
                     }
                 }
             }
-            result.put(entity.getAgentName(), new StepPercept(step, teams.get(entity.getTeamName()).getScore(),
-                    visibleThings, visibleTerrain, allTasks, entity.getLastAction(), entity.getLastActionParams(), entity.getLastActionResult(), attachedThings));
+            var percept = new StepPercept(step, teams.get(entity.getTeamName()).getScore(),
+                    visibleThings, visibleTerrain, allTasks, entity.getLastAction(), entity.getLastActionParams(),
+                    entity.getLastActionResult(), attachedThings);
+            percept.energy = entity.getEnergy();
+            percept.disabled = entity.isDisabled();
+            result.put(entity.getAgentName(), percept);
         }
         return result;
     }
@@ -394,7 +405,7 @@ class GameState {
         var requestPosition = entity.getPosition().moved(direction, 1);
         var dispenser = dispensers.get(requestPosition);
         if (dispenser == null) return Actions.RESULT_F_TARGET;
-        if (!grid.isFree(requestPosition)) return Actions.RESULT_F_BLOCKED;
+        if (!grid.isUnblocked(requestPosition)) return Actions.RESULT_F_BLOCKED;
         createBlock(requestPosition, dispenser.getBlockType());
         return Actions.RESULT_SUCCESS;
     }
@@ -419,14 +430,60 @@ class GameState {
         }
         task.getRequirements().keySet().forEach(pos -> {
             Attachable a = getUniqueAttachable(pos.translate(e.getPosition()));
-            if (a != null) {
-                grid.removeAttachable(a);
-                gameObjects.remove(a.getID());
-            }
+            removeObjectFromGame(a);
         });
         teams.get(e.getTeamName()).addScore(task.getReward());
         task.complete();
         return Actions.RESULT_SUCCESS;
+    }
+
+    /**
+     * @param entity entity executing the action
+     * @param xy target position in entity local system
+     * @return action result
+     */
+    String handleClearAction(Entity entity, Position xy) {
+        var target = xy.translate(entity.getPosition());
+        if (grid.isInBounds(target)) {
+            if (entity.getEnergy() < Entity.clearEnergyCost) return Actions.RESULT_F_STATUS;
+            var previousPos = entity.getPreviousClearPosition();
+
+            if(entity.getPreviousClearStep() != step - 1 || previousPos.x != target.x || previousPos.y != target.y) {
+                entity.resetClearCounter();
+            }
+            var counter = entity.incrementClearCounter();
+            if (counter == clearSteps) {
+                clearArea(target, 1);
+                entity.consumeClearEnergy();
+                entity.resetClearCounter();
+            }
+            else {
+                for (Position position: new Area(target, 1)) {
+                    grid.createMarker(position, Marker.Type.CLEAR);
+                }
+            }
+            entity.recordClearAction(step, target);
+            return Actions.RESULT_SUCCESS;
+        }
+        else{
+            return Actions.RESULT_F_TARGET;
+        }
+    }
+
+    void clearArea(Position center, int radius) {
+        for (Position position : new Area(center, radius)) {
+            getGameObjects(position).forEach(go -> {
+                if (go instanceof Entity) {
+                    ((Entity)go).disable();
+                }
+                else if (go instanceof Block) {
+                    grid.removeThing((Positionable) go);
+                }
+                else if (grid.getTerrain(position) == Terrain.OBSTACLE) {
+                    grid.setTerrain(position.x, position.y, Terrain.EMPTY);
+                }
+            });
+        }
     }
 
     Task createTask(int duration, int size) {
@@ -462,6 +519,12 @@ class GameState {
         return t;
     }
 
+    private void removeObjectFromGame(GameObject go){
+        if (go == null) return;
+        if (go instanceof Positionable) grid.removeThing((Positionable) go);
+        gameObjects.remove(go.getID());
+    }
+
     private Entity createEntity(Position xy, String name, String teamName) {
         Entity e = grid.createEntity(xy, name, teamName);
         registerGameObject(e);
@@ -477,9 +540,9 @@ class GameState {
         return b;
     }
 
-    public boolean createDispenser(Position xy, String blockType) {
+    boolean createDispenser(Position xy, String blockType) {
         if (!blockTypes.contains(blockType)) return false;
-        if (!grid.isFree(xy)) return false;
+        if (!grid.isUnblocked(xy)) return false;
         Dispenser d = new Dispenser(xy, blockType);
         registerGameObject(d);
         dispensers.put(xy, d);
@@ -505,8 +568,8 @@ class GameState {
                 .collect(Collectors.toSet());
     }
 
-    private Set<GameObject> getGameObjects(Position pos) {
-        return grid.getThings(pos).stream().map(id -> gameObjects.get(id)).collect(Collectors.toSet());
+    private Set<Positionable> getGameObjects(Position pos) {
+        return grid.getThings(pos);
     }
 
     private boolean attachedToOpponent(Attachable a, Entity entity) {
@@ -585,7 +648,7 @@ class GameState {
     boolean teleport(String entityName, Position targetPos) {
         Entity entity = getEntityByName(entityName);
         if (entity == null || targetPos == null) return false;
-        if (grid.isFree(targetPos)) {
+        if (grid.isUnblocked(targetPos)) {
             grid.moveWithoutAttachments(entity, targetPos);
             return true;
         }
@@ -601,5 +664,21 @@ class GameState {
         Attachable a2 = getUniqueAttachable(p2);
         if (a1 == null || a2 == null) return false;
         return grid.attach(a1, a2);
+    }
+
+    public class Area extends ArrayList<Position> {
+        /**
+         * Creates a new list containing all positions belonging to the
+         * area around a given center within the given radius.
+         */
+        public Area(Position center, int radius) {
+            for (var dx = -radius; dx <= radius; dx++) {
+                var x = center.x + dx;
+                var dy = radius - dx;
+                for (var y = center.y - dy; y <= center.y + dy; dy++) {
+                    this.add(Position.of(x, y));
+                }
+            }
+        }
     }
 }

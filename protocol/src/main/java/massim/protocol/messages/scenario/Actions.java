@@ -14,9 +14,10 @@ public abstract class Actions {
     public final static String CONNECT = "connect";
     public final static String REQUEST = "request";
     public final static String SUBMIT = "submit";
+    public final static String CLEAR = "clear";
 
     public static final List<String> ALL_ACTIONS = List.of(
-            MOVE, ATTACH, DETACH, ROTATE, CONNECT, REQUEST, SUBMIT);
+            MOVE, ATTACH, DETACH, ROTATE, CONNECT, REQUEST, SUBMIT, CLEAR);
 
     public final static String RESULT_UNPROCESSED = "unprocessed";
     public final static String RESULT_SUCCESS = "success";
@@ -27,4 +28,5 @@ public abstract class Actions {
     public final static String RESULT_F_PARTNER = "failed_partner";
     public final static String RESULT_F_TARGET = "failed_target";
     public static final String RESULT_F_BLOCKED = "failed_blocked";
+    public static final String RESULT_F_STATUS = "failed_status";
 }
