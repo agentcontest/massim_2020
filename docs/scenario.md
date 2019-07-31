@@ -227,6 +227,8 @@ Example (complete request-action message):
          "lastAction": "move",
          "lastActionResult": "success",
          "lastActionParams": ["n"],
+         "energy": 300,
+         "disabled": false,
          "things": [
             {
                "x": 0,
@@ -245,6 +247,12 @@ Example (complete request-action message):
                "y": -1,
                "details": "b1",
                "type": "block"
+            },
+            {
+               "x": 2,
+               "y": -1,
+               "type": "marker",
+               "details" clear
             }
          ],
          "terrain": {
@@ -288,12 +296,15 @@ Example (complete request-action message):
 * __lastAction__: the last action submitted by the agent
 * __lastActionResult__: the result of that action
 * __lastActionParams__: the parameters of that action
+* __energy__: the agent's current energy level
+* __disabled__: whether the agent is disabled
 * __things__: things in the simulation visible to the agent
   * __x/y__: position of the thing _relative_ to the agent
-  * __type__: the type of the thing (entity, block, dispenser, ...)
+  * __type__: the type of the thing (entity, block, dispenser, marker,...)
   * __details__: details about the thing
     * for blocks and dispensers: the block type
     * for entities: the team
+    * for markers: the type of marker (i.e. clear)
 * __terrain__: the terrain around the agent (if no value is given for a visible cell, the terrain is just *empty*)
 * __task__: a task taht is currently active
   * __name__: the task's identifier

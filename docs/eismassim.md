@@ -221,6 +221,10 @@ The following percepts might be included in a `REQUEST-ACTION` message. Most of 
   * x/y : Numeral - the relative position of the terrain
 * `attached(x, y)`
   * x/y : Numeral - relative position of a thing that is attached to some entity
+* `energy(n)`
+  * n : Numeral - the agent's energy level
+* `disabled(b)`
+  * b : Identifier - true if the agent is disabled (else false)
 
 #### SIM-END percepts
 
