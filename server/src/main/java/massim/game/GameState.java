@@ -485,6 +485,7 @@ class GameState {
      */
     String handleClearAction(Entity entity, Position xy) {
         var target = xy.translate(entity.getPosition());
+        if (target.distanceTo(entity.getPosition()) > entity.getVision()) return Actions.RESULT_F_TARGET;
         if (grid.isInBounds(target)) {
             if (entity.getEnergy() < Entity.clearEnergyCost) return Actions.RESULT_F_STATUS;
             var previousPos = entity.getPreviousClearPosition();
