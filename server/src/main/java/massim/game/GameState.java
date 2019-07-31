@@ -289,29 +289,23 @@ class GameState {
                 .map(Task::toPercept)
                 .collect(Collectors.toSet());
         for (Entity entity : entityToAgent.keySet()) {
-            var vision = entity.getVision();
             var pos = entity.getPosition();
             var visibleThings = new HashSet<Thing>();
             Map<String, Set<Position>> visibleTerrain = new HashMap<>();
             Set<Position> attachedThings = new HashSet<>();
-            for (int dy = -vision; dy <= vision ; dy++) {
-                int y = pos.y + dy;
-                int visionLeft = vision - Math.abs(dy);
-                for (int x = pos.x - visionLeft ; x <= pos.x + visionLeft; x++) {
-                    Position currentPos = Position.of(x, y);
-                    getGameObjects(currentPos).forEach(go -> {
-                        visibleThings.add(go.toPercept(pos));
-                        if (go instanceof Attachable && ((Attachable)go).isAttachedToAnotherEntity()){
-                            attachedThings.add(((Attachable) go).getPosition().toLocal(pos));
-                        }
-                    });
-                    var d = dispensers.get(currentPos);
-                    if (d != null) visibleThings.add(d.toPercept(pos));
-                    var terrain = grid.getTerrain(currentPos);
-                    if (terrain != Terrain.EMPTY) {
-                        visibleTerrain.computeIfAbsent(terrain.name,
-                                t -> new HashSet<>()).add(currentPos.toLocal(pos));
+            for (Position currentPos: new Area(pos, entity.getVision())){
+                getGameObjects(currentPos).forEach(go -> {
+                    visibleThings.add(go.toPercept(pos));
+                    if (go instanceof Attachable && ((Attachable)go).isAttachedToAnotherEntity()){
+                        attachedThings.add(go.getPosition().toLocal(pos));
                     }
+                });
+                var d = dispensers.get(currentPos);
+                if (d != null) visibleThings.add(d.toPercept(pos));
+                var terrain = grid.getTerrain(currentPos);
+                if (terrain != Terrain.EMPTY) {
+                    visibleTerrain.computeIfAbsent(terrain.name,
+                            t -> new HashSet<>()).add(currentPos.toLocal(pos));
                 }
             }
             var percept = new StepPercept(step, teams.get(entity.getTeamName()).getScore(),
