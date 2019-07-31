@@ -165,6 +165,7 @@ public class Grid {
             for (int rotations = 0; rotations < distance; rotations++) {
                 rotatedPosition = rotatedPosition.rotatedOneStep(anchor.getPosition(), clockwise);
                 if(!isUnblocked(rotatedPosition, attachments)) return null;
+                if(!isInBounds(rotatedPosition)) return null;
             }
             newPositions.put(a, rotatedPosition);
         }
@@ -176,6 +177,7 @@ public class Grid {
         for (Positionable thing : things) {
             for (int i = 1; i <= distance; i++) {
                 var newPos = thing.getPosition().moved(direction, i);
+                if (!isInBounds(newPos)) return null;
                 if(!isUnblocked(newPos, things)) return null;
             }
             newPositions.put(thing, thing.getPosition().moved(direction, distance));

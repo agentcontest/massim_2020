@@ -36,7 +36,7 @@ public final class Position {
             case "w": return Position.of(x - distance, y);
             case "e": return Position.of(x + distance, y);
         }
-        return null;
+        return Position.of(x, y);
     }
 
     public static Position of(int x, int y) {
