@@ -13,28 +13,43 @@ import java.util.Set;
 public class GameStateTest {
 
     private static final JSONObject CONFIG = new JSONObject("{\n" +
-            "      \"steps\" : 10,\n" +
+            "      \"steps\" : 500,\n" +
             "      \"randomSeed\" : 17,\n" +
             "      \"randomFail\" : 1,\n" +
             "      \"entities\" : [{\"standard\" : 10}],\n" +
+            "      \"clearSteps\" : 3,\n" +
+            "      \"clearEnergyCost\" : 50,\n" +
+            "      \"disableDuration\" : 4,\n" +
+            "      \"maxEnergy\" : 300,\n" +
+            "      \"attachLimit\" : 10,\n" +
+            "\n" +
             "      \"grid\" : {\n" +
-            "        \"height\" : 20,\n" +
-            "        \"width\" : 20\n" +
+            "        \"height\" : 40,\n" +
+            "        \"width\" : 40,\n" +
+            "        \"file\" : \"conf/maps/test40x40.bmp\"\n" +
             "      },\n" +
-            "      \"attachLimit\" : 3,\n" +
+            "\n" +
             "      \"blockTypes\" : [3, 3],\n" +
             "      \"dispensers\" : [2, 3],\n" +
+            "\n" +
             "      \"tasks\" : {\n" +
             "        \"size\" : [2, 4],\n" +
             "        \"duration\" : [100, 200],\n" +
-            "        \"probability\" : 1\n" +
+            "        \"probability\" : 0.05\n" +
+            "      },\n" +
+            "\n" +
+            "      \"events\" : {\n" +
+            "        \"chance\" : 10,\n" +
+            "        \"radius\" : [3, 5],\n" +
+            "        \"warning\" : 5,\n" +
+            "        \"create\" : [5, 10]\n" +
             "      }\n" +
             "    }");
 
     private GameState state;
 
     @org.junit.Before
-    public void setUp() throws Exception {
+    public void setUp() {
         RNG.initialize(17);
 
         var team = new TeamConfig("A");
@@ -78,5 +93,10 @@ public class GameStateTest {
         assert(state.attach(Position.of(15,15), Position.of(15,16)));
         assert(state.attach(Position.of(15,16), Position.of(14,16)));
         assert(state.handleSubmitAction(state.getEntityByName("A1"), "testTask1").equals(Actions.RESULT_SUCCESS));
+    }
+
+    @org.junit.Test
+    public void getStepPercepts() {
+
     }
 }
