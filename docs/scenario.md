@@ -25,6 +25,20 @@ __Tournament points__ are distributed according to the score of a team at the en
 The environment is a rectangular grid. The dimensions are not known to the agents. Agents only perceive positions relative to their own. The x-axis goes from left to right (or eastwards) and the y-axis from top to bottom (southwards).
 Each cell of the grid contains up to one thing that may collide with other things (i.e. agents and blocks for now). Only in the beginning of the simulation, an agent shares *the same* cell with one agent of the other team/s (to ensure fairness). Once one of the agents has moved, they cannot overlap again later.
 
+### Entity/Agent
+
+Each agent controls one entity in the simulation (s.t. we can use both terms interchangeably). Agents do not know their absolute positioning in the environment. They only know their *energy* level (used for *clearing*) and whether they are currently disabled.
+
+`Config: match.maxEnergy`
+
+#### Disabled agents
+
+If an agent becomes disabled, it **loses all of its attachments** and remains inactive for a fixed configurable number of steps. For as long as the agent is disabled, all its actions will result in *failed_status*.
+A disabled agent repairs itself and will work normally after a few steps.
+
+`Config: match.disableDuration`
+
+
 ### Things
 
 There are number of __things__ that can inhabit a cell of the grid:
@@ -32,6 +46,7 @@ There are number of __things__ that can inhabit a cell of the grid:
 * __Entities__: Each agent controls an entity on the grid. Entites can move around and attach themselves to other things.
 * __Blocks__: The building blocks of the scenario. Each block has a specific type. Agents can pick up blocks and stick multiple blocks together. Blocks have to be arranged into specific patterns to get score points.
 * __Dispenser__: Each dispenser can be used to retrieve a specific kind of block.
+* __Marker__: A marker *marks* a cell. Markers do not block other things. For now, markers are used to indicate cells that are about to be *cleared*.
 
 ### Terrain
 
@@ -40,6 +55,21 @@ Each cell of the grid has a specific terrain type.
 * __empty__: If nothing else is specified, a cell is *just a cell*.
 * __goal__: Agents have to be on a __goal__ cell in order to be allowed to submit a task.
 * __obstacle__: Obstacle cells are not traversable, i.e. they block movement and rotations that would involve the cell.
+
+### Events
+
+The environment randomly generates events.
+
+#### Clear events
+
+When a clear event happens, a certain area is marked similar to a clear action. The timing and size of an event is random. Each event can be perceived (i.e. its clear *markers*) for a few steps before it actually occurs. Once it resolves, the marked area is *cleared* (see the *clear* action for more details). Additionally, new obstacle terrain is created randomly around the center of the event.
+
+`Config: match.events.*`:
+
+* `chance` - the chance for a clear event to start in any step (in %)
+* `radius` - the bounds for the event size
+* `warning` - the number of steps the area is marked before the event resolves
+* `create` - the bounds for how many obstacles are created (additional to the number of objects destroyed by the event)
 
 ## Tasks
 
@@ -186,6 +216,9 @@ Failure Code | Reason
 failed_parameter | No valid integer coordinates given.
 failed_target | Target location is not within the agent's vision radius or outside the grid.
 failed_status | The agent's energy is too low.
+
+* `Config: match.clearSteps` - number of action required for a successful clear
+* `Config: match.clearEnergyCost` - energy cost for a clear action (subtracted when the clear actually resolves)
 
 ### all actions
 
