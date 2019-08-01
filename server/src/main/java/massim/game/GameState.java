@@ -330,7 +330,7 @@ class GameState {
         }
     }
 
-    private Map<String, RequestActionMessage> getStepPercepts(){
+    Map<String, RequestActionMessage> getStepPercepts(){
         Map<String, RequestActionMessage> result = new HashMap<>();
         var allTasks = tasks.values().stream()
                 .filter(t -> !t.isCompleted())
@@ -344,7 +344,7 @@ class GameState {
             for (Position currentPos: new Area(pos, entity.getVision())){
                 getGameObjects(currentPos).forEach(go -> {
                     visibleThings.add(go.toPercept(pos));
-                    if (go instanceof Attachable && ((Attachable)go).isAttachedToAnotherEntity()){
+                    if (go != entity && go instanceof Attachable && ((Attachable)go).isAttachedToAnotherEntity()){
                         attachedThings.add(go.getPosition().toLocal(pos));
                     }
                 });
