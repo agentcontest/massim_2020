@@ -51,6 +51,8 @@ public class StepPercept extends RequestActionMessage {
         percept.put("things", jsonThings);
         percept.put("tasks", jsonTasks);
         percept.put("terrain", jsonTerrain);
+        percept.put("energy", energy);
+        percept.put("disabled", disabled);
         things.forEach(t -> jsonThings.put(t.toJSON()));
         taskInfo.forEach(t -> jsonTasks.put(t.toJSON()));
         terrain.forEach((t, positions) -> {
@@ -104,5 +106,7 @@ public class StepPercept extends RequestActionMessage {
             JSONArray pos = jsonAttached.getJSONArray(i);
             attachedThings.add(Position.of(pos.getInt(0), pos.getInt(1)));
         }
+        energy = percept.getInt("energy");
+        disabled = percept.getBoolean("disabled");
     }
 }
