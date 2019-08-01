@@ -4,6 +4,7 @@ import massim.config.TeamConfig;
 import massim.game.environment.Terrain;
 import massim.protocol.data.Position;
 import massim.protocol.messages.scenario.Actions;
+import massim.protocol.messages.scenario.StepPercept;
 import massim.util.RNG;
 import org.json.JSONObject;
 
@@ -97,6 +98,19 @@ public class GameStateTest {
 
     @org.junit.Test
     public void getStepPercepts() {
+        var a1 = state.getEntityByName("A1");
+        var a2 = state.getEntityByName("A2");
+        state.teleport("A1", Position.of(3, 2));
+        state.teleport("A2", Position.of(3, 3));
+        var block = state.createBlock(Position.of(3, 4), "b1");
+        assert(a1.getPosition().equals(Position.of(3, 2)));
+        assert(a2.getPosition().equals(Position.of(3, 3)));
+        assert(block != null);
+        state.attach(a1.getPosition(), a2.getPosition());
+        state.attach(a2.getPosition(), block.getPosition());
 
+        var percept = new StepPercept(((StepPercept)state.getStepPercepts().get("A1")).toJson().getJSONObject("content"));
+        assert(percept.attachedThings.contains(a2.getPosition().toLocal(a1.getPosition())));
+        assert(percept.attachedThings.contains(block.getPosition().toLocal(a1.getPosition())));
     }
 }
