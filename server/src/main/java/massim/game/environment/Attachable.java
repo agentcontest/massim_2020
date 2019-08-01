@@ -33,7 +33,6 @@ public abstract class Attachable extends Positionable {
         new ArrayList<>(attachments).forEach(this::detach);
     }
 
-
     private void requestAttachment(Attachable requester) {
         attachments.add(requester);
     }
@@ -42,18 +41,19 @@ public abstract class Attachable extends Positionable {
         attachments.remove(requester);
     }
 
+    /**
+     * @return a set of all attachments and attachments attached to these attachments (and so on)
+     * including this Attachable
+     */
     public Set<Attachable> collectAllAttachments() {
         var attachables = new HashSet<Attachable>();
         attachables.add(this);
         Set<Attachable> newAttachables = new HashSet<>(attachables);
         while (!newAttachables.isEmpty()) {
-            Set<Attachable> tempAttachables = new HashSet<>();
+            var tempAttachables = new HashSet<Attachable>();
             for (Attachable a : newAttachables) {
                 for (Attachable a2 : a.getAttachments()) {
-                    if (!attachables.contains(a2)) {
-                        attachables.add(a2);
-                        tempAttachables.add(a2);
-                    }
+                    if (attachables.add(a2)) tempAttachables.add(a2);
                 }
             }
             newAttachables = tempAttachables;
