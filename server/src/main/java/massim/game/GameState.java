@@ -519,7 +519,7 @@ class GameState {
                     removed++;
                     grid.removeThing((Positionable) go);
                 }
-                else if (grid.getTerrain(position) == Terrain.OBSTACLE) {
+                if (grid.getTerrain(position) == Terrain.OBSTACLE) {
                     removed++;
                     grid.setTerrain(position.x, position.y, Terrain.EMPTY);
                 }
@@ -610,7 +610,7 @@ class GameState {
                 .collect(Collectors.toSet());
     }
 
-    private Set<Positionable> getGameObjects(Position pos) {
+    Set<Positionable> getGameObjects(Position pos) {
         return grid.getThings(pos);
     }
 
@@ -706,6 +706,10 @@ class GameState {
         Attachable a2 = getUniqueAttachable(p2);
         if (a1 == null || a2 == null) return false;
         return grid.attach(a1, a2);
+    }
+
+    Terrain getTerrain(Position pos) {
+        return grid.getTerrain(pos);
     }
 
     public class Area extends ArrayList<Position> {

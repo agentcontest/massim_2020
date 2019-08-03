@@ -113,4 +113,19 @@ public class GameStateTest {
         assert(percept.attachedThings.contains(a2.getPosition().toLocal(a1.getPosition())));
         assert(percept.attachedThings.contains(block.getPosition().toLocal(a1.getPosition())));
     }
+
+    @org.junit.Test
+    public void clearArea() {
+        var a1 = state.getEntityByName("A1");
+        state.teleport("A1", Position.of(10, 10));
+        var block1 = state.createBlock(Position.of(10,11), "b1");
+        var block2 = state.createBlock(Position.of(10,12), "b1");
+        state.setTerrain(Position.of(11,10), Terrain.OBSTACLE);
+
+        state.clearArea(Position.of(10,10), 1);
+
+        assert(a1.isDisabled());
+        assert(state.getGameObjects(block1.getPosition()).size() == 0);
+        assert(state.getGameObjects(block2.getPosition()).size() == 1);
+    }
 }
