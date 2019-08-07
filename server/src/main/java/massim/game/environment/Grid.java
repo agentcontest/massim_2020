@@ -82,8 +82,8 @@ public class Grid {
         things.forEach(a -> getThings(a.getPosition()).remove(a));
         for (Positionable thing : things) {
             var newPos = newPositions.get(thing);
-            insertThing(thing);
             thing.setPosition(newPos);
+            insertThing(thing);
         }
     }
 
