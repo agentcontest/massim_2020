@@ -52,7 +52,7 @@ class GameState {
     private int taskDurationMax;
     private int taskSizeMin;
     private int taskSizeMax;
-    private int clearSteps;
+    int clearSteps;
     private int eventChance;
     private int eventRadiusMin;
     private int eventRadiusMax;
@@ -342,7 +342,7 @@ class GameState {
             Map<String, Set<Position>> visibleTerrain = new HashMap<>();
             Set<Position> attachedThings = new HashSet<>();
             for (Position currentPos: new Area(pos, entity.getVision())){
-                getGameObjects(currentPos).forEach(go -> {
+                getThingsAt(currentPos).forEach(go -> {
                     visibleThings.add(go.toPercept(pos));
                     if (go != entity && go instanceof Attachable && ((Attachable)go).isAttachedToAnotherEntity()){
                         attachedThings.add(go.getPosition().toLocal(pos));
@@ -511,7 +511,7 @@ class GameState {
     int clearArea(Position center, int radius) {
         var removed = 0;
         for (Position position : new Area(center, radius)) {
-            for (var go : getGameObjects(position)) {
+            for (var go : getThingsAt(position)) {
                 if (go instanceof Entity) {
                     ((Entity)go).disable();
                 }
@@ -604,13 +604,13 @@ class GameState {
     }
 
     private Set<Attachable> getAttachables(Position position) {
-        return getGameObjects(position).stream()
+        return getThingsAt(position).stream()
                 .filter(go -> go instanceof Attachable)
                 .map(go -> (Attachable)go)
                 .collect(Collectors.toSet());
     }
 
-    Set<Positionable> getGameObjects(Position pos) {
+    Set<Positionable> getThingsAt(Position pos) {
         return grid.getThings(pos);
     }
 
@@ -712,12 +712,12 @@ class GameState {
         return grid.getTerrain(pos);
     }
 
-    public class Area extends ArrayList<Position> {
+    public static class Area extends ArrayList<Position> {
         /**
          * Creates a new list containing all positions belonging to the
          * area around a given center within the given radius.
          */
-        public Area(Position center, int radius) {
+        Area(Position center, int radius) {
             for (var dx = -radius; dx <= radius; dx++) {
                 var x = center.x + dx;
                 var dy = radius - dx;
