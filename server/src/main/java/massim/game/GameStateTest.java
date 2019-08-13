@@ -3,11 +3,13 @@ package massim.game;
 import massim.config.TeamConfig;
 import massim.game.environment.Terrain;
 import massim.protocol.data.Position;
+import massim.protocol.data.Thing;
 import massim.protocol.messages.scenario.Actions;
 import massim.protocol.messages.scenario.StepPercept;
 import massim.util.RNG;
 import org.json.JSONObject;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -125,7 +127,34 @@ public class GameStateTest {
         state.clearArea(Position.of(10,10), 1);
 
         assert(a1.isDisabled());
-        assert(state.getGameObjects(block1.getPosition()).size() == 0);
-        assert(state.getGameObjects(block2.getPosition()).size() == 1);
+        assert(state.getThingsAt(block1.getPosition()).size() == 0);
+        assert(state.getThingsAt(block2.getPosition()).size() == 1);
+    }
+
+    @org.junit.Test
+    public void handleClearAction() {
+        var a1 = state.getEntityByName("A1");
+        var a2 = state.getEntityByName("A2");
+        var posA2 = Position.of(22, 20);
+        state.teleport(a1.getAgentName(), Position.of(20, 20));
+        state.teleport("A2", posA2);
+        var block = state.createBlock(Position.of(21, 20), "b1");
+
+        assert(!a2.isDisabled());
+        int i;
+        for (i = 0; i < state.clearSteps - 1; i++) {
+            state.prepareStep(i);
+            assert(state.handleClearAction(a1, Position.of(2, 0)).equals(Actions.RESULT_SUCCESS));
+            var percept = (StepPercept)state.getStepPercepts().get("A1");
+            assert(containsThing(percept.things, Thing.TYPE_MARKER, Position.of(2, 0)));
+        }
+        state.prepareStep(i);
+        assert(state.handleClearAction(a1, Position.of(2, 0)).equals(Actions.RESULT_SUCCESS));
+        assert(!state.getThingsAt(block.getPosition()).contains(block));
+        assert(a2.isDisabled());
+    }
+
+    private static boolean containsThing(Collection<Thing> things, String type, Position pos) {
+        return things.stream().anyMatch(t -> t.type.equals(type) && t.x == pos.x && t.y == pos.y);
     }
 }
