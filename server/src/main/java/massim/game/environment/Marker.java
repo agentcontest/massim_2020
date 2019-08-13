@@ -21,7 +21,8 @@ public class Marker extends Positionable {
 
     @Override
     public Thing toPercept(Position relativeTo) {
-        return new Thing(getPosition().x, getPosition().y, Thing.TYPE_MARKER, type.name);
+        var pos = getPosition().toLocal(relativeTo);
+        return new Thing(pos.x, pos.y, Thing.TYPE_MARKER, type.name);
     }
 
     public enum Type {
