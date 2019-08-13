@@ -99,13 +99,17 @@ class GameState {
 
         var eventConfig = config.getJSONObject("events");
         eventChance = eventConfig.getInt("chance");
+        Log.log(Log.Level.NORMAL, "config.events.chance: " + eventChance);
         var eventRadius = eventConfig.getJSONArray("radius");
         eventRadiusMin = eventRadius.getInt(0);
         eventRadiusMax = eventRadius.getInt(1);
+        Log.log(Log.Level.NORMAL, "config.events.radius: " + eventRadiusMin + " - " + eventRadiusMax);
         eventWarning = eventConfig.getInt("warning");
+        Log.log(Log.Level.NORMAL, "config.events.warning: " + eventWarning);
         var eventCreate = eventConfig.getJSONArray("create");
         eventCreateMin = eventCreate.getInt(0);
         eventCreateMax = eventCreate.getInt(1);
+        Log.log(Log.Level.NORMAL, "config.events.create: " + eventCreateMin + " - " + eventCreateMax);
 
         // create teams
         matchTeams.forEach(team -> teams.put(team.getName(), new Team(team.getName())));
