@@ -1,8 +1,28 @@
 # MASSim CHANGELOG
 
+## 2019
+
+### MASSim 2.0 - feature complete
+
+* many bugfixs
+* monitor improvements
+* scenario
+  * added percept for vision and team
+  * added percept for which things are currently attached to another agent
+  * added "clear" action that removes blocks and obstacles and disables agents
+    * agents may now become temporarily disabled
+    * agents now have "energy"
+      * new percepts for energy and disabled status
+  * added map events
+    * are perceived similar to clear actions
+    * will clear the marked area
+    * will create new obstacles around the center of the event
+
+### MASSim 1.0 - new scenario!
+
 ## 2018
 
-## Package release 1.2 - the final 2018 package
+### Package release 1.2 - the final 2018 package
 
 * monitor
   * show the sum of current wells' efficiency
@@ -13,7 +33,7 @@
   * fix build action result
   * fix generator using wrong parameter
 
-## Package release 1.1
+### Package release 1.1
 
 * protocol
   * changed xml structure of items to attributes
