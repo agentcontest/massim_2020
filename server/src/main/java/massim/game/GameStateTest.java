@@ -148,10 +148,15 @@ public class GameStateTest {
             var percept = (StepPercept)state.getStepPercepts().get("A1");
             assert(containsThing(percept.things, Thing.TYPE_MARKER, Position.of(2, 0)));
         }
-        state.prepareStep(i);
+        state.prepareStep(i++);
         assert(state.handleClearAction(a1, Position.of(2, 0)).equals(Actions.RESULT_SUCCESS));
         assert(!state.getThingsAt(block.getPosition()).contains(block));
         assert(a2.isDisabled());
+        for (var j = 0; j < Entity.disableDuration; j++) {
+            assert(a2.isDisabled());
+            state.prepareStep(i + j);
+        }
+        assert(!a2.isDisabled());
     }
 
     private static boolean containsThing(Collection<Thing> things, String type, Position pos) {
