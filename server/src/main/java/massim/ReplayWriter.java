@@ -38,8 +38,7 @@ public class ReplayWriter {
     }
 
     private boolean isStatic(JSONObject world) {
-        //TODO
-        return true;
+        return world.has("grid");
     }
 
     private void write(String startTime, String simId, String name, JSONObject json) {
