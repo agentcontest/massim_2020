@@ -653,6 +653,8 @@ class GameState {
         snapshot.put("tasks", taskArr);
         JSONArray cells = new JSONArray();
         snapshot.put("cells", cells);
+        JSONArray clear = new JSONArray();
+        snapshot.put("clear", clear);
         for (int y = 0; y < grid.getDimY(); y++) {
             JSONArray row = new JSONArray();
             for (int x = 0; x < grid.getDimX(); x++) {
@@ -685,6 +687,13 @@ class GameState {
                 dispenser.put("type", ((Dispenser) o).getBlockType());
                 dispensers.put(dispenser);
             }
+        }
+        for (ClearEvent e : clearEvents) {
+            JSONObject event = new JSONObject();
+            event.put("x", e.getPosition().x);
+            event.put("y", e.getPosition().y);
+            event.put("radius", e.getRadius());
+            clear.put(event);
         }
         tasks.values().stream().filter(t -> !t.isCompleted()).forEach(t -> {
             JSONObject task  = new JSONObject();

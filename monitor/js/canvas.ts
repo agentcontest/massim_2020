@@ -189,4 +189,12 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
     ctx.fillStyle = 'white';
     ctx.fillText(agent.name.replace('agent', ''), (agent.x + 0.5) * GRID, (agent.y + 0.5) * GRID);
   }
+
+  // clear events
+  for (let clear of dynamic.clear) {
+    ctx.strokeStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(GRID * (clear.x + 0.5), GRID * (clear.y + 0.5), GRID * (clear.radius + 0.5), 0, 2 * Math.PI);
+    ctx.stroke();
+  }
 }

@@ -38,6 +38,7 @@ export interface DynamicWorld {
   blocks: Block[]
   dispensers: Dispenser[]
   tasks: Task[]
+  clear: ClearEvent[]
   cells: Terrain[][]
 }
 
@@ -67,6 +68,12 @@ export interface Task {
   name: string
   deadline: number
   requirements: Block[]
+}
+
+export interface ClearEvent {
+  x: number
+  y: number
+  radius: number
 }
 
 export interface Rect {
