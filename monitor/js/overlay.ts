@@ -45,12 +45,37 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
 }
 
 function hover(world: DynamicWorld, pos: Pos): VNode[] {
+  // pos
   const r = [h('p', `x = ${pos.x}, y = ${pos.y}`)];
+
+  // terrain
   const terrain = world.cells[pos.y][pos.x];
-  if (terrain === 0) r.push(h('p', 'terrain = empty'));
-  else if (terrain === 1) r.push(h('p', 'terrain = goal'));
-  else if (terrain === 2) r.push(h('p', 'terrain = obstacle'));
-  else r.push(h('p', 'terrain = unknown'));
+  if (terrain === 0) r.push(h('p', 'terrain: empty'));
+  else if (terrain === 1) r.push(h('p', 'terrain: goal'));
+  else if (terrain === 2) r.push(h('p', 'terrain: obstacle'));
+  else r.push(h('p', 'terrain: unknown'));
+
+  // dispensers
+  for (let dispenser of world.dispensers) {
+    if (dispenser.x == pos.x && dispenser.y == pos.y) {
+      r.push(h('p', `dispenser: type = ${dispenser.type}`));
+    }
+  }
+
+  // blocks
+  for (let block of world.blocks) {
+    if (block.x == pos.x && block.y == pos.y) {
+      r.push(h('p', `block: type = ${block.type}`));
+    }
+  }
+
+  // agents
+  for (let agent of world.entities) {
+    if (agent.x == pos.x && agent.y == pos.y) {
+      r.push(h('p', `agent: name = ${agent.name}, team = ${agent.team}`));
+    }
+  }
+
   return r;
 }
 
