@@ -180,7 +180,8 @@ class GameState {
                 var b = new BufferedReader(new FileReader(setupFilePath));
                 var line = "";
                 while ((line = b.readLine()) != null) {
-                    if (line.startsWith("#")) continue;
+                    if (line.startsWith("#") || line.isEmpty()) continue;
+                    if (line.startsWith("stop")) break;
                     handleCommand(line.split(" "));
                 }
             } catch (IOException e) {
@@ -198,6 +199,8 @@ class GameState {
     }
 
     private void handleCommand(String[] command) {
+        if (command.length == 0) return;
+
         switch (command[0]) {
             case "move":
                 if (command.length != 4) break;
@@ -261,6 +264,18 @@ class GameState {
                 if (a1 == null || a2 == null) break;
                 grid.attach(a1, a2);
                 break;
+
+            case "terrain":
+                if (command.length != 4) break;
+                x = Util.tryParseInt(command[1]);
+                y = Util.tryParseInt(command[2]);
+                var type = command[3];
+                if (x == null || y == null || type.isEmpty()) break;
+                if (type.equalsIgnoreCase("obstacle")) setTerrain(Position.of(x, y), Terrain.OBSTACLE);
+                else if (type.equalsIgnoreCase("goal")) setTerrain(Position.of(x, y), Terrain.GOAL);
+                else if (type.equalsIgnoreCase("empty")) setTerrain(Position.of(x, y), Terrain.EMPTY);
+                break;
+
             default:
                 Log.log(Log.Level.ERROR, "Cannot handle command " + Arrays.toString(command));
         }

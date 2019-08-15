@@ -9,6 +9,8 @@
 
   "match" : [
     {
+      "setup" : "conf/setup/test.txt",
+
       "steps" : 500,
       "randomSeed" : 17,
       "randomFail" : 1,
