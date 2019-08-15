@@ -45,15 +45,17 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
 }
 
 function hover(world: DynamicWorld, pos: Pos): VNode[] {
+  if (!world.cells[pos.y]) return [];
+  const terrain = world.cells[pos.y][pos.x];
+  if (typeof terrain == 'undefined') return [];
+
   // pos
   const r = [h('p', `x = ${pos.x}, y = ${pos.y}`)];
 
   // terrain
-  const terrain = world.cells[pos.y][pos.x];
   if (terrain === 0) r.push(h('p', 'terrain: empty'));
   else if (terrain === 1) r.push(h('p', 'terrain: goal'));
   else if (terrain === 2) r.push(h('p', 'terrain: obstacle'));
-  else r.push(h('p', 'terrain: unknown'));
 
   // dispensers
   for (let dispenser of world.dispensers) {
@@ -134,6 +136,6 @@ export default function(ctrl: Ctrl): VNode {
     ]),
     h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
     h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
-    ctrl.vm.hover ? h('div.box', hover(ctrl.vm.dynamic, ctrl.vm.hover)) : undefined
+    h('div.box', ctrl.vm.hover ? hover(ctrl.vm.dynamic, ctrl.vm.hover) : [])
   ]);
 }
