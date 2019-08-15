@@ -1,4 +1,4 @@
-import { Ctrl, StaticWorld, DynamicWorld, Task, Block } from './interfaces';
+import { Ctrl, StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
 import { renderBlocks } from './canvas';
 import  * as styles from './styles';
 
@@ -42,6 +42,16 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
     ]),
     ...(selectedTask ? taskDetails(st, selectedTask) : [])
   ]
+}
+
+function hover(world: DynamicWorld, pos: Pos): VNode[] {
+  const r = [h('p', `x = ${pos.x}, y = ${pos.y}`)];
+  const terrain = world.cells[pos.y][pos.x];
+  if (terrain === 0) r.push(h('p', 'terrain = empty'));
+  else if (terrain === 1) r.push(h('p', 'terrain = goal'));
+  else if (terrain === 2) r.push(h('p', 'terrain = obstacle'));
+  else r.push(h('p', 'terrain = unknown'));
+  return r;
 }
 
 function taskDetails(st: StaticWorld, task: Task): VNode[] {
@@ -98,6 +108,7 @@ export default function(ctrl: Ctrl): VNode {
       `Step: ${ctrl.vm.dynamic.step} / ${ctrl.vm.static.steps - 1}`
     ]),
     h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
-    h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic))
+    h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
+    ctrl.vm.hover ? h('div.box', hover(ctrl.vm.dynamic, ctrl.vm.hover)) : undefined
   ]);
 }
