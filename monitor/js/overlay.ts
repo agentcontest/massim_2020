@@ -10,12 +10,12 @@ function simplePlural(n: number, singular: string): string {
   else return n + ' ' + singular + 's';
 }
 
-function teams(world: StaticWorld): VNode[] {
-  const teamNames = Object.keys(world.teams);
+function teams(st: StaticWorld, world: DynamicWorld): VNode[] {
+  const teamNames = Object.keys(st.teams);
   teamNames.sort();
   return teamNames.map((name, i) => h('div.team', {
     style: { background: styles.teams[i] }
-  }, name));
+  }, `${name}: $${world.scores[name]}`));
 }
 
 function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
@@ -97,7 +97,7 @@ export default function(ctrl: Ctrl): VNode {
     h('div.box', [
       'Connected.'
     ]),
-    h('div.box', teams(ctrl.vm.static)),
+    h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
     h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic))
   ]);
 }

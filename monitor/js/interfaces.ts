@@ -40,6 +40,7 @@ export interface DynamicWorld {
   tasks: Task[]
   clear: ClearEvent[]
   cells: Terrain[][]
+  scores: { [team: string]: number }
 }
 
 export interface Agent {

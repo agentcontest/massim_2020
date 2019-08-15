@@ -655,6 +655,8 @@ class GameState {
         snapshot.put("cells", cells);
         JSONArray clear = new JSONArray();
         snapshot.put("clear", clear);
+        JSONObject scores = new JSONObject();
+        snapshot.put("scores", scores);
         for (int y = 0; y < grid.getDimY(); y++) {
             JSONArray row = new JSONArray();
             for (int x = 0; x < grid.getDimX(); x++) {
@@ -710,6 +712,9 @@ class GameState {
                 requirementsArr.put(requirement);
             });
             taskArr.put(task);
+        });
+        teams.values().forEach(t -> {
+            scores.put(t.getName(), t.getScore());
         });
         return snapshot;
     }
