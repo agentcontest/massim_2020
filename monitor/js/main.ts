@@ -9,7 +9,7 @@ import listeners from 'snabbdom/modules/eventlisteners';
 import style from 'snabbdom/modules/style';
 
 import makeCtrl from './ctrl';
-import render from './canvas';
+import { render, invClientPos } from './canvas';
 import overlay from './overlay';
 
 const patch = init([klass, props, attributes, listeners, style]);
@@ -35,4 +35,12 @@ export default function Monitor(overlayTarget: Element, canvas: HTMLCanvasElemen
   redraw();
 
   window.addEventListener('resize', redraw, { passive: true });
+
+  canvas.addEventListener('mousemove', e => {
+    if (!ctrl.vm.static) return;
+    ctrl.setHover(invClientPos(canvas, ctrl.vm.static, e.clientX, e.clientY));
+  });
+  canvas.addEventListener('mouseleave', e => {
+    ctrl.setHover(undefined);
+  });
 }

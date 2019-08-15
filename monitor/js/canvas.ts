@@ -1,14 +1,31 @@
-import { Ctrl, DynamicWorld, StaticWorld, Block, Rect } from './interfaces';
+import { Ctrl, DynamicWorld, StaticWorld, Block, Rect, Pos } from './interfaces';
 import * as styles from './styles';
 
 let GRID = 20; // todo: make const
 
-export default function(canvas: HTMLCanvasElement, ctrl: Ctrl) {
+export function render(canvas: HTMLCanvasElement, ctrl: Ctrl) {
   const ctx = canvas.getContext('2d')!;
   ctx.save();
   if (ctrl.vm.static) renderStatic(canvas, ctx, ctrl.vm.static);
   if (ctrl.vm.static && ctrl.vm.dynamic) renderDynamic(ctx, ctrl.vm.static, ctrl.vm.dynamic);
+  if (ctrl.vm.static && ctrl.vm.hover) renderHover(ctx, ctrl.vm.static, ctrl.vm.hover);
   ctx.restore();
+}
+
+export function invClientPos(canvas: HTMLCanvasElement, world: StaticWorld, clientX: number, clientY: number): Pos {
+  const clientRect = canvas.getBoundingClientRect();
+  return {
+    x: Math.floor((clientX - clientRect.left - Math.floor((canvas.width - world.grid.width * GRID) / 2)) / GRID),
+    y: Math.floor((clientY - clientRect.top - Math.floor((canvas.height - world.grid.height * GRID) / 2)) / GRID)
+  };
+}
+
+function renderHover(ctx: CanvasRenderingContext2D, st: StaticWorld, hover: Pos) {
+  if (hover.x < 0 || hover.x >= st.grid.width || hover.y < 0 || hover.y >= st.grid.height) return;
+  ctx.beginPath();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.rect(hover.x * GRID, hover.y * GRID, GRID, GRID);
+  ctx.fill();
 }
 
 function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, world: StaticWorld) {

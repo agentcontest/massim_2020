@@ -1,4 +1,4 @@
-import { Redraw, Ctrl, ViewModel } from './interfaces';
+import { Redraw, Ctrl, ViewModel, Pos } from './interfaces';
 
 export default function(redraw: Redraw): Ctrl {
   const vm: ViewModel = {
@@ -38,6 +38,11 @@ export default function(redraw: Redraw): Ctrl {
 
   return {
     vm,
-    redraw
+    redraw,
+    setHover(pos?: Pos) {
+      const changed = (!pos && vm.hover) || (pos && !vm.hover) || (pos && vm.hover && (pos.x != vm.hover.x || pos.y != vm.hover.y));
+      vm.hover = pos;
+      if (changed) redraw();
+    }
   }
 }

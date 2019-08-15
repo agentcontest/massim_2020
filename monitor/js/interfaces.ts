@@ -7,11 +7,13 @@ export interface ViewModel {
   static?: StaticWorld
   dynamic?: DynamicWorld
   taskName?: string
+  hover?: Pos
 }
 
 export interface Ctrl {
   vm: ViewModel
   redraw: Redraw
+  setHover(pos?: Pos): void
 }
 
 export type BlockType = string
@@ -86,4 +88,9 @@ export interface Rect {
   y2: number
   width: number
   height: number
+}
+
+export interface Pos {
+  x: number
+  y: number
 }
