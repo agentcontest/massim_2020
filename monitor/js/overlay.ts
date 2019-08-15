@@ -95,7 +95,7 @@ export default function(ctrl: Ctrl): VNode {
     ]);
   return h('div#overlay', [
     h('div.box', [
-      'Connected.'
+      `Step: ${ctrl.vm.dynamic.step} / ${ctrl.vm.static.steps - 1}`
     ]),
     h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
     h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic))

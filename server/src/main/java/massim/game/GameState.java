@@ -643,6 +643,7 @@ class GameState {
 
     JSONObject takeSnapshot() {
         JSONObject snapshot = new JSONObject();
+        snapshot.put("step", step);
         JSONArray entities = new JSONArray();
         snapshot.put("entities", entities);
         JSONArray blocks = new JSONArray();

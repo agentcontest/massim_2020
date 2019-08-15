@@ -23,8 +23,10 @@ public class Simulation {
 
     private String name;
     private GameState state;
+    private int steps;
 
     public Map<String, SimStartMessage> init(int steps, JSONObject config, Set<TeamConfig> matchTeams) {
+        this.steps = steps;
         this.state = new GameState(config, matchTeams);
         this.name = System.currentTimeMillis() + "_" + matchTeams.stream()
                 .map(TeamConfig::getName)
@@ -77,6 +79,7 @@ public class Simulation {
         world.put("grid", grid);
         world.put("teams", teams);
         world.put("blockTypes", this.state.getBlockTypes());
+        world.put("steps", steps);
         return world;
     }
 

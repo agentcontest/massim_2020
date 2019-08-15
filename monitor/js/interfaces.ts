@@ -20,6 +20,7 @@ export interface StaticWorld {
   grid: Grid
   teams: { [key: string]: Team }
   blockTypes: BlockType[]
+  steps: number
 }
 
 export interface Team {
@@ -34,6 +35,7 @@ export interface Grid {
 type Terrain = 0 | 1 | 2
 
 export interface DynamicWorld {
+  step: number
   entities: Agent[]
   blocks: Block[]
   dispensers: Dispenser[]
