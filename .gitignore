@@ -9,3 +9,6 @@ monitor/node_modules
 monitor/src/main/resources/www/main.js
 monitor/js/*.js
 *.iml
+.idea
+*.DS_Store
+docs/*.html
