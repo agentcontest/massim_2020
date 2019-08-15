@@ -651,6 +651,15 @@ class GameState {
         snapshot.put("dispensers", dispensers);
         JSONArray taskArr = new JSONArray();
         snapshot.put("tasks", taskArr);
+        JSONArray cells = new JSONArray();
+        snapshot.put("cells", cells);
+        for (int y = 0; y < grid.getDimY(); y++) {
+            JSONArray row = new JSONArray();
+            for (int x = 0; x < grid.getDimX(); x++) {
+                row.put(grid.getTerrain(Position.of(x, y)).id);
+            }
+            cells.put(row);
+        }
         for (GameObject o : gameObjects.values()) {
             if (o instanceof Entity) {
                 JSONObject entity = new JSONObject();

@@ -57,19 +57,9 @@ public class Simulation {
     }
 
     public JSONObject getStaticData() {
-        var cells = new JSONArray();
-        for (int y = 0; y < this.state.getGrid().getDimY(); y++) {
-            var row = new JSONArray();
-            for (int x = 0; x < this.state.getGrid().getDimX(); x++) {
-                row.put(this.state.getGrid().getTerrain(Position.of(x, y)).id);
-            }
-            cells.put(row);
-        }
-
         var grid = new JSONObject();
         grid.put("width", this.state.getGrid().getDimX());
         grid.put("height", this.state.getGrid().getDimY());
-        grid.put("cells", cells);
 
         var teams = new JSONObject();
         for (var entry: this.state.getTeams().entrySet()) {

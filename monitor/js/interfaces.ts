@@ -29,7 +29,6 @@ export interface Team {
 export interface Grid {
   width: number
   height: number
-  cells: Terrain[][]
 }
 
 type Terrain = 0 | 1 | 2
@@ -39,6 +38,7 @@ export interface DynamicWorld {
   blocks: Block[]
   dispensers: Dispenser[]
   tasks: Task[]
+  cells: Terrain[][]
 }
 
 export interface Agent {

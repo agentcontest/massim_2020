@@ -36,29 +36,6 @@ function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, 
       ctx.fill();
     }
   }
-
-  // terrain
-  for (let y = 0; y < world.grid.height; y++) {
-    for (let x = 0; x < world.grid.width; x++) {
-      switch (world.grid.cells[y][x]) {
-        case 0: // EMPTY
-          continue;
-        case 1: // GOAL
-          ctx.fillStyle = styles.goalFill;
-          ctx.strokeStyle = styles.goalStroke;
-          ctx.beginPath();
-          ctx.rect(x * GRID, y * GRID, GRID, GRID);
-          ctx.fill();
-          continue;
-        case 2: // OBSTABLE
-          ctx.fillStyle = styles.obstacle;
-          break;
-      }
-      ctx.beginPath();
-      ctx.rect(x * GRID, y * GRID, GRID, GRID);
-      ctx.fill();
-    }
-  }
 }
 
 function rect(ctx: CanvasRenderingContext2D, blockSize: number, x: number, y: number, margin: number): Rect {
@@ -132,6 +109,29 @@ export function renderBlocks(ctx: CanvasRenderingContext2D, st: StaticWorld, blo
 }
 
 function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: DynamicWorld) {
+  // terrain
+  for (let y = 0; y < st.grid.height; y++) {
+    for (let x = 0; x < st.grid.width; x++) {
+      switch (dynamic.cells[y][x]) {
+        case 0: // EMPTY
+          continue;
+        case 1: // GOAL
+          ctx.fillStyle = styles.goalFill;
+          ctx.strokeStyle = styles.goalStroke;
+          ctx.beginPath();
+          ctx.rect(x * GRID, y * GRID, GRID, GRID);
+          ctx.fill();
+          continue;
+        case 2: // OBSTABLE
+          ctx.fillStyle = styles.obstacle;
+          break;
+      }
+      ctx.beginPath();
+      ctx.rect(x * GRID, y * GRID, GRID, GRID);
+      ctx.fill();
+    }
+  }
+
   // dispensers
   for (let dispenser of dynamic.dispensers) {
     ctx.lineWidth = GRID / 20;
