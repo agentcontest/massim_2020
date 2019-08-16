@@ -53,12 +53,14 @@ export interface Agent {
   name: string
   id: string
   team: string
+  attached?: Pos[]
 }
 
 export interface Block {
   x: number
   y: number
   type: BlockType
+  attached?: Pos[]
 }
 
 export interface Dispenser {

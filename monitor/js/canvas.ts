@@ -1,4 +1,4 @@
-import { Ctrl, DynamicWorld, StaticWorld, Block, Rect, Pos } from './interfaces';
+import { Ctrl, DynamicWorld, StaticWorld, Block, Rect, Agent, Pos } from './interfaces';
 import * as styles from './styles';
 
 let GRID = 20; // todo: make const
@@ -8,7 +8,7 @@ export function render(canvas: HTMLCanvasElement, ctrl: Ctrl) {
   ctx.save();
   if (ctrl.vm.static) renderStatic(canvas, ctx, ctrl.vm.static);
   if (ctrl.vm.static && ctrl.vm.dynamic) renderDynamic(ctx, ctrl.vm.static, ctrl.vm.dynamic);
-  if (ctrl.vm.static && ctrl.vm.hover) renderHover(ctx, ctrl.vm.static, ctrl.vm.hover);
+  if (ctrl.vm.static && ctrl.vm.dynamic && ctrl.vm.hover) renderHover(ctx, ctrl.vm.static, ctrl.vm.dynamic, ctrl.vm.hover);
   ctx.restore();
 }
 
@@ -20,12 +20,22 @@ export function invClientPos(canvas: HTMLCanvasElement, world: StaticWorld, clie
   };
 }
 
-function renderHover(ctx: CanvasRenderingContext2D, st: StaticWorld, hover: Pos) {
+function renderHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, hover: Pos) {
   if (hover.x < 0 || hover.x >= st.grid.width || hover.y < 0 || hover.y >= st.grid.height) return;
   ctx.beginPath();
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
   ctx.rect(hover.x * GRID, hover.y * GRID, GRID, GRID);
   ctx.fill();
+
+  for (let attachable of (world.entities as Array<Agent | Block>).concat(world.blocks)) {
+    if (attachable.x == hover.x && attachable.y == hover.y && attachable.attached) {
+      for (let pos of attachable.attached) {
+        ctx.beginPath();
+        ctx.rect(pos.x * GRID, pos.y * GRID, GRID, GRID);
+        ctx.fill();
+      }
+    }
+  }
 }
 
 function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, world: StaticWorld) {
