@@ -52,7 +52,7 @@ public class Entity extends Attachable {
      */
     void preStep() {
         disabled--;
-        maxEnergy = Math.min(energy + 1, maxEnergy);
+        energy = Math.min(energy + 1, maxEnergy);
     }
 
     String getTeamName() {
