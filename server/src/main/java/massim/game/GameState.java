@@ -529,19 +529,19 @@ class GameState {
 
     int clearArea(Position center, int radius) {
         var removed = 0;
-        for (Position position : new Area(center, radius)) {
+        for (var position : new Area(center, radius)) {
             for (var go : getThingsAt(position)) {
                 if (go instanceof Entity) {
                     ((Entity)go).disable();
                 }
                 else if (go instanceof Block) {
                     removed++;
-                    grid.removeThing((Positionable) go);
+                    grid.removeThing(go);
                 }
-                if (grid.getTerrain(position) == Terrain.OBSTACLE) {
-                    removed++;
-                    grid.setTerrain(position.x, position.y, Terrain.EMPTY);
-                }
+            }
+            if (grid.getTerrain(position) == Terrain.OBSTACLE) {
+                removed++;
+                grid.setTerrain(position.x, position.y, Terrain.EMPTY);
             }
         }
         return removed;
@@ -767,7 +767,7 @@ class GameState {
         Area(Position center, int radius) {
             for (var dx = -radius; dx <= radius; dx++) {
                 var x = center.x + dx;
-                var dy = radius - dx;
+                var dy = radius - Math.abs(dx);
                 for (var y = center.y - dy; y <= center.y + dy; y++) {
                     this.add(Position.of(x, y));
                 }
