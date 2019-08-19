@@ -2,6 +2,11 @@
 
 ## 2019
 
+### MASSim 2.1 - bugfixes
+
+* some not so minor bugs fixed
+* monitor improvements
+
 ### MASSim 2.0 - feature complete
 
 * many bugfixs
