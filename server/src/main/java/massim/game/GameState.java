@@ -130,7 +130,7 @@ class GameState {
                     var width = Math.min(gridX, img.getWidth());
                     var height = Math.min(gridY, img.getHeight());
                     for (int x = 0; x < width; x++) { for (int y = 0; y < height; y++) {
-                        grid.setTerrain(x, y, terrainColors.getOrDefault(img.getRGB(x, y), Terrain.EMPTY));
+                        grid.setTerrain(Position.of(x, y), terrainColors.getOrDefault(img.getRGB(x, y), Terrain.EMPTY));
                     }}
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -344,7 +344,7 @@ class GameState {
         for (var i = 0; i < distributeNew; i++) {
             var pos = grid.findRandomFreePosition(event.getPosition(),event.getRadius() + 3);
             if(grid.isInBounds(pos)) {
-                grid.setTerrain(pos.x, pos.y, Terrain.OBSTACLE);
+                grid.setTerrain(pos, Terrain.OBSTACLE);
             }
         }
     }
@@ -541,7 +541,7 @@ class GameState {
             }
             if (grid.getTerrain(position) == Terrain.OBSTACLE) {
                 removed++;
-                grid.setTerrain(position.x, position.y, Terrain.EMPTY);
+                grid.setTerrain(position, Terrain.EMPTY);
             }
         }
         return removed;
@@ -745,7 +745,7 @@ class GameState {
     }
 
     void setTerrain(Position p, Terrain terrain) {
-        grid.setTerrain(p.x, p.y, terrain);
+        grid.setTerrain(p, terrain);
     }
 
     boolean attach(Position p1, Position p2) {

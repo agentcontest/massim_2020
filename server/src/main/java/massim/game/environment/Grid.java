@@ -230,8 +230,9 @@ public class Grid {
         return blockingThings.isEmpty();
     }
 
-    public void setTerrain(int x, int y, Terrain terrainType) {
-        terrainMap[x][y] = terrainType;
+    public void setTerrain(Position pos, Terrain terrainType) {
+        if (outOfBounds(pos)) return;
+        terrainMap[pos.x][pos.y] = terrainType;
     }
 
     public Terrain getTerrain(Position pos) {
