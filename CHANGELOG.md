@@ -2,14 +2,14 @@
 
 ## 2019
 
-### MASSim 2.1 - bugfixes
+### MASSim 2.1 - bug-fixes
 
 * some not so minor bugs fixed
 * monitor improvements
 
 ### MASSim 2.0 - feature complete
 
-* many bugfixs
+* many bug-fixes
 * monitor improvements
 * scenario
   * added percept for vision and team
