@@ -161,6 +161,29 @@ public class GameStateTest {
         assert(!a2.isDisabled());
     }
 
+    @org.junit.Test
+    public void testArea() {
+        var area = new GameState.Area(Position.of(10, 10), 2);
+        assert(area.size() == 13);
+        assert(area.contains(Position.of(10, 10)));
+        assert(area.contains(Position.of(10, 11)));
+        assert(area.contains(Position.of(10, 12)));
+        assert(area.contains(Position.of(10, 9)));
+        assert(area.contains(Position.of(10, 8)));
+        assert(area.contains(Position.of(11, 10)));
+        assert(area.contains(Position.of(12, 10)));
+        assert(area.contains(Position.of(9, 10)));
+        assert(area.contains(Position.of(8, 10)));
+        assert(area.contains(Position.of(9, 9)));
+        assert(area.contains(Position.of(9, 11)));
+        assert(area.contains(Position.of(11, 11)));
+        assert(area.contains(Position.of(11, 9)));
+
+        assert(new GameState.Area(Position.of(0,0), 3).size() == 25);
+        assert(new GameState.Area(Position.of(0,0), 1).size() == 5);
+        assert(new GameState.Area(Position.of(0,0), 0).size() == 1);
+    }
+
     private static boolean containsThing(Collection<Thing> things, String type, Position pos) {
         return things.stream().anyMatch(t -> t.type.equals(type) && t.x == pos.x && t.y == pos.y);
     }
