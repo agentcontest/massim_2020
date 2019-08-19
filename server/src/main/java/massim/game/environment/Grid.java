@@ -6,7 +6,6 @@ import massim.util.Log;
 import massim.util.RNG;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Grid {
 
@@ -204,13 +203,17 @@ public class Grid {
     }
 
     public Position findRandomFreePosition(Position center, int maxDistance) {
-        int x = center.x;
-        int y = center.y;
-        int dx = RNG.nextInt(maxDistance + 1);
-        int dy = maxDistance - dx;
-        x += RNG.nextDouble() < .5? dx : -dx;
-        y += RNG.nextDouble() < .5? dy : -dy;
-        return Position.of(x, y);
+        for (var i = 0; i < 50; i++) {
+            int x = center.x;
+            int y = center.y;
+            int dx = RNG.nextInt(maxDistance + 1);
+            int dy = RNG.nextInt(maxDistance + 1);
+            x += RNG.nextDouble() < .5? dx : -dx;
+            y += RNG.nextDouble() < .5? dy : -dy;
+            var target = Position.of(x, y);
+            if (isUnblocked(target)) return target;
+        }
+        return null;
     }
 
     /**
@@ -224,10 +227,7 @@ public class Grid {
         if (outOfBounds(xy)) return false;
         if (terrainMap[xy.x][xy.y] == Terrain.OBSTACLE) return false;
 
-        var blockingThings = getThings(xy).stream()
-                .filter(t -> t instanceof Attachable && !excludedObjects.contains(t))
-                .collect(Collectors.toCollection(HashSet::new));
-        return blockingThings.isEmpty();
+        return getThings(xy).stream().noneMatch(t -> t instanceof Attachable && !excludedObjects.contains(t));
     }
 
     public void setTerrain(Position pos, Terrain terrainType) {
@@ -241,7 +241,7 @@ public class Grid {
     }
 
     public boolean isInBounds(Position p) {
-        return p.x >= 0 && p.y >= 0 && p.x < dimX && p.y < dimY;
+        return p != null && p.x >= 0 && p.y >= 0 && p.x < dimX && p.y < dimY;
     }
 
     public void createMarker(Position position, Marker.Type type) {

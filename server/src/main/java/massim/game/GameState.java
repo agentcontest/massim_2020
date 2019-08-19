@@ -342,8 +342,9 @@ class GameState {
         var distributeNew = RNG.betweenClosed(eventCreateMin, eventCreateMax) + removed;
 
         for (var i = 0; i < distributeNew; i++) {
-            var pos = grid.findRandomFreePosition(event.getPosition(),event.getRadius() + 3);
-            if(grid.isInBounds(pos)) {
+            var pos = grid.findRandomFreePosition(event.getPosition(),3 + event.getRadius());
+            if(pos != null && grid.getTerrain(pos) == Terrain.EMPTY
+                    && dispensers.get(pos) == null && grid.isInBounds(pos)) {
                 grid.setTerrain(pos, Terrain.OBSTACLE);
             }
         }
