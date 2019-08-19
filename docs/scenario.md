@@ -27,7 +27,7 @@ Each cell of the grid contains up to one thing that may collide with other thing
 
 ### Entity/Agent
 
-Each agent controls one entity in the simulation (s.t. we can use both terms interchangeably). Agents do not know their absolute positioning in the environment. They only know their *energy* level (used for *clearing*) and whether they are currently disabled.
+Each agent controls one entity in the simulation (s.t. we can use both terms interchangeably). Agents do not know their absolute positioning in the environment. They only know their *energy* level (used for *clearing*) and whether they are currently disabled. Agents automatically recharge 1 energy per step.
 
 `Config: match.maxEnergy`
 
