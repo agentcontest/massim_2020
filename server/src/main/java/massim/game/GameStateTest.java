@@ -45,7 +45,7 @@ public class GameStateTest {
             "        \"chance\" : 10,\n" +
             "        \"radius\" : [3, 5],\n" +
             "        \"warning\" : 5,\n" +
-            "        \"create\" : [5, 10]\n" +
+            "        \"create\" : [2, 5]\n" +
             "      }\n" +
             "    }");
 
@@ -124,11 +124,13 @@ public class GameStateTest {
         var block2 = state.createBlock(Position.of(10,12), "b1");
         state.setTerrain(Position.of(11,10), Terrain.OBSTACLE);
 
-        state.clearArea(Position.of(10,10), 1);
+        var result = state.clearArea(Position.of(10,10), 1);
 
         assert(a1.isDisabled());
         assert(state.getThingsAt(block1.getPosition()).size() == 0);
         assert(state.getThingsAt(block2.getPosition()).size() == 1);
+        assert(state.getTerrain(Position.of(11, 10)) == Terrain.EMPTY);
+        assert(result == 2);
     }
 
     @org.junit.Test
