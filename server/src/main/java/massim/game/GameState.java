@@ -39,7 +39,7 @@ class GameState {
 
     private int step = -1;
     private Grid grid;
-    private Map<String, GameObject> gameObjects = new HashMap<>();
+    private Map<Integer, GameObject> gameObjects = new HashMap<>();
     private Map<Position, Dispenser> dispensers = new HashMap<>();
     private Map<String, Task> tasks = new HashMap<>();
     private Set<String> blockTypes = new TreeSet<>();

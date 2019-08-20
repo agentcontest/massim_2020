@@ -48,10 +48,10 @@ export interface DynamicWorld {
 }
 
 export interface Agent {
+  id: number
   x: number
   y: number
   name: string
-  id: string
   team: string
   energy: number
   attached?: Pos[]
@@ -65,9 +65,9 @@ export interface Block {
 }
 
 export interface Dispenser {
+  id: number
   x: number
   y: number
-  id: string
   type: BlockType
 }
 
