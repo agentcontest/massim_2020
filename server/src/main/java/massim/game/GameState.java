@@ -402,6 +402,8 @@ class GameState {
     }
 
     String handleMoveAction(Entity entity, String direction) {
+        if (!grid.isInBounds(entity.getPosition().moved(direction, 1)))
+            return Actions.RESULT_F_FORBIDDEN;
         if (grid.moveWithAttached(entity, direction, 1)) {
             return Actions.RESULT_SUCCESS;
         }

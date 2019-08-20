@@ -102,6 +102,7 @@ Failure Code | Reason
 --- | ---
 failed_parameter | Parameter is not a direction.
 failed_path | Cannot move to the target location because the agent or one of its attached things are blocked.
+failed_forbidden | New agent position would be out of map/grid bounds.
 
 ### attach
 
