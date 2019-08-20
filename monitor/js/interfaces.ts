@@ -53,6 +53,7 @@ export interface Agent {
   name: string
   id: string
   team: string
+  energy: number
   attached?: Pos[]
 }
 

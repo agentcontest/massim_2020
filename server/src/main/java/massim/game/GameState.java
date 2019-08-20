@@ -686,6 +686,7 @@ class GameState {
                 obj.put("id", o.getID());
                 obj.put("name", ((Entity) o).getAgentName());
                 obj.put("team", ((Entity) o).getTeamName());
+                obj.put("energy", ((Entity) o).getEnergy());
                 entities.put(obj);
             } else if (o instanceof Block) {
                 obj.put("type", ((Block) o).getBlockType());
