@@ -54,6 +54,7 @@ export interface Agent {
   name: string
   team: string
   energy: number
+  vision: number
   attached?: Pos[]
 }
 

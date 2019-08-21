@@ -39,7 +39,7 @@ function renderHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: Dyna
 
   const teams = Object.keys(st.teams);
   for (let agent of world.entities) {
-    if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= 5) {
+    if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= agent.vision) {
       ctx.lineWidth = 2;
       ctx.strokeStyle = styles.teams[teams.indexOf(agent.team)];
       drawArea(ctx, agent.x, agent.y, 5);
