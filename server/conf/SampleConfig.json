@@ -24,7 +24,8 @@
       "grid" : {
         "height" : 40,
         "width" : 40,
-        "file" : "conf/maps/test40x40.bmp"
+        "file" : "conf/maps/test40x40.bmp",
+        "borders": true
       },
 
       "blockTypes" : [3, 3],

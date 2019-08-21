@@ -4,13 +4,20 @@ import massim.game.Entity;
 import massim.protocol.data.Position;
 import massim.util.Log;
 import massim.util.RNG;
+import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class Grid {
 
     public static final Set<String> DIRECTIONS = Set.of("n", "s", "e", "w");
     public static final Set<String> ROTATION_DIRECTIONS = Set.of("cw", "ccw");
+    private static Map<Integer, Terrain> terrainColors =
+            Map.of(-16777216, Terrain.OBSTACLE, -1, Terrain.EMPTY, -65536, Terrain.GOAL);
 
     private int dimX;
     private int dimY;
@@ -19,20 +26,43 @@ public class Grid {
     private Terrain[][] terrainMap;
     private List<Marker> markers = new ArrayList<>();
 
-    public Grid(int dimX, int dimY, int attachLimit) {
-        this.dimX = dimX;
-        this.dimY = dimY;
+    public Grid(JSONObject gridConf, int attachLimit) {
         this.attachLimit = attachLimit;
+        dimX = gridConf.getInt("width");
+        dimY = gridConf.getInt("height");
         thingsMap = new HashMap<>();
         terrainMap = new Terrain[dimX][dimY];
         for (Terrain[] col : terrainMap) Arrays.fill(col, Terrain.EMPTY);
-        for (int x = 0; x < dimX; x++) {
-            terrainMap[x][0] = Terrain.OBSTACLE;
-            terrainMap[x][dimY - 1] = Terrain.OBSTACLE;
+
+        // terrain from bitmap
+        String mapFilePath = gridConf.optString("file");
+        if (!mapFilePath.isBlank()){
+            var mapFile = new File(mapFilePath);
+            if (mapFile.exists()) {
+                try {
+                    BufferedImage img = ImageIO.read(mapFile);
+                    var width = Math.min(dimX, img.getWidth());
+                    var height = Math.min(dimY, img.getHeight());
+                    for (int x = 0; x < width; x++) { for (int y = 0; y < height; y++) {
+                        setTerrain(Position.of(x, y), terrainColors.getOrDefault(img.getRGB(x, y), Terrain.EMPTY));
+                    }}
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else Log.log(Log.Level.ERROR, "File " + mapFile.getAbsolutePath() + " not found.");
         }
-        for (int y = 0; y < dimY; y++) {
-            terrainMap[0][y] = Terrain.OBSTACLE;
-            terrainMap[dimX - 1][y] = Terrain.OBSTACLE;
+
+        // obstacle boundary
+        if (gridConf.optBoolean("borders", false)) {
+            for (int x = 0; x < dimX; x++) {
+                terrainMap[x][0] = Terrain.OBSTACLE;
+                terrainMap[x][dimY - 1] = Terrain.OBSTACLE;
+            }
+            for (int y = 0; y < dimY; y++) {
+                terrainMap[0][y] = Terrain.OBSTACLE;
+                terrainMap[dimX - 1][y] = Terrain.OBSTACLE;
+            }
         }
     }
 

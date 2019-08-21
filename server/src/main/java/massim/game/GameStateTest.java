@@ -29,7 +29,8 @@ public class GameStateTest {
             "      \"grid\" : {\n" +
             "        \"height\" : 40,\n" +
             "        \"width\" : 40,\n" +
-            "        \"file\" : \"conf/maps/test40x40.bmp\"\n" +
+            "        \"file\" : \"conf/maps/test40x40.bmp\",\n" +
+            "        \"borders\" : true\n" +
             "      },\n" +
             "\n" +
             "      \"blockTypes\" : [3, 3],\n" +

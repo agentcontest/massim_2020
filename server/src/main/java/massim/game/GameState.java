@@ -16,10 +16,7 @@ import massim.util.Util;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -29,9 +26,6 @@ import java.util.stream.Collectors;
  * State of the game.
  */
 class GameState {
-
-    private static Map<Integer, Terrain> terrainColors =
-            Map.of(-16777216, Terrain.OBSTACLE, -1, Terrain.EMPTY, -65536, Terrain.GOAL);
 
     private Map<String, Team> teams = new HashMap<>();
     private Map<String, Entity> agentToEntity = new HashMap<>();
@@ -115,29 +109,7 @@ class GameState {
         matchTeams.forEach(team -> teams.put(team.getName(), new Team(team.getName())));
 
         // create grid environment
-        JSONObject gridConf = config.getJSONObject("grid");
-        var gridX = gridConf.getInt("width");
-        var gridY = gridConf.getInt("height");
-        grid = new Grid(gridX, gridY, attachLimit);
-
-        // read bitmap if available
-        String mapFilePath = gridConf.optString("file");
-        if (!mapFilePath.equals("")){
-            var mapFile = new File(mapFilePath);
-            if (mapFile.exists()) {
-                try {
-                    BufferedImage img = ImageIO.read(mapFile);
-                    var width = Math.min(gridX, img.getWidth());
-                    var height = Math.min(gridY, img.getHeight());
-                    for (int x = 0; x < width; x++) { for (int y = 0; y < height; y++) {
-                        grid.setTerrain(Position.of(x, y), terrainColors.getOrDefault(img.getRGB(x, y), Terrain.EMPTY));
-                    }}
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else Log.log(Log.Level.ERROR, "File " + mapFile.getAbsolutePath() + " not found.");
-        }
+        grid = new Grid(config.getJSONObject("grid"), attachLimit);
 
         // create entities
         JSONArray entities = config.getJSONArray("entities");
@@ -724,9 +696,7 @@ class GameState {
             });
             taskArr.put(task);
         });
-        teams.values().forEach(t -> {
-            scores.put(t.getName(), t.getScore());
-        });
+        teams.values().forEach(t -> scores.put(t.getName(), t.getScore()));
         return snapshot;
     }
 
@@ -765,7 +735,7 @@ class GameState {
         return grid.getTerrain(pos);
     }
 
-    public static class Area extends ArrayList<Position> {
+    static class Area extends ArrayList<Position> {
         /**
          * Creates a new list containing all positions belonging to the
          * area around a given center within the given radius.
