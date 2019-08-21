@@ -23,7 +23,7 @@ export function invClientPos(canvas: HTMLCanvasElement, world: StaticWorld, clie
 function renderHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, hover: Pos) {
   if (hover.x < 0 || hover.x >= st.grid.width || hover.y < 0 || hover.y >= st.grid.height) return;
   ctx.beginPath();
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.fillStyle = 'rgba(180, 180, 255, 0.4)';
   ctx.rect(hover.x * GRID, hover.y * GRID, GRID, GRID);
   ctx.fill();
 
@@ -34,6 +34,15 @@ function renderHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: Dyna
         ctx.rect(pos.x * GRID, pos.y * GRID, GRID, GRID);
         ctx.fill();
       }
+    }
+  }
+
+  const teams = Object.keys(st.teams);
+  for (let agent of world.entities) {
+    if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= agent.vision) {
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = styles.teams[teams.indexOf(agent.team)];
+      drawArea(ctx, agent.x, agent.y, 5);
     }
   }
 }
@@ -219,9 +228,18 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
 
   // clear events
   for (let clear of dynamic.clear) {
+    ctx.lineWidth = 2;
     ctx.strokeStyle = 'red';
-    ctx.beginPath();
-    ctx.arc(GRID * (clear.x + 0.5), GRID * (clear.y + 0.5), GRID * (clear.radius + 0.5), 0, 2 * Math.PI);
-    ctx.stroke();
+    drawArea(ctx, clear.x, clear.y, clear.radius);
   }
+}
+
+function drawArea(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
+  ctx.beginPath();
+  ctx.moveTo((x - radius) * GRID, (y + 0.5) * GRID);
+  ctx.lineTo((x + 0.5) * GRID, (y - radius) * GRID);
+  ctx.lineTo((x + 1 + radius) * GRID, (y + 0.5) * GRID);
+  ctx.lineTo((x + 0.5) * GRID, (y + radius + 1) * GRID);
+  ctx.lineTo((x - radius) * GRID, (y + 0.5) * GRID);
+  ctx.stroke();
 }

@@ -39,7 +39,7 @@ class GameState {
 
     private int step = -1;
     private Grid grid;
-    private Map<String, GameObject> gameObjects = new HashMap<>();
+    private Map<Integer, GameObject> gameObjects = new HashMap<>();
     private Map<Position, Dispenser> dispensers = new HashMap<>();
     private Map<String, Task> tasks = new HashMap<>();
     private Set<String> blockTypes = new TreeSet<>();
@@ -688,6 +688,9 @@ class GameState {
                 obj.put("id", o.getID());
                 obj.put("name", ((Entity) o).getAgentName());
                 obj.put("team", ((Entity) o).getTeamName());
+                obj.put("energy", ((Entity) o).getEnergy());
+                obj.put("vision", ((Entity) o).getVision());
+                if (((Entity) o).isDisabled()) obj.put("disabled", true);
                 entities.put(obj);
             } else if (o instanceof Block) {
                 obj.put("type", ((Block) o).getBlockType());

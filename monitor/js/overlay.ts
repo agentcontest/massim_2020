@@ -44,41 +44,43 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
   ]
 }
 
-function hover(world: DynamicWorld, pos: Pos): VNode[] {
-  if (!world.cells[pos.y]) return [];
+function hover(world: DynamicWorld, pos: Pos): VNode | undefined {
+  if (!world.cells[pos.y]) return;
   const terrain = world.cells[pos.y][pos.x];
-  if (typeof terrain == 'undefined') return [];
+  if (typeof terrain == 'undefined') return;
 
   // pos
-  const r = [h('p', `x = ${pos.x}, y = ${pos.y}`)];
+  const r = [h('li', `x = ${pos.x}, y = ${pos.y}`)];
 
   // terrain
-  if (terrain === 0) r.push(h('p', 'terrain: empty'));
-  else if (terrain === 1) r.push(h('p', 'terrain: goal'));
-  else if (terrain === 2) r.push(h('p', 'terrain: obstacle'));
+  if (terrain === 0) r.push(h('li', 'terrain: empty'));
+  else if (terrain === 1) r.push(h('li', 'terrain: goal'));
+  else if (terrain === 2) r.push(h('li', 'terrain: obstacle'));
 
   // dispensers
   for (let dispenser of world.dispensers) {
     if (dispenser.x == pos.x && dispenser.y == pos.y) {
-      r.push(h('p', `dispenser: type = ${dispenser.type}`));
+      r.push(h('li', `dispenser: type = ${dispenser.type}`));
     }
   }
 
   // blocks
   for (let block of world.blocks) {
     if (block.x == pos.x && block.y == pos.y) {
-      r.push(h('p', `block: type = ${block.type}`));
+      r.push(h('li', `block: type = ${block.type}`));
     }
   }
 
   // agents
   for (let agent of world.entities) {
     if (agent.x == pos.x && agent.y == pos.y) {
-      r.push(h('p', `agent: name = ${agent.name}, team = ${agent.team}`));
+      let description = `agent: name = ${agent.name}, team = ${agent.team}, energy = ${agent.energy}`;
+      if (agent.disabled) description += ', disabled';
+      r.push(h('li', description));
     }
   }
 
-  return r;
+  return h('ul', r);
 }
 
 function taskDetails(st: StaticWorld, task: Task): VNode[] {
