@@ -221,7 +221,11 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
   for (let clear of dynamic.clear) {
     ctx.strokeStyle = 'red';
     ctx.beginPath();
-    ctx.arc(GRID * (clear.x + 0.5), GRID * (clear.y + 0.5), GRID * (clear.radius + 0.5), 0, 2 * Math.PI);
+    ctx.moveTo((clear.x - clear.radius) * GRID, (clear.y + 0.5) * GRID);
+    ctx.lineTo((clear.x + 0.5) * GRID, (clear.y - clear.radius) * GRID);
+    ctx.lineTo((clear.x + 1 + clear.radius) * GRID, (clear.y + 0.5) * GRID);
+    ctx.lineTo((clear.x + 0.5) * GRID, (clear.y + clear.radius + 1) * GRID);
+    ctx.lineTo((clear.x - clear.radius) * GRID, (clear.y + 0.5) * GRID);
     ctx.stroke();
   }
 }
