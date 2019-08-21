@@ -23,7 +23,7 @@ export function invClientPos(canvas: HTMLCanvasElement, world: StaticWorld, clie
 function renderHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, hover: Pos) {
   if (hover.x < 0 || hover.x >= st.grid.width || hover.y < 0 || hover.y >= st.grid.height) return;
   ctx.beginPath();
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.fillStyle = 'rgba(180, 180, 255, 0.4)';
   ctx.rect(hover.x * GRID, hover.y * GRID, GRID, GRID);
   ctx.fill();
 
