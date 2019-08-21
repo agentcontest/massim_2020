@@ -220,12 +220,16 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
   // clear events
   for (let clear of dynamic.clear) {
     ctx.strokeStyle = 'red';
-    ctx.beginPath();
-    ctx.moveTo((clear.x - clear.radius) * GRID, (clear.y + 0.5) * GRID);
-    ctx.lineTo((clear.x + 0.5) * GRID, (clear.y - clear.radius) * GRID);
-    ctx.lineTo((clear.x + 1 + clear.radius) * GRID, (clear.y + 0.5) * GRID);
-    ctx.lineTo((clear.x + 0.5) * GRID, (clear.y + clear.radius + 1) * GRID);
-    ctx.lineTo((clear.x - clear.radius) * GRID, (clear.y + 0.5) * GRID);
-    ctx.stroke();
+    drawArea(ctx, clear.x, clear.y, clear.radius);
   }
+}
+
+function drawArea(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
+  ctx.beginPath();
+  ctx.moveTo((x - radius) * GRID, (y + 0.5) * GRID);
+  ctx.lineTo((x + 0.5) * GRID, (y - radius) * GRID);
+  ctx.lineTo((x + 1 + radius) * GRID, (y + 0.5) * GRID);
+  ctx.lineTo((x + 0.5) * GRID, (y + radius + 1) * GRID);
+  ctx.lineTo((x - radius) * GRID, (y + 0.5) * GRID);
+  ctx.stroke();
 }
