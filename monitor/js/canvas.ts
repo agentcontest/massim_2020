@@ -36,6 +36,15 @@ function renderHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: Dyna
       }
     }
   }
+
+  const teams = Object.keys(st.teams);
+  for (let agent of world.entities) {
+    if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= 5) {
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = styles.teams[teams.indexOf(agent.team)];
+      drawArea(ctx, agent.x, agent.y, 5);
+    }
+  }
 }
 
 function renderStatic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, world: StaticWorld) {
@@ -219,6 +228,7 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
 
   // clear events
   for (let clear of dynamic.clear) {
+    ctx.lineWidth = 2;
     ctx.strokeStyle = 'red';
     drawArea(ctx, clear.x, clear.y, clear.radius);
   }
