@@ -56,6 +56,7 @@ export interface Agent {
   energy: number
   vision: number
   attached?: Pos[]
+  disabled?: boolean
 }
 
 export interface Block {

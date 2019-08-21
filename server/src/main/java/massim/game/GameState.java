@@ -688,6 +688,7 @@ class GameState {
                 obj.put("team", ((Entity) o).getTeamName());
                 obj.put("energy", ((Entity) o).getEnergy());
                 obj.put("vision", ((Entity) o).getVision());
+                if (((Entity) o).isDisabled()) obj.put("disabled", true);
                 entities.put(obj);
             } else if (o instanceof Block) {
                 obj.put("type", ((Block) o).getBlockType());

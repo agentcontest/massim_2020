@@ -74,7 +74,9 @@ function hover(world: DynamicWorld, pos: Pos): VNode | undefined {
   // agents
   for (let agent of world.entities) {
     if (agent.x == pos.x && agent.y == pos.y) {
-      r.push(h('li', `agent: name = ${agent.name}, team = ${agent.team}, energy = ${agent.energy}`));
+      let description = `agent: name = ${agent.name}, team = ${agent.team}, energy = ${agent.energy}`;
+      if (agent.disabled) description += ', disabled';
+      r.push(h('li', description));
     }
   }
 
