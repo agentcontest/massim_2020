@@ -62,7 +62,7 @@ The environment randomly generates events.
 
 #### Clear events
 
-When a clear event happens, a certain area is marked similar to a clear action. The timing and size of an event is random. Each event can be perceived (i.e. its clear *markers*) for a few steps before it actually occurs. Once it resolves, the marked area is *cleared* (see the *clear* action for more details). Additionally, new obstacle terrain is created randomly around the center of the event.
+When a clear event happens, a certain area is marked similar to a clear action. The timing and size of an event is random. Each event can be perceived (i.e. its clear *markers*) for a few steps before it actually occurs. Once it resolves, the marked area is *cleared* (see the *clear* action for more details). Additionally, new obstacle terrain is created randomly around the center of the event (and not necessarily in the previously marked area).
 
 `Config: match.events.*`:
 
