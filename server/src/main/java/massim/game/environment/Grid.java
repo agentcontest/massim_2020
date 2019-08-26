@@ -282,7 +282,6 @@ public class Grid {
     }
 
     public void deleteMarkers() {
-        System.out.println(markers);
         markers.forEach(this::removeThing);
         markers.clear();
     }

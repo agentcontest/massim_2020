@@ -3,19 +3,19 @@ package massim.protocol.data;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class TaskInfo {
     public String name;
     public int deadline;
     public int reward;
-    public Set<Thing> requirements;
+    public List<Thing> requirements;
 
     public TaskInfo(String name, int deadline, int reward, Set<Thing> requirements) {
         this.name = name;
         this.deadline = deadline;
-        this.requirements = requirements;
+        this.requirements = new ArrayList<>(requirements);
+        this.requirements.sort(Comparator.comparingInt(Object::hashCode));
         this.reward = reward;
     }
 

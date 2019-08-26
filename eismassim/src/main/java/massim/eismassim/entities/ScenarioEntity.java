@@ -59,10 +59,12 @@ public class ScenarioEntity extends EISEntity {
                 new Numeral(thing.x), new Numeral(thing.y), new Identifier(thing.type), new Identifier(thing.details))));
 
         percept.taskInfo.forEach(task -> {
-            var tasks = new ParameterList();
-            task.requirements.forEach(req -> tasks.add(new Function("req", new Numeral(req.x), new Numeral(req.y),
-                    new Identifier(req.type))));
-            ret.add(new Percept("task", new Identifier(task.name), new Numeral(task.deadline), new Numeral(task.reward), tasks));
+            var reqs = new ParameterList();
+            for(var req : task.requirements) {
+                reqs.add(new Function("req", new Numeral(req.x), new Numeral(req.y),
+                        new Identifier(req.type)));
+            }
+            ret.add(new Percept("task", new Identifier(task.name), new Numeral(task.deadline), new Numeral(task.reward), reqs));
         });
 
         percept.terrain.forEach((terrain, positions) -> positions.forEach(position ->
