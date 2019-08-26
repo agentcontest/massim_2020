@@ -15,7 +15,11 @@ public class TaskInfo {
         this.name = name;
         this.deadline = deadline;
         this.requirements = new ArrayList<>(requirements);
-        this.requirements.sort(Comparator.comparingInt(Object::hashCode));
+        this.requirements.sort((t1, t2) -> {
+            var r = Integer.compare(t1.x, t2.x);
+            if (r == 0) return Integer.compare(t1.y, t2.y);
+            return r;
+        });
         this.reward = reward;
     }
 
