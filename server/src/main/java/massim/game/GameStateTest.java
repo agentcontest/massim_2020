@@ -46,7 +46,8 @@ public class GameStateTest {
             "        \"chance\" : 10,\n" +
             "        \"radius\" : [3, 5],\n" +
             "        \"warning\" : 5,\n" +
-            "        \"create\" : [2, 5]\n" +
+            "        \"create\" : [2, 5],\n" +
+            "        \"perimeter\" : 3\n" +
             "      }\n" +
             "    }");
 

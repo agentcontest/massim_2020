@@ -53,6 +53,7 @@ class GameState {
     private int eventWarning;
     private int eventCreateMin;
     private int eventCreateMax;
+    private int eventCreatePerimeter;
 
     GameState(JSONObject config, Set<TeamConfig> matchTeams) {
         // parse simulation config
@@ -104,6 +105,8 @@ class GameState {
         eventCreateMin = eventCreate.getInt(0);
         eventCreateMax = eventCreate.getInt(1);
         Log.log(Log.Level.NORMAL, "config.events.create: " + eventCreateMin + " - " + eventCreateMax);
+        eventCreatePerimeter = eventConfig.getInt("perimeter");
+        Log.log(Log.Level.NORMAL, "config.events.perimeter: " + eventCreatePerimeter);
 
         // create teams
         matchTeams.forEach(team -> teams.put(team.getName(), new Team(team.getName())));
@@ -299,9 +302,12 @@ class GameState {
                 processedEvents.add(event);
             }
             else {
-                for (Position pos: new Area(event.getPosition(), event.getRadius())) {
-                    grid.createMarker(pos, Marker.Type.CLEAR);
-                }
+                var type = event.getStep() - step <= 2? Marker.Type.CLEAR_IMMEDIATE : Marker.Type.CLEAR;
+                var clearArea = new Area(event.getPosition(), event.getRadius());
+                var clearPerimeter = new Area(event.getPosition(), event.getRadius() + eventCreatePerimeter);
+                clearPerimeter.removeAll(clearArea);
+                for (Position pos: clearArea) grid.createMarker(pos, type);
+                for (Position pos: clearPerimeter) grid.createMarker(pos, Marker.Type.CLEAR_PERIMETER);
             }
         }
         clearEvents.removeAll(processedEvents);
@@ -314,7 +320,7 @@ class GameState {
         var distributeNew = RNG.betweenClosed(eventCreateMin, eventCreateMax) + removed;
 
         for (var i = 0; i < distributeNew; i++) {
-            var pos = grid.findRandomFreePosition(event.getPosition(),3 + event.getRadius());
+            var pos = grid.findRandomFreePosition(event.getPosition(),eventCreatePerimeter + event.getRadius());
             if(pos != null && grid.getTerrain(pos) == Terrain.EMPTY
                     && dispensers.get(pos) == null && grid.isInBounds(pos)) {
                 grid.setTerrain(pos, Terrain.OBSTACLE);

@@ -25,8 +25,15 @@ public class Marker extends Positionable {
         return new Thing(pos.x, pos.y, Thing.TYPE_MARKER, type.name);
     }
 
+    @Override
+    public String toString() {
+        return "Marker("  + getPosition()+"," + type+")";
+    }
+
     public enum Type {
-        CLEAR("clear");
+        CLEAR("clear"),
+        CLEAR_PERIMETER("cp"),
+        CLEAR_IMMEDIATE("ci");
 
         public final String name;
 

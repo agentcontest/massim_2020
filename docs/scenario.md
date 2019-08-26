@@ -46,7 +46,7 @@ There are number of __things__ that can inhabit a cell of the grid:
 * __Entities__: Each agent controls an entity on the grid. Entites can move around and attach themselves to other things.
 * __Blocks__: The building blocks of the scenario. Each block has a specific type. Agents can pick up blocks and stick multiple blocks together. Blocks have to be arranged into specific patterns to get score points.
 * __Dispenser__: Each dispenser can be used to retrieve a specific kind of block.
-* __Marker__: A marker *marks* a cell. Markers do not block other things. For now, markers are used to indicate cells that are about to be *cleared*.
+* __Marker__: A marker *marks* a cell. Markers do not block other things. For now, markers are used for the _clear action_ and _clear events_.
 
 ### Terrain
 
@@ -70,6 +70,7 @@ When a clear event happens, a certain area is marked similar to a clear action. 
 * `radius` - the bounds for the event size
 * `warning` - the number of steps the area is marked before the event resolves
 * `create` - the bounds for how many obstacles are created (additional to the number of objects destroyed by the event)
+* `perimeter` - an additional radius where new obstacles may be created (added to the event's radius)
 
 ## Tasks
 
@@ -135,8 +136,6 @@ failed | There was a thing but not attached to the agent.
 ### rotate
 
 Rotates the agent (and all attached things) 90 degrees in the given direction. For each attached thing, all _intermediate positions_ for the rotation have to be free as well. For any thing, the intermediate rotation positions are those, which have the same distance to the agent as the thing and are between the thing's current and target positions.
-
-(TODO: example graphic)
 
 No | Parameter | Meaning
 --- | --- | ---
@@ -307,7 +306,7 @@ Example (complete request-action message):
                "x": 2,
                "y": -1,
                "type": "marker",
-               "details" clear
+               "details" : "clear"
             }
          ],
          "terrain": {
@@ -360,6 +359,9 @@ Example (complete request-action message):
     * for blocks and dispensers: the block type
     * for entities: the team
     * for markers: the type of marker (i.e. clear)
+      * _clear_: the cell is about to be cleared
+      * _ci_: "clear_immediate" - a clear event will clear the cell in 2 steps or less
+      * _cp_: "clear_perimeter" - the cell is in the perimeter of a clear event (i.e. new obstacles may be generated there as part of the event)
 * __terrain__: the terrain around the agent (if no value is given for a visible cell, the terrain is just *empty*)
 * __task__: a task taht is currently active
   * __name__: the task's identifier

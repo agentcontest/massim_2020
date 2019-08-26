@@ -41,7 +41,8 @@
         "chance" : 10,
         "radius" : [3, 5],
         "warning" : 5,
-        "create" : [5, 10]
+        "create" : [5, 10],
+        "perimeter" : 3
       }
     }
   ],
