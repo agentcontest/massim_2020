@@ -62,6 +62,10 @@ public class Grid {
                     var width = instruction.getInt(1);
                     for (var j = 0; j < width; j++) createLineBorder(j);
                     break;
+                case "ragged-border":
+                    width = instruction.getInt(1);
+                    createRaggedBorder(width);
+                    break;
                 case "cave":
                     var chanceAlive = instruction.getDouble(1);
                     for (int x = 0; x < dimX; x++) { for (int y = 0; y < dimY; y++) {
@@ -119,6 +123,29 @@ public class Grid {
         for (int y = offset; y < dimY - offset; y++) {
             terrainMap[offset][y] = Terrain.OBSTACLE;
             terrainMap[dimX - (offset + 1)][y] = Terrain.OBSTACLE;
+        }
+    }
+
+    private void createRaggedBorder(int width) {
+        var currentWidth = width;
+        for (var x = 0; x < dimX; x++) {
+            currentWidth = Math.max(currentWidth - 1 + RNG.nextInt(3), 1);
+            for (var i = 0; i < currentWidth; i++) terrainMap[x][i] = Terrain.OBSTACLE;
+        }
+        currentWidth = width;
+        for (var x = 0; x < dimX; x++) {
+            currentWidth = Math.max(currentWidth - 1 + RNG.nextInt(3), 1);
+            for (var i = 0; i < currentWidth; i++) terrainMap[x][dimY - (i + 1)] = Terrain.OBSTACLE;
+        }
+        currentWidth = width;
+        for (var y = 0; y < dimY; y++) {
+            currentWidth = Math.max(currentWidth - 1 + RNG.nextInt(3), 1);
+            for (var i = 0; i < currentWidth; i++) terrainMap[i][y] = Terrain.OBSTACLE;
+        }
+        currentWidth = width;
+        for (var y = 0; y < dimY; y++) {
+            currentWidth = Math.max(currentWidth - 1 + RNG.nextInt(3), 1);
+            for (var i = 0; i < currentWidth; i++) terrainMap[dimX - (i + 1)][y] = Terrain.OBSTACLE;
         }
     }
 

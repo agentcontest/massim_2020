@@ -6,7 +6,7 @@
     "launch" : "key",
     "port" : 12300,
     "backlog" : 10000,
-    "agentTimeout" : 100,
+    "agentTimeout" : 1000,
     "resultPath" : "results",
     "logLevel" : "normal",
     "logPath" : "logs",
@@ -40,7 +40,8 @@
         "file" : "conf/maps/test40x40.bmp",
         "instructions": [
           ["cave", 0.45, 10, 5, 4],
-          ["line-border", 2]
+          ["line-border", 1],
+          ["ragged-border", 3]
         ],
         "goals": {
           "number" : 3,
@@ -58,11 +59,11 @@
       },
 
       "events" : {
-        "chance" : 10,
+        "chance" : 15,
         "radius" : [3, 5],
         "warning" : 5,
         "create" : [-3, 1],
-        "perimeter" : 3
+        "perimeter" : 2
       }
     }
   ],
