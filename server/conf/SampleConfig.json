@@ -1,5 +1,18 @@
 {
-  "server" : "$(server/server.json)",
+  "server" : {
+    "tournamentMode" : "round-robin",
+    "teamsPerMatch" : 2,
+    "teamSize" : 10,
+    "launch" : "key",
+    "port" : 12300,
+    "backlog" : 10000,
+    "agentTimeout" : 100,
+    "resultPath" : "results",
+    "logLevel" : "normal",
+    "logPath" : "logs",
+    "replayPath" : "replays",
+    "maxPacketLength" : 65536
+  },
 
   "manual-mode" : [
     ["A", "B"],
@@ -12,24 +25,31 @@
       "setup" : "conf/setup/test.txt",
 
       "steps" : 500,
-      "randomSeed" : 17,
+      "NOrandomSeed" : 17,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
       "clearSteps" : 3,
-      "clearEnergyCost" : 50,
+      "clearEnergyCost" : 30,
       "disableDuration" : 4,
       "maxEnergy" : 300,
       "attachLimit" : 10,
 
       "grid" : {
-        "height" : 40,
-        "width" : 40,
+        "height" : 50,
+        "width" : 50,
         "file" : "conf/maps/test40x40.bmp",
-        "borders": true
+        "instructions": [
+          ["cave", 0.45, 10, 5, 4],
+          ["line-border", 2]
+        ],
+        "goals": {
+          "number" : 3,
+          "size" : [3,7]
+        }
       },
 
       "blockTypes" : [3, 3],
-      "dispensers" : [2, 3],
+      "dispensers" : [5, 10],
 
       "tasks" : {
         "size" : [2, 4],
@@ -41,7 +61,7 @@
         "chance" : 10,
         "radius" : [3, 5],
         "warning" : 5,
-        "create" : [5, 10],
+        "create" : [-3, 1],
         "perimeter" : 3
       }
     }

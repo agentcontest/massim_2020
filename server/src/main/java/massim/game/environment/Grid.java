@@ -53,16 +53,72 @@ public class Grid {
             else Log.log(Log.Level.ERROR, "File " + mapFile.getAbsolutePath() + " not found.");
         }
 
-        // obstacle boundary
-        if (gridConf.optBoolean("borders", false)) {
-            for (int x = 0; x < dimX; x++) {
-                terrainMap[x][0] = Terrain.OBSTACLE;
-                terrainMap[x][dimY - 1] = Terrain.OBSTACLE;
+        var instructions = gridConf.getJSONArray("instructions");
+        for (var i = 0; i < instructions.length(); i++) {
+            var instruction = instructions.optJSONArray(i);
+            if (instruction == null) continue;
+            switch (instruction.getString(0)) {
+                case "line-border":
+                    var width = instruction.getInt(1);
+                    for (var j = 0; j < width; j++) createLineBorder(j);
+                    break;
+                case "cave":
+                    var chanceAlive = instruction.getDouble(1);
+                    for (int x = 0; x < dimX; x++) { for (int y = 0; y < dimY; y++) {
+                        if (RNG.nextDouble() < chanceAlive) terrainMap[x][y] = Terrain.OBSTACLE;
+                    }}
+                    var iterations = instruction.getInt(2);
+                    var createLimit = instruction.getInt(3);
+                    var destroyLimit = instruction.getInt(4);
+                    for (var it = 0; it < iterations; it++) {
+                        doCaveIteration(createLimit, destroyLimit);
+                    }
+                    break;
             }
-            for (int y = 0; y < dimY; y++) {
-                terrainMap[0][y] = Terrain.OBSTACLE;
-                terrainMap[dimX - 1][y] = Terrain.OBSTACLE;
+        }
+    }
+
+    private void doCaveIteration(int createLimit, int destroyLimit) {
+        var newTerrain = new Terrain[dimX][dimY];
+        for (var x = 0; x < dimX; x++) { for (var y = 0; y < dimY; y++) {
+            var n = countObstacleNeighbours(x,y);
+            if (terrainMap[x][y] == Terrain.OBSTACLE) {
+                if (n < destroyLimit) newTerrain[x][y] = Terrain.EMPTY;
+                else newTerrain[x][y] = Terrain.OBSTACLE;
             }
+            else if (terrainMap[x][y] == Terrain.EMPTY) {
+                if (n > createLimit) newTerrain[x][y] = Terrain.OBSTACLE;
+                else newTerrain[x][y] = Terrain.EMPTY;
+            }
+            else {
+                newTerrain[x][y] = terrainMap[x][y];
+            }
+        }}
+        terrainMap = newTerrain;
+    }
+
+    private int countObstacleNeighbours(int cx, int cy) {
+        var count = 0;
+        for (var x = cx - 1; x <= cx + 1; x++) { for (var y = cy - 1; y <= cy + 1; y++) {
+            if (x != cx || y != cy) {
+                if (x < 0 || y < 0 || x >= dimX || y >= dimX) count++;
+                else if (terrainMap[x][y] == Terrain.OBSTACLE) count++;
+            }
+        }}
+        return count;
+    }
+
+    /**
+     * @param offset distance to the outer map boundaries
+     */
+    private void createLineBorder(int offset) {
+        for (int x = offset; x < dimX - offset; x++) {
+            terrainMap[x][offset] = Terrain.OBSTACLE;
+            terrainMap[x][dimY - (offset + 1)] = Terrain.OBSTACLE;
+        }
+        for (int y = offset; y < dimY - offset; y++) {
+            terrainMap[offset][y] = Terrain.OBSTACLE;
+            terrainMap[dimX - (offset + 1)][y] = Terrain.OBSTACLE;
         }
     }
 
