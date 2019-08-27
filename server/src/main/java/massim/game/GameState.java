@@ -38,6 +38,7 @@ class GameState {
     private Map<String, Task> tasks = new HashMap<>();
     private Set<String> blockTypes = new TreeSet<>();
     private Set<ClearEvent> clearEvents = new HashSet<>();
+    private Set<Position> agentCausedClearMarkers = new HashSet<>();
 
     // config parameters
     private int randomFail;
@@ -279,8 +280,10 @@ class GameState {
     Map<String, RequestActionMessage> prepareStep(int step) {
         this.step = step;
 
-        //cleanup
+        //cleanup & transfer markers
         grid.deleteMarkers();
+        for (Position pos : agentCausedClearMarkers) grid.createMarker(pos, Marker.Type.CLEAR);
+        agentCausedClearMarkers.clear();
 
         //handle tasks
         if (RNG.nextDouble() < pNewTask) {
@@ -500,9 +503,7 @@ class GameState {
             entity.resetClearCounter();
         }
         else {
-            for (Position position: new Area(target, 1)) {
-                grid.createMarker(position, Marker.Type.CLEAR);
-            }
+            agentCausedClearMarkers.addAll(new Area(target, 1));
         }
         entity.recordClearAction(step, target);
         return Actions.RESULT_SUCCESS;
