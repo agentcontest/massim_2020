@@ -518,6 +518,7 @@ class GameState {
                 else if (go instanceof Block) {
                     removed++;
                     grid.removeThing(go);
+                    gameObjects.remove(go.getID());
                 }
             }
             if (grid.getTerrain(position) == Terrain.OBSTACLE) {
