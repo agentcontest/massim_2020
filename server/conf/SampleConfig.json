@@ -6,7 +6,7 @@
     "launch" : "key",
     "port" : 12300,
     "backlog" : 10000,
-    "agentTimeout" : 1000,
+    "agentTimeout" : 4000,
     "resultPath" : "results",
     "logLevel" : "normal",
     "logPath" : "logs",
