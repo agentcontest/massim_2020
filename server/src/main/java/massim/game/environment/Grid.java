@@ -53,6 +53,7 @@ public class Grid {
             else Log.log(Log.Level.ERROR, "File " + mapFile.getAbsolutePath() + " not found.");
         }
 
+        // terrain from other instructions
         var instructions = gridConf.getJSONArray("instructions");
         for (var i = 0; i < instructions.length(); i++) {
             var instruction = instructions.optJSONArray(i);
@@ -79,6 +80,16 @@ public class Grid {
                     }
                     break;
             }
+        }
+
+        // goal terrain
+        var goalConf = gridConf.getJSONObject("goals");
+        var goalNumber = goalConf.getInt("number");
+        var goalSize = goalConf.getJSONArray("size");
+        var goalSizeMin = goalSize.getInt(0);
+        var goalSizeMax = goalSize.getInt(1);
+        for (var i = 0; i < goalNumber; i++) {
+            // TODO
         }
     }
 
