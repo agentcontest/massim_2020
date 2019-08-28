@@ -22,12 +22,13 @@
 
   "match" : [
     {
-      "setup" : "conf/setup/test.txt",
+      "NOsetup" : "conf/setup/test.txt",
 
       "steps" : 500,
       "NOrandomSeed" : 17,
       "randomFail" : 1,
       "entities" : [{"standard" : 10}],
+
       "clearSteps" : 3,
       "clearEnergyCost" : 30,
       "disableDuration" : 4,
@@ -37,9 +38,9 @@
       "grid" : {
         "height" : 50,
         "width" : 50,
-        "file" : "conf/maps/test40x40.bmp",
+        "NOfile" : "conf/maps/test40x40.bmp",
         "instructions": [
-          ["cave", 0.45, 10, 5, 4],
+          ["cave", 0.45, 9, 5, 4],
           ["line-border", 1],
           ["ragged-border", 3]
         ],

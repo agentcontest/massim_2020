@@ -382,22 +382,50 @@ Example:
 ```JSON
 {
   "id": "2019-SampleSimulation",
-  "steps": 700,
+  "steps": 500,
   "randomSeed": 17,
   "randomFail": 1,
 
   "attachLimit": 10,
-  "blockTypes": [3, 3],
-  "dispensers": [2, 3],
+  "clearSteps" : 3,
+  "clearEnergyCost" : 30,
+  "disableDuration" : 4,
+  "maxEnergy" : 300,
 
   "entities" : [
     {"standard": 10}
   ],
 
-  "grid": {
-    "height": 40,
-    "width": 40,
-    "file": "conf/maps/test.bmp"
+  "blockTypes": [3, 3],
+  "dispensers": [5, 10],
+
+  "grid" : {
+    "height" : 50,
+    "width" : 50,
+    "file" : "conf/maps/test40x40.bmp",
+    "instructions": [
+      ["cave", 0.45, 10, 5, 4],
+      ["line-border", 1],
+      ["ragged-border", 3]
+    ],
+    "goals": {
+      "number" : 3,
+      "size" : [1,2]
+    }
+  },
+
+  "tasks" : {
+    "size" : [2, 4],
+    "duration" : [100, 200],
+    "probability" : 0.05
+  },
+
+  "events" : {
+    "chance" : 15,
+    "radius" : [3, 5],
+    "warning" : 5,
+    "create" : [-3, 1],
+    "perimeter" : 2
   },
 
   "setup" : "conf/setup/test.txt"
@@ -414,9 +442,36 @@ For each simulation, the following parameters may be specified:
 * __blockTypes__: upper and lower bounds for the number of block types
 * __dispensers__: upper and lower bounds for the number of dispenser per block type
 * __entities__: the number of entities (i.e. agents) per type
+* __clearSteps__: how often a clear action has to be executed to take effect
+* __clearEnergyCost__: how much an effective clear action costs
+* __disableDuration__: for how many steps an agent remains disabled
+* __maxEnergy__: an agent's initial and maximum energy level
 * __grid__:
   * __height/width__: dimensions of the environment
   * __file__: a bitmap file describing the map layout (see examples for more information)
+  * __instructions__: an arbitrary number of map generation steps
+    * __cave__: generates a cave like structure using a cellular automaton
+      * 1st parameter: chance for a cell to start as an obstacle
+      * 2nd parameter: number of iterations
+      * 3rd parameter: min. number of obstacle neighbours for an empty cell to become an obstacle
+      * 4th parameter: min. number of obstacle neighbours for an obstacle to remain an obstacle
+    * __line-border__: creates a straight line of obstacles around the map
+      * 1st parameter: width of the line
+    * __ragged-border__: creates an irregular border around the map
+      * 1st parameter: initial (and average) width of the border
+  * __goals__:
+    * __number__: number of goal areas
+    * __size__: bounds for goal area radius
+* __tasks__:
+  * __size__: bounds for the size of a tasks (i.e. number of blocks)
+  * __duration__: bounds for a task's duration (i.e. number of steps)
+  * __probability__: probability to create a new task in any step (0-1)
+* __events__:
+  * __chance__: chance to generate an event in any step (0-100)
+  * __radius__: bounds for the event radius
+  * __warning__: number of steps the event area is marked before the event occurs
+  * __create__: bounds for how many additional obstacles an event can create (besides those that were removed)
+  * __perimeter__: an additional radius where new obstacles may be created (added to the event's radius)
 * __setup__: a file describing additional steps to be performed before the simulation starts
   * might be useful for testing & debugging
   * see examples for more information
