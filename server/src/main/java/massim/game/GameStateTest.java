@@ -1,6 +1,7 @@
 package massim.game;
 
 import massim.config.TeamConfig;
+import massim.game.environment.Area;
 import massim.game.environment.Terrain;
 import massim.protocol.data.Position;
 import massim.protocol.data.Thing;
@@ -165,7 +166,7 @@ public class GameStateTest {
 
     @org.junit.Test
     public void testArea() {
-        var area = new GameState.Area(Position.of(10, 10), 2);
+        var area = new Area(Position.of(10, 10), 2);
         assert(area.size() == 13);
         assert(area.contains(Position.of(10, 10)));
         assert(area.contains(Position.of(10, 11)));
@@ -181,9 +182,9 @@ public class GameStateTest {
         assert(area.contains(Position.of(11, 11)));
         assert(area.contains(Position.of(11, 9)));
 
-        assert(new GameState.Area(Position.of(0,0), 3).size() == 25);
-        assert(new GameState.Area(Position.of(0,0), 1).size() == 5);
-        assert(new GameState.Area(Position.of(0,0), 0).size() == 1);
+        assert(new Area(Position.of(0,0), 3).size() == 25);
+        assert(new Area(Position.of(0,0), 1).size() == 5);
+        assert(new Area(Position.of(0,0), 0).size() == 1);
     }
 
     private static boolean containsThing(Collection<Thing> things, String type, Position pos) {

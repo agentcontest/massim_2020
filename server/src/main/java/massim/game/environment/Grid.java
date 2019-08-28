@@ -89,7 +89,9 @@ public class Grid {
         var goalSizeMin = goalSize.getInt(0);
         var goalSizeMax = goalSize.getInt(1);
         for (var i = 0; i < goalNumber; i++) {
-            // TODO
+            var centerPos = findRandomFreePosition();
+            var size = RNG.betweenClosed(goalSizeMin, goalSizeMax);
+            for (var pos : new Area(centerPos, size)) setTerrain(pos, Terrain.GOAL);
         }
     }
 

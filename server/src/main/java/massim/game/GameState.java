@@ -742,20 +742,4 @@ class GameState {
     Terrain getTerrain(Position pos) {
         return grid.getTerrain(pos);
     }
-
-    static class Area extends ArrayList<Position> {
-        /**
-         * Creates a new list containing all positions belonging to the
-         * area around a given center within the given radius.
-         */
-        Area(Position center, int radius) {
-            for (var dx = -radius; dx <= radius; dx++) {
-                var x = center.x + dx;
-                var dy = radius - Math.abs(dx);
-                for (var y = center.y - dy; y <= center.y + dy; y++) {
-                    this.add(Position.of(x, y));
-                }
-            }
-        }
-    }
 }
