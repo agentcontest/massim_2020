@@ -236,7 +236,8 @@ public class Grid {
         return true;
     }
 
-    public boolean detach(Attachable a1, Attachable a2) {
+    public boolean detachNeighbors(Attachable a1, Attachable a2) {
+        if (a1 == null || a2 ==  null) return false;
         if (a1.getPosition().distanceTo(a2.getPosition()) != 1) return false;
         if (!a1.getAttachments().contains(a2)) return false;
         a1.detach(a2);

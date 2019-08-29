@@ -15,6 +15,7 @@ public abstract class Actions {
     public final static String REQUEST = "request";
     public final static String SUBMIT = "submit";
     public final static String CLEAR = "clear";
+    public final static String DISCONNECT = "disconnect";
 
     public static final List<String> ALL_ACTIONS = List.of(
             MOVE, ATTACH, DETACH, ROTATE, CONNECT, REQUEST, SUBMIT, CLEAR);

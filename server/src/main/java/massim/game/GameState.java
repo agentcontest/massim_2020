@@ -418,10 +418,21 @@ class GameState {
         if (a instanceof Entity && ofDifferentTeams(entity, (Entity) a)) {
             return Actions.RESULT_F_TARGET;
         }
-        if (grid.detach(entity, a)){
+        if (grid.detachNeighbors(entity, a)){
             return Actions.RESULT_SUCCESS;
         }
         return Actions.RESULT_F;
+    }
+
+    String handleDisconnectAction(Entity entity, Position attPos1, Position attPos2) {
+        var attachable1 = getUniqueAttachable(attPos1);
+        var attachable2 = getUniqueAttachable(attPos2);
+        if (attachable1 == null || attachable2 == null) return Actions.RESULT_F_TARGET;
+        var allAttachments = entity.collectAllAttachments();
+        if (!allAttachments.contains(attachable1) || !allAttachments.contains(attachable2))
+            return Actions.RESULT_F_TARGET;
+        if (grid.detachNeighbors(attachable1, attachable2)) return Actions.RESULT_SUCCESS;
+        return Actions.RESULT_F_TARGET;
     }
 
     String handleConnectAction(Entity entity, Position blockPos, Entity partnerEntity, Position partnerBlockPos) {

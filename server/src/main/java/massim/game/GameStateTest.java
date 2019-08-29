@@ -17,25 +17,34 @@ import java.util.Set;
 public class GameStateTest {
 
     private static final JSONObject CONFIG = new JSONObject("{\n" +
+            "      \"NOsetup\" : \"conf/setup/test.txt\",\n" +
+            "\n" +
             "      \"steps\" : 500,\n" +
-            "      \"randomSeed\" : 17,\n" +
+            "      \"NOrandomSeed\" : 17,\n" +
             "      \"randomFail\" : 1,\n" +
             "      \"entities\" : [{\"standard\" : 10}],\n" +
+            "\n" +
             "      \"clearSteps\" : 3,\n" +
-            "      \"clearEnergyCost\" : 50,\n" +
+            "      \"clearEnergyCost\" : 30,\n" +
             "      \"disableDuration\" : 4,\n" +
             "      \"maxEnergy\" : 300,\n" +
             "      \"attachLimit\" : 10,\n" +
             "\n" +
             "      \"grid\" : {\n" +
-            "        \"height\" : 40,\n" +
-            "        \"width\" : 40,\n" +
-            "        \"file\" : \"conf/maps/test40x40.bmp\",\n" +
-            "        \"borders\" : true\n" +
+            "        \"height\" : 100,\n" +
+            "        \"width\" : 100,\n" +
+            "        \"NOfile\" : \"conf/maps/test40x40.bmp\",\n" +
+            "        \"instructions\": [\n" +
+            "          [\"line-border\", 1]\n" +
+            "        ],\n" +
+            "        \"goals\": {\n" +
+            "          \"number\" : 0,\n" +
+            "          \"size\" : [1,2]\n" +
+            "        }\n" +
             "      },\n" +
             "\n" +
             "      \"blockTypes\" : [3, 3],\n" +
-            "      \"dispensers\" : [2, 3],\n" +
+            "      \"dispensers\" : [5, 10],\n" +
             "\n" +
             "      \"tasks\" : {\n" +
             "        \"size\" : [2, 4],\n" +
@@ -44,11 +53,11 @@ public class GameStateTest {
             "      },\n" +
             "\n" +
             "      \"events\" : {\n" +
-            "        \"chance\" : 10,\n" +
+            "        \"chance\" : 15,\n" +
             "        \"radius\" : [3, 5],\n" +
             "        \"warning\" : 5,\n" +
-            "        \"create\" : [2, 5],\n" +
-            "        \"perimeter\" : 3\n" +
+            "        \"create\" : [-3, 1],\n" +
+            "        \"perimeter\" : 2\n" +
             "      }\n" +
             "    }");
 
@@ -144,17 +153,21 @@ public class GameStateTest {
         state.teleport(a1.getAgentName(), Position.of(20, 20));
         state.teleport("A2", posA2);
         var block = state.createBlock(Position.of(21, 20), "b1");
+        assert block != null;
 
         assert(!a2.isDisabled());
         int i;
         for (i = 0; i < state.clearSteps - 1; i++) {
             state.prepareStep(i);
+            if (i!=0) {
+                var percept = (StepPercept) state.getStepPercepts().get("A1");
+                assert (containsThing(percept.things, Thing.TYPE_MARKER, Position.of(2, 0)));
+            }
             assert(state.handleClearAction(a1, Position.of(2, 0)).equals(Actions.RESULT_SUCCESS));
-            var percept = (StepPercept)state.getStepPercepts().get("A1");
-            assert(containsThing(percept.things, Thing.TYPE_MARKER, Position.of(2, 0)));
         }
         state.prepareStep(i++);
         assert(state.handleClearAction(a1, Position.of(2, 0)).equals(Actions.RESULT_SUCCESS));
+        System.out.println(state.getThingsAt(block.getPosition()));
         assert(!state.getThingsAt(block.getPosition()).contains(block));
         assert(a2.isDisabled());
         for (var j = 0; j < Entity.disableDuration; j++) {
@@ -162,6 +175,29 @@ public class GameStateTest {
             state.prepareStep(i + j);
         }
         assert(!a2.isDisabled());
+    }
+
+    @org.junit.Test
+    public void handleDisconnectAction() {
+        var a1 = state.getEntityByName("A1");
+        var a2 = state.getEntityByName("A2");
+        state.teleport(a1.getAgentName(), Position.of(10,10));
+        state.teleport(a2.getAgentName(), Position.of(10,14));
+        var b1 = state.createBlock(Position.of(10, 11), "b1");
+        var b2 = state.createBlock(Position.of(10, 12), "b1");
+        var b3 = state.createBlock(Position.of(10, 13), "b1");
+        assert state.attach(a1.getPosition(), b1.getPosition());
+        assert state.attach(b1.getPosition(), b2.getPosition());
+        assert state.attach(b2.getPosition(), b3.getPosition());
+        assert state.attach(b3.getPosition(), a2.getPosition());
+
+        assert b2.collectAllAttachments().contains(b3);
+        assert b3.collectAllAttachments().contains(b2);
+
+        state.handleDisconnectAction(a1, b2.getPosition(), b3.getPosition());
+
+        assert !b2.collectAllAttachments().contains(b3);
+        assert !b3.collectAllAttachments().contains(b2);
     }
 
     @org.junit.Test

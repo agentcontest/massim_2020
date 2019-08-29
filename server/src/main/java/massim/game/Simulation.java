@@ -203,6 +203,18 @@ public class Simulation {
                     }
                     continue;
 
+                case DISCONNECT:
+                    var x1 = getIntParam(params, 0);
+                    var y1 = getIntParam(params, 1);
+                    var x2 = getIntParam(params, 2);
+                    var y2 = getIntParam(params, 3);
+                    if (x1 == null || y1 == null || x2 == null || y2 == null) {
+                        entity.setLastActionResult(RESULT_F_PARAMETER);
+                        continue;
+                    }
+                    entity.setLastActionResult(
+                            state.handleDisconnectAction(entity, Position.of(x1, y1), Position.of(x2, y2)));
+                    continue;
                 default:
                     entity.setLastActionResult(UNKNOWN_ACTION);
             }

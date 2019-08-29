@@ -167,6 +167,20 @@ failed_partner | The partner's action is not `connect` OR failed randomly OR has
 failed_target | At least one of the specified blocks is not at the given position or not attached to the agent or already attached to the other agent.
 failed | The given positions are too far apart OR one agent is already attached to the other (or through other blocks), or connecting both blocks would violate the size limit for connected structures.
 
+### disconnect
+
+Disconnects two attachments (probably blocks) of the agent.
+
+No | Parameter | Meaning
+--- | --- | ---
+0/1 | attachment1 | The x/y coordinates of the first attachment.
+2/3 | attachment2 | The x/y coordinates of the second attachment.
+
+Failure Code | Reason
+--- | ---
+failed_parameter | No valid integer coordinates given.
+failed_target | Target locations aren't attachments of the agent or not attached to each other directly.
+
 ### request
 
 Requests a new block from a dispenser. The agent has to be in a cell adjacent to the dispenser and specify the direction to it.
@@ -484,7 +498,7 @@ Currently, no special scenario commands are available. You may use a simulation 
 
 ## Roadmap
 
-A few things are still planned for 2019:
+A few things are still planned for 2019/20:
 
 * agents pushing other agents/blocks..
 * more terrain options
