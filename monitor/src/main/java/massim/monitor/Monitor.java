@@ -40,8 +40,8 @@ public class Monitor {
         String publicUri = "http://127.0.0.1:" + port + "/";
 
         WebServer server = WebServers.createWebServer(executor, bind, URI.create(publicUri))
-            .add("/monitor", monitorSink)
-            .add("/status", statusSink)
+            .add("/live/monitor", monitorSink)
+            .add("/live/status", statusSink)
             .add(new EmbeddedResourceHandler("www"))
             .start()
             .get();

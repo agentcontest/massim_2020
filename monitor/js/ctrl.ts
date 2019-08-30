@@ -6,7 +6,7 @@ export default function(redraw: Redraw): Ctrl {
   };
 
   function connect() {
-    const source = new EventSource('/monitor');
+    const source = new EventSource('/live/monitor');
 
     source.addEventListener('message', function(msg) {
       const data = JSON.parse(msg.data);

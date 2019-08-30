@@ -7,7 +7,7 @@ export default function(redraw: Redraw): StatusCtrl {
   };
 
   function connect() {
-    const source = new EventSource('/status');
+    const source = new EventSource('/live/status');
 
     source.addEventListener('message', (msg) => {
       const data = JSON.parse(msg.data);
