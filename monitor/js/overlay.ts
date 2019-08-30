@@ -140,12 +140,16 @@ function disconnected(): VNode {
   ]);
 }
 
+function box(child: VNode | undefined): VNode | undefined {
+  return child ? h('div.box', child) : undefined;
+}
+
 export default function(ctrl: Ctrl): VNode {
   return h('div#overlay', [
     (ctrl.replay && ctrl.vm.static) ? replay(ctrl.replay) : undefined,
     (ctrl.vm.state === 'error' || ctrl.vm.state === 'offline') ?
       ctrl.replay ?
-        h('div.box', ctrl.vm.static ? 'Step not found' : 'Could not load replay') :
+        h('div.box', ctrl.vm.static ? 'Could not load step' : 'Could not load replay') :
         disconnected() : undefined,
     (ctrl.vm.static && ctrl.vm.dynamic) ?
       h('div.box', [
@@ -155,7 +159,7 @@ export default function(ctrl: Ctrl): VNode {
     ...((ctrl.vm.state === 'online' && ctrl.vm.static && ctrl.vm.dynamic) ? [
       h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
       h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
-      h('div.box', ctrl.vm.hover ? hover(ctrl.vm.dynamic, ctrl.vm.hover) : [])
+      ctrl.vm.hover ? box(hover(ctrl.vm.dynamic, ctrl.vm.hover)) : undefined
     ] : [])
   ]);
 }
