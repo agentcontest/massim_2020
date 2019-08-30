@@ -186,19 +186,20 @@ public class Grid {
     public void removeThing(Positionable a) {
         if (a == null) return;
         if (a instanceof Attachable) ((Attachable) a).detachAll();
-        thingsMap.get(a.getPosition()).remove(a);
+        var things = thingsMap.get(a.getPosition());
+        if (things != null) things.remove(a);
     }
 
     /**
      * @return a copy of the set of things at the given position
      */
     public Set<Positionable> getThings(Position pos) {
-        return new HashSet<>(thingsMap.computeIfAbsent(pos, kPos -> Collections.emptySet()));
+        return new HashSet<>(thingsMap.computeIfAbsent(pos, kPos -> new HashSet<>()));
     }
 
     private boolean insertThing(Positionable thing) {
         if (outOfBounds(thing.getPosition())) return false;
-        thingsMap.get(thing.getPosition()).add(thing);
+        thingsMap.computeIfAbsent(thing.getPosition(), pos -> new HashSet<>()).add(thing);
         return true;
     }
 
@@ -357,7 +358,7 @@ public class Grid {
         if (outOfBounds(xy)) return false;
         if (terrainMap[xy.x][xy.y] == Terrain.OBSTACLE) return false;
 
-        return thingsMap.get(xy).stream().noneMatch(t -> t instanceof Attachable && !excludedObjects.contains(t));
+        return getThings(xy).stream().noneMatch(t -> t instanceof Attachable && !excludedObjects.contains(t));
     }
 
     public void setTerrain(Position pos, Terrain terrainType) {
