@@ -6,10 +6,9 @@ export default function(redraw: Redraw): Ctrl {
   };
 
   function connect() {
-    const protocol = document.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(protocol + '//' + document.location.host + '/socket');
+    const source = new EventSource('/live/monitor');
 
-    ws.onmessage = function(msg) {
+    source.addEventListener('message', function(msg) {
       const data = JSON.parse(msg.data);
       console.log(data);
       if (data.grid) {
@@ -18,20 +17,20 @@ export default function(redraw: Redraw): Ctrl {
       }
       else vm.dynamic = data;
       redraw();
-    };
+    });
 
-    ws.onopen = function() {
+    source.addEventListener('open', function() {
       console.log('Connected');
       vm.state = 'online';
       redraw();
-    };
+    });
 
-    ws.onclose = function() {
+    source.addEventListener('error', function() {
       console.log('Disconnected');
       setTimeout(connect, 5000);
       vm.state = 'error';
       redraw();
-    };
+    });
   }
 
   connect();
@@ -44,5 +43,5 @@ export default function(redraw: Redraw): Ctrl {
       vm.hover = pos;
       if (changed) redraw();
     }
-  }
+  };
 }

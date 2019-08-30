@@ -58,6 +58,13 @@ public class Simulation {
         return state.takeSnapshot();
     }
 
+    public JSONObject getStatusSnapshot() {
+        JSONObject snapshot = state.takeStatusSnapshot();
+        snapshot.put("sim", name);
+        snapshot.put("steps", steps);
+        return snapshot;
+    }
+
     public JSONObject getStaticData() {
         var grid = new JSONObject();
         grid.put("width", this.state.getGrid().getDimX());

@@ -1,6 +1,6 @@
 export type Redraw = () => void
 
-type ConnectionState = 'offline' | 'online' | 'connecting' | 'error'
+export type ConnectionState = 'offline' | 'online' | 'connecting' | 'error'
 
 export interface ViewModel {
   state: ConnectionState

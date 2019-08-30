@@ -26,40 +26,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class Monitor {
 
-    private String latestStatic;
-    private String latestDynamic;
+    private final EventSink monitorSink = new EventSink("monitor");
 
-    private final ReentrantReadWriteLock poolLock = new ReentrantReadWriteLock();
-    private final HashSet<WebSocketConnection> pool = new HashSet<WebSocketConnection>();
-
-    private final BaseWebSocketHandler socketHandler = new BaseWebSocketHandler() {
-
-        @Override
-        public void onOpen(WebSocketConnection client) {
-            Lock lock = poolLock.writeLock();
-            lock.lock();
-            try {
-                pool.add(client);
-                if (latestStatic != null) client.send(latestStatic);
-                if (latestDynamic != null) client.send(latestDynamic);
-                System.out.println(String.format("[ MONITOR ] %d viewer(s) connected", pool.size()));
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public void onClose(WebSocketConnection client) {
-            Lock lock = poolLock.writeLock();
-            lock.lock();
-            try {
-                pool.remove(client);
-                System.out.println(String.format("[ MONITOR ] %d viewer(s) connected", pool.size()));
-            } finally {
-                lock.unlock();
-            }
-        }
-    };
+    private final EventSink statusSink = new EventSink("status");
 
     /**
      * Constructor.
@@ -71,12 +40,14 @@ public class Monitor {
         String publicUri = "http://127.0.0.1:" + port + "/";
 
         WebServer server = WebServers.createWebServer(executor, bind, URI.create(publicUri))
-            .add("/socket", new HttpToWebSocketHandler(this.socketHandler))
+            .add("/live/monitor", monitorSink)
+            .add("/live/status", statusSink)
             .add(new EmbeddedResourceHandler("www"))
             .start()
             .get();
 
-        System.out.println(String.format("[ MONITOR ] Webmonitor listening on %s", publicUri));
+        System.out.println(String.format("[ MONITOR ] Live monitor: %s", publicUri));
+        System.out.println(String.format("[ MONITOR ] Live status:  %sstatus.html", publicUri));
     }
 
     /**
@@ -103,34 +74,16 @@ public class Monitor {
         System.out.println(String.format("[ MONITOR ] Viewing replay %s on %s?/", replayPath, publicUri));
     }
 
-    private void broadcast(String message) {
-        Lock lock = poolLock.readLock();
-        lock.lock();
-        try {
-            for (WebSocketConnection client: this.pool) {
-                client.send(message);
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
     /**
      * Updates the current state of the monitor.
      * Called by the massim server after each step.
      */
-    public void updateState(JSONObject worldData){
-        if (isStatic(worldData)) {
-            this.latestStatic = worldData.toString();
-            this.broadcast(this.latestStatic);
-        } else {
-            this.latestDynamic = worldData.toString();
-            this.broadcast(this.latestDynamic);
-        }
+    public void updateState(JSONObject state) {
+        monitorSink.broadcast(state.toString(), !state.has("grid"));
     }
 
-    private boolean isStatic(JSONObject worldData) {
-        return worldData.has("grid");
+    public void updateStatus(JSONObject status) {
+        statusSink.broadcast(status.toString(), true);
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {

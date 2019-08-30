@@ -1,0 +1,28 @@
+body {
+  background: #555;
+  color: #bababa;
+  font-family: Arial, Helvetica, sans-serif;
+  max-width: 600px;
+  margin: auto;
+}
+
+h1, h2, table {
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.2), 0 1px 5px 0 rgba(0,0,0,0.12);
+  background-color: #252422;
+  margin: 20px 0;
+  padding: 20px;
+}
+
+table {
+  color: white;
+  width: 100%;
+}
+tbody {
+  font-family: Courier New;
+}
+td {
+  text-align: center;
+}
+td.no_action, td.unknown {
+  background: red;
+}
