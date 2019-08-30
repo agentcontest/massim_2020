@@ -28,6 +28,7 @@ public class Monitor {
 
     private String latestStatic;
     private String latestDynamic;
+    private String latestStatus;
 
     private final ReentrantReadWriteLock poolLock = new ReentrantReadWriteLock();
     private final HashSet<WebSocketConnection> pool = new HashSet<WebSocketConnection>();
@@ -127,6 +128,10 @@ public class Monitor {
             this.latestDynamic = worldData.toString();
             this.broadcast(this.latestDynamic);
         }
+    }
+
+    public void updateStatus(JSONObject status) {
+        this.latestDynamic = status.toString();
     }
 
     private boolean isStatic(JSONObject worldData) {

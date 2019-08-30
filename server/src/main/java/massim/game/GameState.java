@@ -635,6 +635,21 @@ class GameState {
         return !e1.getTeamName().equals(e2.getTeamName());
     }
 
+    JSONObject takeStatusSnapshot() {
+        JSONObject snapshot = new JSONObject();
+        snapshot.put("step", step);
+        JSONArray entityArr = new JSONArray();
+        snapshot.put("entities", entityArr);
+        for (Entity o : agentToEntity.values()) {
+            JSONObject obj = new JSONObject();
+            obj.put("name", o.getAgentName());
+            obj.put("team", o.getTeamName());
+            obj.put("actionResult", o.getLastActionResult());
+            entityArr.put(obj);
+        }
+        return snapshot;
+    }
+
     JSONObject takeSnapshot() {
         JSONObject snapshot = new JSONObject();
         snapshot.put("step", step);
