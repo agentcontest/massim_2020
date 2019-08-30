@@ -25,7 +25,7 @@ export default function(redraw: Redraw): StatusCtrl {
     source.addEventListener('error', () => {
       console.log('Disconnected');
       setTimeout(connect, 5000);
-      vm.state = 'error';
+      vm.state = 'offline';
       redraw();
     });
   }
