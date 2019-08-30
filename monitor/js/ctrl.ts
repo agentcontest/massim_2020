@@ -30,7 +30,7 @@ export default function(redraw: Redraw): Ctrl {
       setTimeout(connect, 5000);
       vm.state = 'error';
       redraw();
-    });;
+    });
   }
 
   connect();
