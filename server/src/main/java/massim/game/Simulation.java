@@ -60,6 +60,7 @@ public class Simulation {
 
     public JSONObject getStatusSnapshot() {
         JSONObject snapshot = state.takeStatusSnapshot();
+        snapshot.put("sim", name);
         snapshot.put("steps", steps);
         return snapshot;
     }
