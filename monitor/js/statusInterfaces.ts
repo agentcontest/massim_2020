@@ -20,5 +20,6 @@ export interface StatusData {
 export interface EntityStatus {
   name: string
   team: string
+  action: string
   actionResult: string
 }
