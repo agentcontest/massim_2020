@@ -43,5 +43,5 @@ export default function(redraw: Redraw): Ctrl {
       vm.hover = pos;
       if (changed) redraw();
     }
-  }
+  };
 }

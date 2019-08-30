@@ -28,6 +28,8 @@ public class Monitor {
 
     private final EventSink monitorSink = new EventSink("monitor");
 
+    private final EventSink statusSink = new EventSink("status");
+
     /**
      * Constructor.
      * Used by the massim server to create the "live" monitor.
@@ -39,6 +41,7 @@ public class Monitor {
 
         WebServer server = WebServers.createWebServer(executor, bind, URI.create(publicUri))
             .add("/monitor", monitorSink)
+            .add("/status", statusSink)
             .add(new EmbeddedResourceHandler("www"))
             .start()
             .get();
@@ -79,7 +82,7 @@ public class Monitor {
     }
 
     public void updateStatus(JSONObject status) {
-        // TODO
+        statusSink.broadcast(status.toString(), true);
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
