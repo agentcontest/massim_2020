@@ -301,6 +301,7 @@ public class Server {
                 var actions = agentManager.requestActions(percepts);
                 sim.step(i, actions); // execute step with agent actions
                 handleSimState(sim.getName(), startTime, sim.getSnapshot());
+                if (monitor != null) monitor.updateStatus(sim.getStatusSnapshot());
             }
 
             // handle final state
