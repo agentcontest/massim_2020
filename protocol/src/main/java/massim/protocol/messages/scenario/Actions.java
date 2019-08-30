@@ -18,7 +18,7 @@ public abstract class Actions {
     public final static String DISCONNECT = "disconnect";
 
     public static final List<String> ALL_ACTIONS = List.of(
-            MOVE, ATTACH, DETACH, ROTATE, CONNECT, REQUEST, SUBMIT, CLEAR);
+            MOVE, ATTACH, DETACH, ROTATE, CONNECT, REQUEST, SUBMIT, CLEAR, DISCONNECT);
 
     public final static String RESULT_UNPROCESSED = "unprocessed";
     public final static String RESULT_SUCCESS = "success";
