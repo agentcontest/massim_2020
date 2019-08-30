@@ -208,7 +208,7 @@ public class Grid {
     }
 
     private void move(Set<Positionable> things, Map<Positionable, Position> newPositions) {
-        things.forEach(this::removeThing);
+        things.forEach(t -> thingsMap.getOrDefault(t.getPosition(), Collections.emptySet()).remove(t));
         for (Positionable thing : things) {
             var newPos = newPositions.get(thing);
             thing.setPosition(newPos);
