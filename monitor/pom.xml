@@ -71,11 +71,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>massim</groupId>
-            <artifactId>protocol</artifactId>
-            <version>2.1</version>
-        </dependency>
-        <dependency>
             <groupId>com.github.webbit</groupId>
             <artifactId>webbit</artifactId>
             <version>f628a7a3ffdd8c288514784f5b0426faaee2a2e3</version>
