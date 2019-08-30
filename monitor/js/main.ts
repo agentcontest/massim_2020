@@ -33,8 +33,19 @@ export default function Monitor(overlayTarget: Element, canvas: HTMLCanvasElemen
     });
   };
 
+  const hashChange = function() {
+    if (ctrl.replay) {
+      const step = parseInt(document.location.hash.substr(1), 10);
+      if (step > 0) ctrl.replay.setStep(step);
+      else if (!document.location.hash) ctrl.replay.start();
+    }
+  };
+
   const replayPath = window.location.search.length > 1 ? window.location.search.substr(1) : undefined;
   ctrl = makeCtrl(redraw, replayPath);
+
+  hashChange();
+  window.onhashchange = hashChange;
 
   redraw();
 
