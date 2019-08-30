@@ -83,6 +83,7 @@ public class Simulation {
         }
 
         var world = new JSONObject();
+        world.put("sim", name);
         world.put("grid", grid);
         world.put("teams", teams);
         world.put("blockTypes", this.state.getBlockTypes());

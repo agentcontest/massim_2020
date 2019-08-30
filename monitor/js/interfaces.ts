@@ -30,6 +30,7 @@ export interface Ctrl {
 export type BlockType = string
 
 export interface StaticWorld {
+  sim: string
   grid: Grid
   teams: { [key: string]: Team }
   blockTypes: BlockType[]

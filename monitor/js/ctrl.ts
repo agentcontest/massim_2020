@@ -6,9 +6,6 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
   };
 
   function connect() {
-    vm.state = 'connecting';
-    redraw();
-
     const source = new EventSource('/live/monitor');
 
     source.addEventListener('message', function(msg) {

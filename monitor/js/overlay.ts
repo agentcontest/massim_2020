@@ -146,7 +146,7 @@ function box(child: VNode | undefined): VNode | undefined {
 
 export default function(ctrl: Ctrl): VNode {
   return h('div#overlay', [
-    (ctrl.replay && ctrl.vm.static) ? replay(ctrl.replay) : undefined,
+    ctrl.vm.static && (ctrl.replay ? replay(ctrl.replay) : h('div.box', ctrl.vm.static.sim)),
     (ctrl.vm.state === 'error' || ctrl.vm.state === 'offline') ?
       ctrl.replay ?
         h('div.box', ctrl.vm.static ? 'Could not load step' : 'Could not load replay') :
