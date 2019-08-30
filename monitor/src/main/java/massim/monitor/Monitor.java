@@ -46,7 +46,8 @@ public class Monitor {
             .start()
             .get();
 
-        System.out.println(String.format("[ MONITOR ] Webmonitor listening on %s", publicUri));
+        System.out.println(String.format("[ MONITOR ] Live monitor: %s", publicUri));
+        System.out.println(String.format("[ MONITOR ] Live status:  %sstatus.html", publicUri));
     }
 
     /**

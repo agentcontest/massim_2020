@@ -644,8 +644,7 @@ class GameState {
             JSONObject obj = new JSONObject();
             obj.put("name", o.getAgentName());
             obj.put("team", o.getTeamName());
-            obj.put("action", o.getLastAction());
-            obj.put("action", Actions.ALL_ACTIONS.contains(o.getAction()) ? "hidden" : o.getAction());
+            obj.put("action", Actions.ALL_ACTIONS.contains(o.getLastAction()) ? "HIDDEN" : o.getLastAction());
             obj.put("actionResult", o.getLastActionResult());
             entityArr.put(obj);
         }
