@@ -33,7 +33,8 @@ export default function Monitor(overlayTarget: Element, canvas: HTMLCanvasElemen
     });
   };
 
-  ctrl = makeCtrl(redraw);
+  const replayPath = window.location.search.length > 1 ? window.location.search.substr(1) : undefined;
+  ctrl = makeCtrl(redraw, replayPath);
 
   redraw();
 
