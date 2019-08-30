@@ -1,9 +1,24 @@
-import { Ctrl, StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
+import { Ctrl, ReplayCtrl, StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
 import { renderBlocks } from './canvas';
 import  * as styles from './styles';
 
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
+
+function replay(ctrl: ReplayCtrl) {
+  return h('div.box.replay', [
+    h('div', [h('strong', 'Replay:'), ' ', ctrl.name()]),
+    h('div', [
+      h('button', { on: { click: () => ctrl.setStep(0) } }, '|<<'),
+      h('button', { on: { click: () => ctrl.setStep(ctrl.step() - 10) } }, '<<'),
+      h('button', {
+        on: { click: () => ctrl.toggle() }
+      }, ctrl.playing() ? '||' : '>'),
+      h('button', { on: { click: () => ctrl.setStep(ctrl.step() + 10) } }, '>>'),
+      h('button', { on: { click: () => ctrl.setStep(99999999) } }, '>>|')
+    ])
+  ]);
+}
 
 function simplePlural(n: number, singular: string): string {
   if (n === 1) return '1 ' + singular;
@@ -116,8 +131,7 @@ function taskDetails(st: StaticWorld, task: Task): VNode[] {
   }), h('p', simplePlural(task.requirements.length, 'block'))];
 }
 
-function disconnected(_ctrl: Ctrl): VNode {
-  // TODO: Replay available?
+function disconnected(): VNode {
   return h('div.box', [
     h('p', 'Live server not connected.'),
     h('a', {
@@ -127,17 +141,21 @@ function disconnected(_ctrl: Ctrl): VNode {
 }
 
 export default function(ctrl: Ctrl): VNode {
-  if (ctrl.vm.state === 'error') return disconnected(ctrl);
-  if (ctrl.vm.state === 'connecting' || !ctrl.vm.static || !ctrl.vm.dynamic)
-    return h('div.box', [
-      h('div.loader', 'Loading ...')
-    ]);
   return h('div#overlay', [
-    h('div.box', [
-      `Step: ${ctrl.vm.dynamic.step} / ${ctrl.vm.static.steps - 1}`
-    ]),
-    h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
-    h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
-    h('div.box', ctrl.vm.hover ? hover(ctrl.vm.dynamic, ctrl.vm.hover) : [])
+    (ctrl.replay && ctrl.vm.static) ? replay(ctrl.replay) : undefined,
+    (ctrl.vm.state === 'error' || ctrl.vm.state === 'offline') ?
+      ctrl.replay ?
+        h('div.box', ctrl.vm.static ? 'Step not found' : 'Could not load replay') :
+        disconnected() : undefined,
+    (ctrl.vm.static && ctrl.vm.dynamic) ?
+      h('div.box', [
+        `Step: ${ctrl.vm.dynamic.step} / ${ctrl.vm.static.steps - 1}`
+      ]) : undefined,
+    ctrl.vm.state === 'connecting' ? h('div.box', [h('div.loader', 'Loading ...')]) : undefined,
+    ...((ctrl.vm.state === 'online' && ctrl.vm.static && ctrl.vm.dynamic) ? [
+      h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
+      h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
+      h('div.box', ctrl.vm.hover ? hover(ctrl.vm.dynamic, ctrl.vm.hover) : [])
+    ] : [])
   ]);
 }

@@ -6,6 +6,9 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
   };
 
   function connect() {
+    vm.state = 'connecting';
+    redraw();
+
     const source = new EventSource('/live/monitor');
 
     source.addEventListener('message', function(msg) {
@@ -28,7 +31,7 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
     source.addEventListener('error', function() {
       console.log('Disconnected');
       setTimeout(connect, 5000);
-      vm.state = 'error';
+      vm.state = 'offline';
       redraw();
     });
   }
