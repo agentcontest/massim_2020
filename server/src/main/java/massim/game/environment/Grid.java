@@ -183,7 +183,7 @@ public class Grid {
         return b;
     }
 
-    public void removeThing(Positionable a) {
+    public void destroyThing(Positionable a) {
         if (a == null) return;
         if (a instanceof Attachable) ((Attachable) a).detachAll();
         var things = thingsMap.get(a.getPosition());
@@ -222,7 +222,7 @@ public class Grid {
      */
     public void moveWithoutAttachments(Attachable a, Position pos) {
         if(isUnblocked(pos) && a.getAttachments().isEmpty()) {
-            removeThing(a);
+            destroyThing(a);
             a.setPosition(pos);
             insertThing(a);
         }
@@ -383,7 +383,7 @@ public class Grid {
     }
 
     public void deleteMarkers() {
-        markers.forEach(this::removeThing);
+        markers.forEach(this::destroyThing);
         markers.clear();
     }
 

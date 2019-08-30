@@ -529,7 +529,7 @@ class GameState {
                 }
                 else if (go instanceof Block) {
                     removed++;
-                    grid.removeThing(go);
+                    grid.destroyThing(go);
                     gameObjects.remove(go.getID());
                 }
             }
@@ -576,7 +576,7 @@ class GameState {
 
     private void removeObjectFromGame(GameObject go){
         if (go == null) return;
-        if (go instanceof Positionable) grid.removeThing((Positionable) go);
+        if (go instanceof Positionable) grid.destroyThing((Positionable) go);
         gameObjects.remove(go.getID());
     }
 
