@@ -194,7 +194,8 @@ public class GameStateTest {
         assert b2.collectAllAttachments().contains(b3);
         assert b3.collectAllAttachments().contains(b2);
 
-        state.handleDisconnectAction(a1, b2.getPosition(), b3.getPosition());
+        state.handleDisconnectAction(a1,
+                b2.getPosition().toLocal(a1.getPosition()), b3.getPosition().toLocal(a1.getPosition()));
 
         assert !b2.collectAllAttachments().contains(b3);
         assert !b3.collectAllAttachments().contains(b2);

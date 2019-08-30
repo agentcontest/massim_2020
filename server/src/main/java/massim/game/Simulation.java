@@ -222,6 +222,7 @@ public class Simulation {
                     entity.setLastActionResult(
                             state.handleDisconnectAction(entity, Position.of(x1, y1), Position.of(x2, y2)));
                     continue;
+
                 default:
                     entity.setLastActionResult(UNKNOWN_ACTION);
             }
