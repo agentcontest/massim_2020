@@ -7,28 +7,29 @@ export default function(redraw: Redraw): StatusCtrl {
   };
 
   function connect() {
-    const source = new EventSource('/live/status');
+    const protocol = document.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(protocol + '//' + document.location.host + '/live/status');
 
-    source.addEventListener('message', (msg) => {
+    ws.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
       console.log(data);
       vm.data = data;
       redraw();
-    });
+    };
 
-    source.addEventListener('open', () => {
+    ws.onopen = () => {
       console.log('Connected');
       vm.state = 'online';
       redraw();
-    });
+    };
 
-    source.addEventListener('error', () => {
+    ws.onclose = () => {
       console.log('Disconnected');
       setTimeout(connect, 5000);
       vm.data = undefined;
       vm.state = 'offline';
       redraw();
-    });
+    };
   }
 
   connect();
