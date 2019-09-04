@@ -223,7 +223,7 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillStyle = 'white';
-    ctx.fillText(agent.name.replace('agent', ''), (agent.x + 0.5) * GRID, (agent.y + 0.5) * GRID);
+    ctx.fillText(shortName(agent), (agent.x + 0.5) * GRID, (agent.y + 0.5) * GRID);
   }
 
   // clear events
@@ -232,6 +232,11 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
     ctx.strokeStyle = 'red';
     drawArea(ctx, clear.x, clear.y, clear.radius);
   }
+}
+
+function shortName(agent: Agent): string {
+  const match = agent.name.match(/^agent-([A-Za-z])[A-Za-z-_]*([0-9]+)$/);
+  return match ? match[1] + match[2] : agent.name;
 }
 
 function drawArea(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
