@@ -8,7 +8,8 @@ export default function(redraw: Redraw): StatusCtrl {
 
   function connect() {
     const protocol = document.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(protocol + '//' + document.location.host + '/live/status');
+    const path = document.location.pathname.substr(0, document.location.pathname.lastIndexOf('/'));
+    const ws = new WebSocket(protocol + '//' + document.location.host + path + '/live/status');
 
     ws.onmessage = (msg) => {
       const data = JSON.parse(msg.data);

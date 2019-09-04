@@ -8,7 +8,8 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
 
   function connect() {
     const protocol = document.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(protocol + '//' + document.location.host + '/live/monitor');
+    const path = document.location.pathname.substr(0, document.location.pathname.lastIndexOf('/'));
+    const ws = new WebSocket(protocol + '//' + document.location.host + path + '/live/monitor');
 
     ws.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
