@@ -1,4 +1,4 @@
-export const teams = ['blue', 'green'];
+export const teams = ['blue', 'green', '#ff1493', '#ffa500'];
 
 export const goalStroke = 'red';
 export const goalFill = 'rgba(255, 0, 0, 0.4)';
