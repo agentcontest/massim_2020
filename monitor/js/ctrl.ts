@@ -5,10 +5,13 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
     state: 'connecting'
   };
 
-  function connect() {
-    const source = new EventSource('/live/monitor');
 
-    source.addEventListener('message', function(msg) {
+  function connect() {
+    const protocol = document.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const path = document.location.pathname.substr(0, document.location.pathname.lastIndexOf('/'));
+    const ws = new WebSocket(protocol + '//' + document.location.host + path + '/live/monitor');
+
+    ws.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
       console.log(data);
       if (data.grid) {
@@ -17,20 +20,20 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
       }
       else vm.dynamic = data;
       redraw();
-    });
+    };
 
-    source.addEventListener('open', function() {
+    ws.onopen = () => {
       console.log('Connected');
       vm.state = 'online';
       redraw();
-    });
+    };
 
-    source.addEventListener('error', function() {
+    ws.onclose = () => {
       console.log('Disconnected');
       setTimeout(connect, 5000);
       vm.state = 'offline';
       redraw();
-    });
+    };
   }
 
   const makeReplayCtrl = function(path: string): ReplayCtrl {
