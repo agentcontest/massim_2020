@@ -598,6 +598,7 @@ class GameState {
     boolean createDispenser(Position xy, String blockType) {
         if (!blockTypes.contains(blockType)) return false;
         if (!grid.isUnblocked(xy)) return false;
+        if (dispensers.get(xy) != null) return false;
         Dispenser d = new Dispenser(xy, blockType);
         registerGameObject(d);
         dispensers.put(xy, d);

@@ -320,7 +320,7 @@ public class Grid {
         int y = RNG.nextInt(dimY);
         final int startX = x;
         final int startY = y;
-        while (!isUnblocked(Position.of(x,y))) {
+        while (!isUnblocked(Position.of(x,y)) || terrainMap[x][y] != Terrain.EMPTY) {
             if (++x >= dimX) {
                 x = 0;
                 if (++y >= dimY) y = 0;
