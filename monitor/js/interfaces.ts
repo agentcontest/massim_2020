@@ -69,6 +69,8 @@ export interface Agent {
   vision: number
   attached?: Pos[]
   disabled?: boolean
+  action: string
+  actionResult: string
 }
 
 export interface Block {
