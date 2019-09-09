@@ -718,7 +718,7 @@ class GameState {
             event.put("radius", e.getRadius());
             clear.put(event);
         }
-        tasks.values().stream().filter(t -> !t.isCompleted()).forEach(t -> {
+        tasks.values().stream().filter(t -> !t.isCompleted() && step <= t.getDeadline()).forEach(t -> {
             JSONObject task  = new JSONObject();
             task.put("name", t.getName());
             task.put("deadline", t.getDeadline());
