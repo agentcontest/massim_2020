@@ -698,6 +698,9 @@ class GameState {
                 obj.put("team", ((Entity) o).getTeamName());
                 obj.put("energy", ((Entity) o).getEnergy());
                 obj.put("vision", ((Entity) o).getVision());
+                obj.put("action", ((Entity) o).getLastAction());
+                obj.put("actionParams", ((Entity) o).getLastActionParams());
+                obj.put("actionResult", ((Entity) o).getLastActionResult());
                 if (((Entity) o).isDisabled()) obj.put("disabled", true);
                 entities.put(obj);
             } else if (o instanceof Block) {
@@ -716,7 +719,7 @@ class GameState {
             event.put("radius", e.getRadius());
             clear.put(event);
         }
-        tasks.values().stream().filter(t -> !t.isCompleted()).forEach(t -> {
+        tasks.values().stream().filter(t -> !t.isCompleted() && step <= t.getDeadline()).sorted(Comparator.comparing(t -> t.getDeadline())).forEach(t -> {
             JSONObject task  = new JSONObject();
             task.put("name", t.getName());
             task.put("deadline", t.getDeadline());
