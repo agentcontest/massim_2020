@@ -70,6 +70,7 @@ export interface Agent {
   attached?: Pos[]
   disabled?: boolean
   action: string
+  actionParams: string[]
   actionResult: string
 }
 
