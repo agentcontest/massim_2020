@@ -224,6 +224,15 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
     ctx.textAlign = 'center';
     ctx.fillStyle = 'white';
     ctx.fillText(shortName(agent), (agent.x + 0.5) * GRID, (agent.y + 0.5) * GRID);
+
+    // clear action
+    if (agent.action == 'clear' && agent.actionResult.indexOf("failed_") != 0) {
+      const x = agent.x + parseInt(agent.actionParams[0], 10);
+      const y = agent.y + parseInt(agent.actionParams[1], 10);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'red';
+      drawArea(ctx, x, y, 1);
+    }
   }
 
   // clear events
