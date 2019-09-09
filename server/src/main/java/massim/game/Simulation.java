@@ -116,6 +116,7 @@ public class Simulation {
             switch(entity.getLastAction()) {
 
                 case NO_ACTION:
+                case SKIP:
                     entity.setLastActionResult(RESULT_SUCCESS);
                     continue;
 

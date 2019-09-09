@@ -91,6 +91,10 @@ All actions have the same probability to just fail randomly.
 
 Each action has a number of `parameters`. The exact number depends on the type of action. Also, the position of each parameter determines its meaning. Parameters are always string values.
 
+### skip
+
+The agent won't do anything this turn. Always successful (except for random fail).
+
 ### move
 
 Moves the agent in the specified direction.
