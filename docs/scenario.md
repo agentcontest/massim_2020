@@ -10,7 +10,7 @@
 
 ### Background Story
 
-_In the year 2090, ..._
+_In the year 2088, after 43 years of depleting Mars' natural resources, humankind now faces a drastically changed ecosystem. Building so many water wells has led to the surface becoming unstable, such that volcanic eruptions have become a regular sight. People have started rebuilding efforts, though they need specialised compounds which are durable enough to survive in the new circumstances. Thus, they once again rely on their trusty All-Terrain-Planetary-Vehicles - now equipped with robotic arms and pneumatic cleanup gear - sending them into particularly hazardous environments, where they can obtain the necessary materials._
 
 ### Introduction
 
