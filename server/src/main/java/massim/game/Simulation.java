@@ -102,15 +102,14 @@ public class Simulation {
         for (Entity entity : entities) {
             var action = actions.get(entity.getAgentName());
             entity.setNewAction(action);
-            if (RNG.nextInt(100) < state.getRandomFail()) {
+            if (entity.isDisabled()) {
+                entity.setLastActionResult(RESULT_F_STATUS);
+            }
+            else if (RNG.nextInt(100) < state.getRandomFail()) {
                 entity.setLastActionResult(RESULT_F_RANDOM);
             }
         }
         for (Entity entity : entities) {
-            if (entity.isDisabled()) {
-                entity.setLastActionResult(RESULT_F_STATUS);
-                continue;
-            }
             if (!entity.getLastActionResult().equals(RESULT_UNPROCESSED)) continue;
             var params = entity.getLastActionParams();
             switch(entity.getLastAction()) {
