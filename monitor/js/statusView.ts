@@ -8,8 +8,8 @@ function compare(a: EntityStatus, b: EntityStatus) {
   if (a.team < b.team) return -1;
   else if (a.team > b.team) return 1;
 
-  const suffixA = parseInt(a.name.replace(/^agent\w/, ''), 10);
-  const suffixB = parseInt(b.name.replace(/^agent\w/, ''), 10);
+  const suffixA = parseInt(a.name.replace(/^[^\d]*/, ''), 10);
+  const suffixB = parseInt(b.name.replace(/^[^\d]*/, ''), 10);
   if (suffixA < suffixB) return -1;
   else if (suffixA > suffixB) return 1;
 
