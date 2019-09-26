@@ -11,6 +11,7 @@ class LiveBroadcast:
         self.path = path
         self.dynamic = []
         self.step = 0
+        self.condition = asyncio.Condition()
 
         with open(os.path.join(path, "static.json")) as f:
             self.static = json.load(f)
@@ -24,17 +25,24 @@ class LiveBroadcast:
     async def run(self):
         for step in range(self.static["steps"]):
             self.step = step
-            print(self.path, self.step, "/", self.static["steps"])
-            await asyncio.sleep(1)
+            print(self.path, self.step, "/", self.static["steps"] - 1)
+
+            async with self.condition:
+                self.condition.notify_all()
+
+            await asyncio.sleep(0.1)
 
     async def live(self, req):
         ws = aiohttp.web.WebSocketResponse()
         await ws.prepare(req)
 
         await ws.send_json(self.static)
+        await ws.send_json(self.dynamic[self.step])
 
-        if self.dynamic is not None:
-            await ws.send_json(self.dynamic[self.step])
+        while True:
+            async with self.condition:
+                await self.condition.wait()
+                await ws.send_json(self.dynamic[self.step])
 
         return ws
 
