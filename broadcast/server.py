@@ -6,6 +6,7 @@ import argparse
 import asyncio
 import aiohttp.web
 import json
+import logging
 import os
 import sys
 
@@ -49,7 +50,6 @@ class LiveBroadcast:
             await asyncio.sleep(args.speed)
 
     async def live(self, req):
-        print("Client conntected.")
         async with self.connected:
             self.connected.notify()
 
@@ -86,10 +86,15 @@ async def main(args):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("path", metavar="PATH", help="replay directory (containing static.json)")
     parser.add_argument("--step", type=int, default=0)
     parser.add_argument("--delay", type=float, default=10)
     parser.add_argument("--speed", type=float, default=0.5)
+    parser.add_argument("--bind", default="127.0.0.1")
+    parser.add_argument("--port", default=8000)
     args = parser.parse_args()
-    aiohttp.web.run_app(main(args))
+
+    aiohttp.web.run_app(main(args), host=args.bind, port=args.port)
