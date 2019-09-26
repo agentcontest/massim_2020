@@ -35,9 +35,10 @@ class LiveBroadcast:
         async with self.connected:
             await self.connected.wait()
 
-        print(f"Waiting for {args.delay}s ...")
+        print(f"Waiting for delay ({args.delay}s) ...")
         await asyncio.sleep(args.delay)
 
+        print(f"Broadcast with {args.speed}s per frame ...")
         for step in range(self.step, self.static["steps"]):
             self.step = step
             print(self.args.path, self.step, "/", self.static["steps"] - 1)
@@ -48,7 +49,7 @@ class LiveBroadcast:
             await asyncio.sleep(args.speed)
 
     async def live(self, req):
-        print("WebSocket conntected.")
+        print("Client conntected.")
         async with self.connected:
             self.connected.notify()
 
