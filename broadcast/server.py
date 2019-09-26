@@ -50,6 +50,7 @@ class LiveBroadcast:
             await asyncio.sleep(args.speed)
 
     async def live(self, req):
+        print("Client connected.")
         async with self.connected:
             self.connected.notify()
 
