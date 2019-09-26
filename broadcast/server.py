@@ -80,7 +80,7 @@ def static(path):
 def main(args):
     broadcast = LiveBroadcast(args)
 
-    asyncio.create_task(broadcast.run())
+    asyncio.get_event_loop().create_task(broadcast.run())
 
     app = aiohttp.web.Application()
     app.router.add_route("GET", "/", static(os.path.join(MONITOR_WWW, "index.html")))
