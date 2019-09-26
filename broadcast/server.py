@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 """Live broadcasts for multiagentcontest.org"""
 
@@ -31,39 +31,41 @@ class LiveBroadcast:
                     group = json.load(f)
             self.dynamic.append(group[str(step)])
 
-    async def run(self):
+    @asyncio.coroutine
+    def run(self):
         print("Waiting for first client ...")
-        async with self.connected:
-            await self.connected.wait()
+        with (yield from self.connected):
+            yield from self.connected.wait()
 
         print("Waiting for delay ({}s) ...".format(args.delay))
-        await asyncio.sleep(args.delay)
+        yield from asyncio.sleep(args.delay)
 
         print("Broadcast with {}s per frame ...".format(args.speed))
         for step in range(self.step, self.static["steps"]):
             self.step = step
             print(self.args.path, self.step, "/", self.static["steps"] - 1)
 
-            async with self.step_changed:
+            with (yield from self.step_changed):
                 self.step_changed.notify_all()
 
-            await asyncio.sleep(args.speed)
+            yield from asyncio.sleep(args.speed)
 
-    async def live(self, req):
+    @asyncio.coroutine
+    def live(self, req):
         print("Client connected.")
-        async with self.connected:
+        with (yield from self.connected):
             self.connected.notify()
 
         ws = aiohttp.web.WebSocketResponse()
-        await ws.prepare(req)
+        yield from ws.prepare(req)
 
-        await ws.send_json(self.static)
-        await ws.send_json(self.dynamic[self.step])
+        yield from ws.send_json(self.static)
+        yield from ws.send_json(self.dynamic[self.step])
 
         while True:
-            async with self.step_changed:
-                await self.step_changed.wait()
-                await ws.send_json(self.dynamic[self.step])
+            with (yield from self.step_changed):
+                yield from self.step_changed.wait()
+                yield from ws.send_json(self.dynamic[self.step])
 
         return ws
 
@@ -74,7 +76,8 @@ def static(path):
     return handler
 
 
-async def main(args):
+@asyncio.coroutine
+def main(args):
     broadcast = LiveBroadcast(args)
 
     asyncio.create_task(broadcast.run())
