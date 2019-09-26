@@ -17,7 +17,7 @@ class LiveBroadcast:
     def __init__(self, args):
         self.args = args
         self.dynamic = []
-        self.step = 0
+        self.step = args.step
         self.step_changed = asyncio.Condition()
         self.connected = asyncio.Condition()
 
@@ -38,7 +38,7 @@ class LiveBroadcast:
         print(f"Waiting for {args.delay}s ...")
         await asyncio.sleep(args.delay)
 
-        for step in range(self.static["steps"]):
+        for step in range(self.step, self.static["steps"]):
             self.step = step
             print(self.args.path, self.step, "/", self.static["steps"] - 1)
 
@@ -87,6 +87,7 @@ async def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("path", metavar="PATH", help="replay directory (containing static.json)")
+    parser.add_argument("--step", type=int, default=0)
     parser.add_argument("--delay", type=float, default=10)
     parser.add_argument("--speed", type=float, default=0.5)
     args = parser.parse_args()
