@@ -27,7 +27,7 @@ class LiveBroadcast:
 
         for step in range(self.static["steps"]):
             if step % 5 == 0:
-                with open(os.path.join(args.path, f"{step}.json")) as f:
+                with open(os.path.join(args.path, "{}.json".format(step))) as f:
                     group = json.load(f)
             self.dynamic.append(group[str(step)])
 
@@ -36,10 +36,10 @@ class LiveBroadcast:
         async with self.connected:
             await self.connected.wait()
 
-        print(f"Waiting for delay ({args.delay}s) ...")
+        print("Waiting for delay ({}s) ...".format(args.delay))
         await asyncio.sleep(args.delay)
 
-        print(f"Broadcast with {args.speed}s per frame ...")
+        print("Broadcast with {}s per frame ...".format(args.speed))
         for step in range(self.step, self.static["steps"]):
             self.step = step
             print(self.args.path, self.step, "/", self.static["steps"] - 1)
