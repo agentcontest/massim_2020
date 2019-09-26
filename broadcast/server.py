@@ -18,7 +18,8 @@ class LiveBroadcast:
         self.args = args
         self.dynamic = []
         self.step = 0
-        self.condition = asyncio.Condition()
+        self.step_changed = asyncio.Condition()
+        self.connected = asyncio.Condition()
 
         with open(os.path.join(args.path, "static.json")) as f:
             self.static = json.load(f)
@@ -30,18 +31,27 @@ class LiveBroadcast:
             self.dynamic.append(group[str(step)])
 
     async def run(self):
+        print("Waiting for first client ...")
+        async with self.connected:
+            await self.connected.wait()
+
+        print(f"Waiting for {args.delay}s ...")
         await asyncio.sleep(args.delay)
 
         for step in range(self.static["steps"]):
             self.step = step
             print(self.args.path, self.step, "/", self.static["steps"] - 1)
 
-            async with self.condition:
-                self.condition.notify_all()
+            async with self.step_changed:
+                self.step_changed.notify_all()
 
             await asyncio.sleep(args.speed)
 
     async def live(self, req):
+        print("WebSocket conntected.")
+        async with self.connected:
+            self.connected.notify()
+
         ws = aiohttp.web.WebSocketResponse()
         await ws.prepare(req)
 
@@ -49,8 +59,8 @@ class LiveBroadcast:
         await ws.send_json(self.dynamic[self.step])
 
         while True:
-            async with self.condition:
-                await self.condition.wait()
+            async with self.step_changed:
+                await self.step_changed.wait()
                 await ws.send_json(self.dynamic[self.step])
 
         return ws
