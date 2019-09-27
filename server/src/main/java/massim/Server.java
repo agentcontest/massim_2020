@@ -291,6 +291,7 @@ public class Server {
             // handle initial state
             var initialPercepts = sim.init(steps, simConfig, matchTeams);
             handleSimState(sim.getName(), startTime, sim.getStaticData());
+            handleSimState(sim.getName(), startTime, sim.getSnapshot());
             agentManager.handleInitialPercepts(initialPercepts);
 
             // handle steps
