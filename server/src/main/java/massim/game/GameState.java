@@ -56,6 +56,8 @@ class GameState {
     private int eventCreateMax;
     private int eventCreatePerimeter;
 
+    private JSONArray logEvents = new JSONArray();
+
     GameState(JSONObject config, Set<TeamConfig> matchTeams) {
         // parse simulation config
         randomFail = config.getInt("randomFail");
@@ -280,6 +282,8 @@ class GameState {
     Map<String, RequestActionMessage> prepareStep(int step) {
         this.step = step;
 
+        logEvents = new JSONArray();
+
         //cleanup & transfer markers
         grid.deleteMarkers();
         for (Position pos : agentCausedClearMarkers) grid.createMarker(pos, Marker.Type.CLEAR);
@@ -472,10 +476,10 @@ class GameState {
         if (grid.getTerrain(ePos) != Terrain.GOAL) return Actions.RESULT_F;
         Set<Attachable> attachedBlocks = e.collectAllAttachments();
         for (Map.Entry<Position, String> entry : task.getRequirements().entrySet()) {
-            Position pos = entry.getKey();
-            String reqType = entry.getValue();
-            Position checkPos = Position.of(pos.x + ePos.x, pos.y + ePos.y);
-            Attachable actualBlock = getUniqueAttachable(checkPos);
+            var pos = entry.getKey();
+            var reqType = entry.getValue();
+            var checkPos = Position.of(pos.x + ePos.x, pos.y + ePos.y);
+            var actualBlock = getUniqueAttachable(checkPos);
             if (actualBlock instanceof Block
                 && ((Block) actualBlock).getBlockType().equals(reqType)
                 && attachedBlocks.contains(actualBlock)) {
@@ -489,6 +493,13 @@ class GameState {
         });
         teams.get(e.getTeamName()).addScore(task.getReward());
         task.complete();
+
+        var result = new JSONObject();
+        result.put("type", "task completed");
+        result.put("task", task.getName());
+        result.put("team", e.getTeamName());
+        if (logEvents != null) logEvents.put(result);
+
         return Actions.RESULT_SUCCESS;
     }
 
@@ -736,6 +747,7 @@ class GameState {
             taskArr.put(task);
         });
         teams.values().forEach(t -> scores.put(t.getName(), t.getScore()));
+        snapshot.put("events", logEvents);
         return snapshot;
     }
 
