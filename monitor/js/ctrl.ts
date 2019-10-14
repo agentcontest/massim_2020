@@ -40,7 +40,7 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
     if (path[path.length - 1] == '/') path = path.substr(0, path.length - 1);
     const suffix = location.pathname == '/' ? `?sri=${Math.random().toString(36).slice(-8)}` : '';
 
-    var step = 0;
+    var step = -1;
     var timer: number | undefined = undefined;
 
     var cache: any = {};
@@ -88,7 +88,7 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
         return;
       }
 
-      const group = Math.floor(step / 5) * 5;
+      const group = step > 0 ? Math.floor(step / 5) * 5 : 0;
       const xhr = new XMLHttpRequest();
       xhr.open('GET', `${path}/${group}.json${suffix}`);
       xhr.onload = function() {
@@ -122,7 +122,7 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
 
     function setStep(s: number) {
       // keep step in bounds
-      step = Math.max(0, s);
+      step = Math.max(-1, s);
       if (vm.static && step >= vm.static.steps) {
         stop();
         step = vm.static.steps - 1;

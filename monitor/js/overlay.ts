@@ -9,7 +9,7 @@ function replay(ctrl: ReplayCtrl) {
   return h('div.box.replay', [
     h('div', [h('strong', 'Replay:'), ' ', ctrl.name()]),
     h('div', [
-      h('button', { on: { click: () => ctrl.setStep(0) } }, '|<<'),
+      h('button', { on: { click: () => ctrl.setStep(-1) } }, '|<<'),
       h('button', { on: { click: () => ctrl.setStep(ctrl.step() - 10) } }, '<<'),
       h('button', {
         on: { click: () => ctrl.toggle() }
