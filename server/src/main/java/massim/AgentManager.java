@@ -334,9 +334,9 @@ class AgentManager {
          * @param message the message document to send
          */
         private void sendMessage(Message message){
-            if(sendQueue.size() > sendBufferSize) try {
-                sendQueue.take();
-            } catch (InterruptedException ignored) {}
+            if (sendQueue.size() > sendBufferSize)
+                sendQueue.poll();
+
             try {
                 sendQueue.put(message.toJson());
             } catch (InterruptedException e) {
