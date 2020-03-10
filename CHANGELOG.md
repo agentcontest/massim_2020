@@ -1,5 +1,11 @@
 # MASSim CHANGELOG
 
+## 2020
+
+### MASSim 2.2 - Initial release 2020
+
+* the grid now *loops* horizontally and vertically (is it a donut?)
+
 ## 2019
 
 ### MASSim 2.1 - bug-fixes

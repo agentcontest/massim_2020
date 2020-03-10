@@ -1,6 +1,6 @@
 # MASSim Scenario Documentation
 
-## Agents Assemble (2019)
+## Agents Assemble (2020)
 
 * [Intro](#background-story)
 * [Actions](#actions)
@@ -10,7 +10,7 @@
 
 ### Background Story
 
-_In the year 2088, after 43 years of depleting Mars' natural resources, humankind now faces a drastically changed ecosystem. Building so many water wells has led to the surface becoming unstable, such that volcanic eruptions have become a regular sight. People have started rebuilding efforts, though they need specialised compounds which are durable enough to survive in the new circumstances. Thus, they once again rely on their trusty All-Terrain-Planetary-Vehicles - now equipped with robotic arms and pneumatic cleanup gear - sending them into particularly hazardous environments, where they can obtain the necessary materials._
+_..._
 
 ### Introduction
 
@@ -23,6 +23,9 @@ __Tournament points__ are distributed according to the score of a team at the en
 ## Environment
 
 The environment is a rectangular grid. The dimensions are not known to the agents. Agents only perceive positions relative to their own. The x-axis goes from left to right (or eastwards) and the y-axis from top to bottom (southwards).
+
+The grid loops horizontally and vertically, i.e. if an agent moved off the right edge of the map, it will appear on the left side instead.
+
 Each cell of the grid contains up to one thing that may collide with other things (i.e. agents and blocks for now). Only in the beginning of the simulation, an agent shares *the same* cell with one agent of the other team/s (to ensure fairness). Once one of the agents has moved, they cannot overlap again later.
 
 ### Entity/Agent
@@ -399,7 +402,7 @@ Example:
 
 ```JSON
 {
-  "id": "2019-SampleSimulation",
+  "id": "2020-SampleSimulation",
   "steps": 500,
   "randomSeed": 17,
   "randomFail": 1,
@@ -499,12 +502,3 @@ Currently, there is only one standard agent role.
 ## Commands
 
 Currently, no special scenario commands are available. You may use a simulation [setup file](#configuration) instead.
-
-## Roadmap
-
-A few things are still planned for 2019/20:
-
-* agents pushing other agents/blocks..
-* more terrain options
-* add-ons (that agents can attach to themselves to unlock further actions)
-* NPCs (entities controlled by the server)
