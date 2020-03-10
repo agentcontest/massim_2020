@@ -1,0 +1,43 @@
+{
+    "NOsetup" : "conf/setup/test.txt",
+
+    "steps" : 750,
+    "randomSeed" : 17,
+    "randomFail" : 1,
+    "entities" : [{"standard" : 50}],
+
+    "clearSteps" : 3,
+    "clearEnergyCost" : 30,
+    "disableDuration" : 4,
+    "maxEnergy" : 300,
+    "attachLimit" : 10,
+
+    "grid" : {
+      "height" : 100,
+      "width" : 100,
+      "instructions": [
+        ["cave", 0.45, 9, 5, 4]
+      ],
+      "goals": {
+        "number" : 3,
+        "size" : [1,2]
+      }
+    },
+
+    "blockTypes" : [3, 3],
+    "dispensers" : [5, 10],
+
+    "tasks" : {
+      "size" : [2, 4],
+      "duration" : [100, 200],
+      "probability" : 0.05
+    },
+
+    "events" : {
+      "chance" : 15,
+      "radius" : [3, 5],
+      "warning" : 5,
+      "create" : [-3, 1],
+      "perimeter" : 2
+    }
+}
