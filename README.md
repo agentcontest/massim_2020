@@ -1,4 +1,4 @@
-MASSim 2019: Agents Assemble
+MASSim 2020: Agents Assemble
 ============================
 
 [![Build Status](https://travis-ci.org/agentcontest/massim_2019.svg?branch=master)](https://travis-ci.org/agentcontest/massim_2019)
@@ -20,7 +20,7 @@ executed by _MASSim_.
 Download
 --------
 
-We upload **binary releases** to GitHub: https://github.com/agentcontest/massim_2019/releases
+We upload **binary releases** to GitHub: https://github.com/agentcontest/massim_2020/releases
 
 There also are (potentially unstable) [development snapshots](https://s3-eu-west-1.amazonaws.com/agentcontest/massim/massim-master.tar.gz) built after each commit.
 
