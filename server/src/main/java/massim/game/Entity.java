@@ -43,7 +43,7 @@ public class Entity extends Attachable {
 
     @Override
     public Thing toPercept(Position origin) {
-        Position localPosition = getPosition().toLocal(origin);
+        Position localPosition = getPosition().relativeTo(origin);
         return new Thing(localPosition.x, localPosition.y, Thing.TYPE_ENTITY, teamName);
     }
 

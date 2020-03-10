@@ -18,7 +18,7 @@ public class Dispenser extends Positionable {
 
     @Override
     public Thing toPercept(Position entityPosition) {
-        Position local = getPosition().toLocal(entityPosition);
+        Position local = getPosition().relativeTo(entityPosition);
         return new Thing(local.x, local.y, Thing.TYPE_DISPENSER, blockType);
     }
 

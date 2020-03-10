@@ -18,7 +18,7 @@ public class Block extends Attachable {
 
     @Override
     public Thing toPercept(Position entityPosition) {
-        Position relativePosition = getPosition().toLocal(entityPosition);
+        Position relativePosition = getPosition().relativeTo(entityPosition);
         return new Thing(relativePosition.x, relativePosition.y, Thing.TYPE_BLOCK, blockType);
     }
 }

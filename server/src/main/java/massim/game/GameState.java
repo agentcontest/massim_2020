@@ -310,8 +310,8 @@ class GameState {
             }
             else {
                 var type = event.getStep() - step <= 2? Marker.Type.CLEAR_IMMEDIATE : Marker.Type.CLEAR;
-                var clearArea = new Area(event.getPosition(), event.getRadius());
-                var clearPerimeter = new Area(event.getPosition(), event.getRadius() + eventCreatePerimeter);
+                var clearArea = event.getPosition().spanArea(event.getRadius());
+                var clearPerimeter = event.getPosition().spanArea(event.getRadius() + eventCreatePerimeter);
                 clearPerimeter.removeAll(clearArea);
                 for (Position pos: clearArea) grid.createMarker(pos, type);
                 for (Position pos: clearPerimeter) grid.createMarker(pos, Marker.Type.CLEAR_PERIMETER);
@@ -329,7 +329,7 @@ class GameState {
         for (var i = 0; i < distributeNew; i++) {
             var pos = grid.findRandomFreePosition(event.getPosition(),eventCreatePerimeter + event.getRadius());
             if(pos != null && grid.getTerrain(pos) == Terrain.EMPTY
-                    && dispensers.get(pos) == null && grid.isInBounds(pos)) {
+                    && dispensers.get(pos) == null && !grid.outOfBounds(pos)) {
                 grid.setTerrain(pos, Terrain.OBSTACLE);
             }
         }
@@ -346,11 +346,11 @@ class GameState {
             var visibleThings = new HashSet<Thing>();
             Map<String, Set<Position>> visibleTerrain = new HashMap<>();
             Set<Position> attachedThings = new HashSet<>();
-            for (Position currentPos: new Area(pos, entity.getVision())){
+            for (Position currentPos: pos.spanArea(entity.getVision())){
                 getThingsAt(currentPos).forEach(go -> {
                     visibleThings.add(go.toPercept(pos));
                     if (go != entity && go instanceof Attachable && ((Attachable)go).isAttachedToAnotherEntity()){
-                        attachedThings.add(go.getPosition().toLocal(pos));
+                        attachedThings.add(go.getPosition().relativeTo(pos));
                     }
                 });
                 var d = dispensers.get(currentPos);
@@ -358,7 +358,7 @@ class GameState {
                 var terrain = grid.getTerrain(currentPos);
                 if (terrain != Terrain.EMPTY) {
                     visibleTerrain.computeIfAbsent(terrain.name,
-                            t -> new HashSet<>()).add(currentPos.toLocal(pos));
+                            t -> new HashSet<>()).add(currentPos.relativeTo(pos));
                 }
             }
             var percept = new StepPercept(step, teams.get(entity.getTeamName()).getScore(),
@@ -372,23 +372,21 @@ class GameState {
     }
 
     Map<String, SimEndMessage> getFinalPercepts() {
-        Map<String, SimEndMessage> result = new HashMap<>();
-        List<Team> teamsSorted = new ArrayList<>(teams.values());
+        var result = new HashMap<String, SimEndMessage>();
+        var teamsSorted = new ArrayList<>(teams.values());
         teamsSorted.sort((t1, t2) -> (int) (t2.getScore() - t1.getScore()));
-        Map<Team, Integer> rankings = new HashMap<>();
+        var rankings = new HashMap<Team, Integer>();
         for (int i = 0; i < teamsSorted.size(); i++) {
             rankings.put(teamsSorted.get(i), i + 1);
         }
         for (Entity e: entityToAgent.keySet()) {
-            Team team = teams.get(e.getTeamName());
+            var team = teams.get(e.getTeamName());
             result.put(e.getAgentName(), new SimEndMessage(team.getScore(), rankings.get(team)));
         }
         return result;
     }
 
     String handleMoveAction(Entity entity, String direction) {
-        if (!grid.isInBounds(entity.getPosition().moved(direction, 1)))
-            return Actions.RESULT_F_FORBIDDEN;
         if (grid.moveWithAttached(entity, direction, 1)) {
             return Actions.RESULT_SUCCESS;
         }
@@ -478,7 +476,7 @@ class GameState {
         for (Map.Entry<Position, String> entry : task.getRequirements().entrySet()) {
             var pos = entry.getKey();
             var reqType = entry.getValue();
-            var checkPos = Position.of(pos.x + ePos.x, pos.y + ePos.y);
+            var checkPos = Position.wrapped(pos.x + ePos.x, pos.y + ePos.y);
             var actualBlock = getUniqueAttachable(checkPos);
             if (actualBlock instanceof Block
                 && ((Block) actualBlock).getBlockType().equals(reqType)
@@ -511,7 +509,6 @@ class GameState {
     String handleClearAction(Entity entity, Position xy) {
         var target = xy.translate(entity.getPosition());
         if (target.distanceTo(entity.getPosition()) > entity.getVision()) return Actions.RESULT_F_TARGET;
-        if (!grid.isInBounds(target)) return Actions.RESULT_F_TARGET;
         if (entity.getEnergy() < Entity.clearEnergyCost) return Actions.RESULT_F_STATUS;
 
         var previousPos = entity.getPreviousClearPosition();
@@ -525,7 +522,7 @@ class GameState {
             entity.resetClearCounter();
         }
         else {
-            agentCausedClearMarkers.addAll(new Area(target, 1));
+            agentCausedClearMarkers.addAll(target.spanArea(1));
         }
         entity.recordClearAction(step, target);
         return Actions.RESULT_SUCCESS;
@@ -533,7 +530,7 @@ class GameState {
 
     int clearArea(Position center, int radius) {
         var removed = 0;
-        for (var position : new Area(center, radius)) {
+        for (var position : center.spanArea(radius)) {
             for (var go : getThingsAt(position)) {
                 if (go instanceof Entity) {
                     ((Entity)go).disable();
@@ -563,13 +560,13 @@ class GameState {
             int index = RNG.nextInt(blockTypes.size());
             double direction = RNG.nextDouble();
             if (direction <= .3) {
-                lastPosition = lastPosition.translate(-1, 0);
+                lastPosition = Position.of(lastPosition.x - 1, lastPosition.y);
             }
             else if (direction <= .6) {
-                lastPosition = lastPosition.translate(1, 0);
+                lastPosition = Position.of(lastPosition.x + 1, lastPosition.y);
             }
             else {
-                lastPosition = lastPosition.translate(0, 1);
+                lastPosition = Position.of(lastPosition.x, lastPosition.y + 1);
             }
             requirements.put(lastPosition, blockList.get(index));
         }

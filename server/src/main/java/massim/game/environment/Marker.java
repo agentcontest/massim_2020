@@ -21,7 +21,7 @@ public class Marker extends Positionable {
 
     @Override
     public Thing toPercept(Position relativeTo) {
-        var pos = getPosition().toLocal(relativeTo);
+        var pos = getPosition().relativeTo(relativeTo);
         return new Thing(pos.x, pos.y, Thing.TYPE_MARKER, type.name);
     }
 

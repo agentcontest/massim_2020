@@ -1,7 +1,7 @@
 package massim.game;
 
 import massim.config.TeamConfig;
-import massim.game.environment.Area;
+import massim.game.environment.Block;
 import massim.game.environment.Terrain;
 import massim.protocol.data.Position;
 import massim.protocol.data.Thing;
@@ -10,9 +10,7 @@ import massim.protocol.messages.scenario.StepPercept;
 import massim.util.RNG;
 import org.json.JSONObject;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GameStateTest {
 
@@ -35,7 +33,6 @@ public class GameStateTest {
             "        \"width\" : 100,\n" +
             "        \"NOfile\" : \"conf/maps/test40x40.bmp\",\n" +
             "        \"instructions\": [\n" +
-            "          [\"line-border\", 1]\n" +
             "        ],\n" +
             "        \"goals\": {\n" +
             "          \"number\" : 0,\n" +
@@ -124,8 +121,8 @@ public class GameStateTest {
         state.attach(a2.getPosition(), block.getPosition());
 
         var percept = new StepPercept(((StepPercept)state.getStepPercepts().get("A1")).toJson().getJSONObject("content"));
-        assert(percept.attachedThings.contains(a2.getPosition().toLocal(a1.getPosition())));
-        assert(percept.attachedThings.contains(block.getPosition().toLocal(a1.getPosition())));
+        assert(percept.attachedThings.contains(a2.getPosition().relativeTo(a1.getPosition())));
+        assert(percept.attachedThings.contains(block.getPosition().relativeTo(a1.getPosition())));
     }
 
     @org.junit.Test
@@ -167,7 +164,6 @@ public class GameStateTest {
         }
         state.prepareStep(i++);
         assert(state.handleClearAction(a1, Position.of(2, 0)).equals(Actions.RESULT_SUCCESS));
-        System.out.println(state.getThingsAt(block.getPosition()));
         assert(!state.getThingsAt(block.getPosition()).contains(block));
         assert(a2.isDisabled());
         for (var j = 0; j < Entity.disableDuration; j++) {
@@ -195,7 +191,7 @@ public class GameStateTest {
         assert b3.collectAllAttachments().contains(b2);
 
         state.handleDisconnectAction(a1,
-                b2.getPosition().toLocal(a1.getPosition()), b3.getPosition().toLocal(a1.getPosition()));
+                b2.getPosition().relativeTo(a1.getPosition()), b3.getPosition().relativeTo(a1.getPosition()));
 
         assert !b2.collectAllAttachments().contains(b3);
         assert !b3.collectAllAttachments().contains(b2);
@@ -203,7 +199,7 @@ public class GameStateTest {
 
     @org.junit.Test
     public void testArea() {
-        var area = new Area(Position.of(10, 10), 2);
+        var area = Position.of(10, 10).spanArea(2);
         assert(area.size() == 13);
         assert(area.contains(Position.of(10, 10)));
         assert(area.contains(Position.of(10, 11)));
@@ -219,9 +215,70 @@ public class GameStateTest {
         assert(area.contains(Position.of(11, 11)));
         assert(area.contains(Position.of(11, 9)));
 
-        assert(new Area(Position.of(0,0), 3).size() == 25);
-        assert(new Area(Position.of(0,0), 1).size() == 5);
-        assert(new Area(Position.of(0,0), 0).size() == 1);
+        assert(Position.of(0,0).spanArea(3).size() == 25);
+        assert(Position.of(0,0).spanArea(1).size() == 5);
+        assert(Position.of(0,0).spanArea(0).size() == 1);
+    }
+
+    @org.junit.Test
+    public void testMapLooping() {
+        var grid = state.getGrid();
+
+        //test basics
+        var pos1 = Position.wrapped(-1, -1);
+        assert(pos1.equals(Position.of(grid.getDimX() - 1, grid.getDimY() - 1)));
+
+        var area = Position.of(0,0).spanArea(1);
+        assert area.contains(Position.of(0,0));
+        assert area.contains(Position.of(1,0));
+        assert area.contains(Position.of(0,1));
+        assert area.contains(Position.of(0,grid.getDimY() - 1));
+        assert area.contains(Position.of(grid.getDimX() - 1,0));
+
+        // test moving
+        var a1 = state.getEntityByName("A1");
+        state.teleport("A1", Position.of(0, 0));
+        state.handleMoveAction(a1, "w");
+        assert(a1.getPosition().equals(Position.of(grid.getDimX() - 1, 0)));
+        state.handleMoveAction(a1, "n");
+        assert(a1.getPosition().equals(Position.of(grid.getDimX() - 1, grid.getDimY() - 1)));
+
+        // test clear across boundaries
+        state.setTerrain(Position.of(0, 0), Terrain.OBSTACLE);
+        assert state.getTerrain(Position.of(0, 0)) == Terrain.OBSTACLE;
+        for (var i = 0; i < state.clearSteps; i++) {
+            state.prepareStep(i);
+            assert state.handleClearAction(a1, Position.of(1, 1)).equals(Actions.RESULT_SUCCESS);
+        }
+        assert state.getTerrain(Position.of(0, 0)) == Terrain.EMPTY;
+
+        state.handleMoveAction(a1, "s");
+        assert a1.getPosition().equals(Position.of(grid.getDimX() - 1, 0));
+
+        // rotate some blocks across the map boundaries
+        var blockType = state.getBlockTypes().iterator().next();
+        var block = state.createBlock(Position.of(0, 0), blockType);
+        var b2 = state.createBlock(Position.of(0, grid.getDimY() - 1), blockType);
+        var b3 = state.createBlock(Position.of(grid.getDimX() - 1, grid.getDimY() - 1), blockType);
+        var b4 = state.createBlock(Position.of(0, grid.getDimY() - 2), blockType);
+        assert state.handleAttachAction(a1, "e").equals(Actions.RESULT_SUCCESS);
+        assert state.attach(block.getPosition(), b2.getPosition());
+        assert state.attach(b2.getPosition(), b3.getPosition());
+        assert state.attach(b2.getPosition(), b4.getPosition());
+
+        assert state.handleRotateAction(a1, false).equals(Actions.RESULT_SUCCESS);
+        assert block.getPosition().equals(Position.of(grid.getDimX() - 1, grid.getDimY() - 1));
+
+        var blocks = Arrays.asList(block, b2, b3, b4);
+        var positions = new HashMap<Block, Position>();
+        for (var b: blocks) positions.put(b, b.getPosition());
+
+        for (var i = 0; i < 3; i++) {
+            assert state.handleRotateAction(a1, true).equals(Actions.RESULT_SUCCESS);
+            for (var b: blocks) assert !b.getPosition().equals(positions.get(b));
+        }
+        assert state.handleRotateAction(a1, true).equals(Actions.RESULT_SUCCESS);
+        for (var b: blocks) assert b.getPosition().equals(positions.get(b));
     }
 
     private static boolean containsThing(Collection<Thing> things, String type, Position pos) {

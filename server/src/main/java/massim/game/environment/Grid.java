@@ -7,6 +7,7 @@ import massim.util.RNG;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class Grid {
         this.attachLimit = attachLimit;
         dimX = gridConf.getInt("width");
         dimY = gridConf.getInt("height");
+        Position.setGridDimensions(dimX, dimY);
         thingsMap = new HashMap<>();
         terrainMap = new Terrain[dimX][dimY];
         for (Terrain[] col : terrainMap) Arrays.fill(col, Terrain.EMPTY);
@@ -91,7 +93,7 @@ public class Grid {
         for (var i = 0; i < goalNumber; i++) {
             var centerPos = findRandomFreePosition();
             var size = RNG.betweenClosed(goalSizeMin, goalSizeMax);
-            for (var pos : new Area(centerPos, size)) setTerrain(pos, Terrain.GOAL);
+            for (var pos : centerPos.spanArea(size)) setTerrain(pos, Terrain.GOAL);
         }
     }
 
@@ -118,8 +120,8 @@ public class Grid {
         var count = 0;
         for (var x = cx - 1; x <= cx + 1; x++) { for (var y = cy - 1; y <= cy + 1; y++) {
             if (x != cx || y != cy) {
-                if (x < 0 || y < 0 || x >= dimX || y >= dimX) count++;
-                else if (terrainMap[x][y] == Terrain.OBSTACLE) count++;
+                var pos = Position.wrapped(x, y);
+                if (terrainMap[pos.x][pos.y] == Terrain.OBSTACLE) count++;
             }
         }}
         return count;
@@ -203,8 +205,11 @@ public class Grid {
         return true;
     }
 
-    private boolean outOfBounds(Position pos) {
-        return pos.x < 0 || pos.y < 0 || pos.x >= dimX || pos.y >= dimY;
+    /**
+     * @return true if a position is out of the grid's bounds (it could be wrapped back in though).
+     */
+    public boolean outOfBounds(Position pos) {
+        return pos == null || pos.x < 0 || pos.y < 0 || pos.x >= dimX || pos.y >= dimY;
     }
 
     private void move(Set<Positionable> things, Map<Positionable, Position> newPositions) {
@@ -290,14 +295,9 @@ public class Grid {
         if(attachments.stream().anyMatch(a -> a != anchor && a instanceof Entity)) return null;
         var newPositions = new HashMap<Positionable, Position>();
         for (Positionable a : attachments) {
-            var rotatedPosition = a.getPosition();
-            int distance = rotatedPosition.distanceTo(anchor.getPosition());
-            for (int rotations = 0; rotations < distance; rotations++) {
-                rotatedPosition = rotatedPosition.rotatedOneStep(anchor.getPosition(), clockwise);
-                if(!isUnblocked(rotatedPosition, attachments)) return null;
-                if(!isInBounds(rotatedPosition)) return null;
-            }
-            newPositions.put(a, rotatedPosition);
+            var rotatedPos = a.getPosition().rotated90(anchor.getPosition(), clockwise);
+            if(!isUnblocked(rotatedPos, attachments)) return null;
+            newPositions.put(a, rotatedPos);
         }
         return newPositions;
     }
@@ -307,7 +307,6 @@ public class Grid {
         for (Positionable thing : things) {
             for (int i = 1; i <= distance; i++) {
                 var newPos = thing.getPosition().moved(direction, i);
-                if (!isInBounds(newPos)) return null;
                 if(!isUnblocked(newPos, things)) return null;
             }
             newPositions.put(thing, thing.getPosition().moved(direction, distance));
@@ -355,28 +354,24 @@ public class Grid {
     }
 
     private boolean isUnblocked(Position xy, Set<Positionable> excludedObjects) {
-        if (outOfBounds(xy)) return false;
+        if (outOfBounds(xy)) xy = xy.wrapped();
         if (terrainMap[xy.x][xy.y] == Terrain.OBSTACLE) return false;
 
         return getThings(xy).stream().noneMatch(t -> t instanceof Attachable && !excludedObjects.contains(t));
     }
 
     public void setTerrain(Position pos, Terrain terrainType) {
-        if (outOfBounds(pos)) return;
+        if (outOfBounds(pos)) pos = pos.wrapped();
         terrainMap[pos.x][pos.y] = terrainType;
     }
 
     public Terrain getTerrain(Position pos) {
-        if (outOfBounds(pos)) return Terrain.EMPTY;
+        if (outOfBounds(pos)) pos = pos.wrapped();
         return terrainMap[pos.x][pos.y];
     }
 
-    public boolean isInBounds(Position p) {
-        return p != null && p.x >= 0 && p.y >= 0 && p.x < dimX && p.y < dimY;
-    }
-
     public void createMarker(Position position, Marker.Type type) {
-        if (!isInBounds(position)) return;
+        if (outOfBounds(position)) position = position.wrapped();
         var marker = new Marker(position, type);
         markers.add(marker);
         insertThing(marker);
