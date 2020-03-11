@@ -135,7 +135,7 @@ public class Scheduler implements AgentListener, EnvironmentListener{
             List<Percept> percepts = new ArrayList<>();
             try {
                 eis.getAllPercepts(ag.getName()).values().forEach(percepts::addAll);
-                newPerceptAgents.add(ag);
+                if (!percepts.isEmpty()) newPerceptAgents.add(ag);
             } catch (PerceiveException ignored) { }
             ag.setPercepts(percepts);
         });
@@ -143,16 +143,17 @@ public class Scheduler implements AgentListener, EnvironmentListener{
         // step all agents which have new percepts
         newPerceptAgents.forEach(agent -> {
             eis.iilang.Action action = agent.step();
-            try {
-                eis.performAction(agent.getName(), action);
-            } catch (ActException e) {
-                if(action != null)
+            if (action != null) {
+                try {
+                    eis.performAction(agent.getName(), action);
+                } catch (ActException e) {
                     System.out.println("Could not perform action " + action.getName() + " for " + agent.getName());
+                }
             }
         });
 
         if(newPerceptAgents.size() == 0) try {
-            Thread.sleep(1000); // wait a bit in case no agents have been executed
+            Thread.sleep(2000); // wait a bit in case no agents have been executed
         } catch (InterruptedException ignored) {}
     }
 
