@@ -51,4 +51,9 @@ public class ServerConfig {
      * The port for the webmonitor or 0.
      */
     public int monitorPort;
+
+    /**
+     * The amount of ms to pause between simulations.
+     */
+    public int waitBetweenSimulations = 0;
 }

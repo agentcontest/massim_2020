@@ -309,6 +309,14 @@ public class Server {
             var finalPercepts = sim.finish();
             agentManager.handleFinalPercepts(finalPercepts);
             result.put(sim.getName(), sim.getResult());
+
+            // pause between simulations
+            if (config.waitBetweenSimulations > 0) {
+                Log.log(Log.Level.NORMAL, "Waiting " + config.waitBetweenSimulations + "ms before starting the next round.");
+                try {
+                    Thread.sleep(config.waitBetweenSimulations);
+                } catch (InterruptedException ignored) {}
+            }
         }
 
         // write match result to file
@@ -400,6 +408,8 @@ public class Server {
         Log.log(Log.Level.NORMAL, "Configuring max packet length: " + config.maxPacketLength);
         config.replayPath = serverJSON.getString("replayPath");
         Log.log(Log.Level.NORMAL, "Configuring replay path: " + config.replayPath);
+        config.waitBetweenSimulations = serverJSON.optInt("waitBetweenSimulations");
+        Log.log(Log.Level.NORMAL, "Configuring wait time: " + config.waitBetweenSimulations);
 
         // parse matches
         JSONArray matchJSON = conf.getJSONArray("match");

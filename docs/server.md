@@ -66,7 +66,8 @@ The server block contains information about the server in general, which will ho
     "logLevel" : "normal",
     "logPath" : "logs",
     "replayPath" : "replays",
-    "maxPacketLength" : 65536
+    "maxPacketLength" : 65536,
+    "waitBetweenSimulations" : 5000
   }
 ```
 
@@ -97,6 +98,8 @@ The server block contains information about the server in general, which will ho
 * __replayPath__: The simulation state can be saved to disk after each step. This is where these files will be saved. Those replay files can be used again e.g. with the web monitor.
 
 * __maxPacketLength__: The maximum number of bytes of an XML message that will be processed by the server. Bytes beyond that limit will be immediately discarded.
+
+* __waitBetweenSimulations__: A number of milliseconds to wait between to conescutive simulations.
 
 ### manual-mode block
 

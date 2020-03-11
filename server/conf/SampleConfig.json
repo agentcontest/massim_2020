@@ -11,7 +11,8 @@
     "logLevel" : "normal",
     "logPath" : "logs",
     "replayPath" : "replays",
-    "maxPacketLength" : 65536
+    "maxPacketLength" : 65536,
+    "waitBetweenSimulations" : 5000
   },
 
   "manual-mode" : [
