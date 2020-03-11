@@ -13,20 +13,29 @@ Some very basic agents are included mainly for testing purposes.
 
 ### Java agents configuration file
 A sample configuration might look like this
+
 ```json
 {
-  "agents" : {
-    "agentA1" : {"entity" : "connectionA1", "team" : "A", "class" : "BasicAgent"},
-    "agentA2" : {"entity" : "connectionA2", "team" : "A", "class" : "BasicAgent"},
-    "agentA3" : {"entity" : "connectionA3", "team" : "A", "class" : "BasicAgent"},
-    "agentA4" : {"entity" : "connectionA4", "team" : "A", "class" : "BasicAgent"},
-    "agentA5" : {"entity" : "connectionA5", "team" : "A", "class" : "BasicAgent"},
-    "agentA6" : {"entity" : "connectionA6", "team" : "A", "class" : "BasicAgent"}
-  }
+  "agents" : [
+    {
+      "count": 20,
+      "start-index": 0,
+      "agent-prefix": "A",
+      "entity-prefix": "connectionA",
+      "team": "A",
+      "class": "BasicAgent"
+    },
+    ...
+  ]
 }
 ```
-The attributes of each agent are
-* [key]: the agent's name
-* entity: the EIS entity name as configured in eismassimconfig.json
-* team: the agent's team name
-* class: the agent's type as registered in the scheduler class
+
+The attributes are
+* __count__: how many agents to create
+* __start-index__: the index that is first appended to the prefixes
+* __agent-prefix__: the prefix for all agents' names
+* __entity-prefix__: the prefix of all entity connections
+* __team__: the agents' team name
+* __class__: the agents' type as registered in the scheduler class
+
+Of course you can specify multiple blocks to configure multiple teams or sets of agents with different agent classes in the same file.
