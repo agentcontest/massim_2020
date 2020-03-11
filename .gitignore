@@ -12,3 +12,8 @@ monitor/js/*.js
 .idea
 *.DS_Store
 docs/*.html
+.classpath
+.project
+.settings
+.vscode
+logs/*
