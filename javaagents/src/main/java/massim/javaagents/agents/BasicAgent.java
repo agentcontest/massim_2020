@@ -32,7 +32,7 @@ public class BasicAgent extends Agent {
         List<Percept> percepts = getPercepts();
         for (Percept percept : percepts) {
             if (percept.getName().equals("actionID")) {
-                Parameter param = percept.getParameters().getFirst();
+                Parameter param = percept.getParameters().get(0);
                 if (param instanceof Numeral) {
                     int id = ((Numeral) param).getValue().intValue();
                     if (id > lastID) {
