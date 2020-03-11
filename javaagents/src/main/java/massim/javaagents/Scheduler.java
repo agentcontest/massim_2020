@@ -61,14 +61,23 @@ public class Scheduler implements AgentListener, EnvironmentListener{
      */
     private void parseConfig(String path) {
         try {
-            JSONObject config = new JSONObject(new String(Files.readAllBytes(Paths.get(path, "javaagentsconfig.json"))));
-            JSONObject agents = config.optJSONObject("agents");
+            var config = new JSONObject(new String(Files.readAllBytes(Paths.get(path, "javaagentsconfig.json"))));
+            var agents = config.optJSONArray("agents");
             if(agents != null){
-                agents.keySet().forEach(agName -> {
-                    JSONObject agConf = agents.getJSONObject(agName);
-                    agentConfigurations.add(new AgentConf(agName, agConf.getString("entity"), agConf.getString("team"),
-                                                          agConf.getString("class")));
-                });
+                for (int i = 0; i < agents.length(); i++) {
+                    var agentBlock = agents.getJSONObject(i);
+                    var count = agentBlock.getInt("count");
+                    var startIndex = agentBlock.getInt("start-index");
+                    var agentPrefix = agentBlock.getString("agent-prefix");
+                    var entityPrefix = agentBlock.getString("entity-prefix");
+                    var team = agentBlock.getString("team");
+                    var agentClass = agentBlock.getString("class");
+
+                    for (int index = startIndex; index < startIndex + count; index++) {
+                        agentConfigurations.add(
+                                new AgentConf(agentPrefix + index, entityPrefix + index, team, agentClass));
+                    }
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -121,15 +130,13 @@ public class Scheduler implements AgentListener, EnvironmentListener{
      */
     void step() {
         // retrieve percepts for all agents
-        List<Agent> newPerceptAgents = new Vector<>();
+        List<Agent> newPerceptAgents = new ArrayList<>();
         agents.values().forEach(ag -> {
-            List<Percept> percepts = new Vector<>();
+            List<Percept> percepts = new ArrayList<>();
             try {
                 eis.getAllPercepts(ag.getName()).values().forEach(percepts::addAll);
                 newPerceptAgents.add(ag);
-            } catch (PerceiveException e) {
-//                System.out.println("No percepts for " + ag.getName());
-            }
+            } catch (PerceiveException ignored) { }
             ag.setPercepts(percepts);
         });
 

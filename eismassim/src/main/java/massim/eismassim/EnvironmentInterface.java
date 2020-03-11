@@ -147,7 +147,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
         }
 
         // timeout
-        int timeout = config.optInt("timeout", 3900);
+        int timeout = config.optInt("timeout", 3000);
         EISEntity.setTimeout(timeout);
         Log.log("Timeout set to " + timeout);
 
@@ -184,6 +184,30 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
             if(entities.put(entity.getName(), entity) != null){
                 // entity by that name already existed
                 Log.log("Entity by name " + entity.getName() + " configured multiple times. Previous one replaced.");
+            }
+        }
+
+        // parse "multi-entities"
+        var multiEntities = config.optJSONArray("multi-entities");
+        if(multiEntities == null) multiEntities = new JSONArray();
+        for (int i = 0; i < multiEntities.length(); i++) {
+            var multiEntity = multiEntities.optJSONObject(i);
+            if(multiEntity == null) continue;
+            var namePrefix = multiEntity.getString("name-prefix");
+            var usernamePrefix = multiEntity.getString("username-prefix");
+            var password = multiEntity.getString("password");
+            var count = multiEntity.getInt("count");
+            var startIndex = multiEntity.getInt("start-index");
+            var printIILang = multiEntity.optBoolean("print-iilang", true);
+            var printJSON = multiEntity.optBoolean("print-json", true);
+
+            for (int index = startIndex; index < startIndex + count; index++) {
+                EISEntity entity = new ScenarioEntity(namePrefix + index, host, port, usernamePrefix + index, password);
+                if (printIILang) entity.enableIILang();
+                if (printJSON) entity.enableJSON();
+                if(entities.put(entity.getName(), entity) != null){
+                    Log.log("Entity by name " + entity.getName() + " configured multiple times. Previous one replaced.");
+                }
             }
         }
     }

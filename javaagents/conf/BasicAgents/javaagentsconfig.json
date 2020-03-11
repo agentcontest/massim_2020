@@ -1,14 +1,28 @@
 {
-  "agents" : {
-    "agentA1" : {"entity" : "connectionA1", "team" : "A", "class" : "BasicAgent"},
-    "agentA2" : {"entity" : "connectionA2", "team" : "A", "class" : "BasicAgent"},
-    "agentA3" : {"entity" : "connectionA3", "team" : "A", "class" : "BasicAgent"},
-    "agentA4" : {"entity" : "connectionA4", "team" : "A", "class" : "BasicAgent"},
-    "agentA5" : {"entity" : "connectionA5", "team" : "A", "class" : "BasicAgent"},
-    "agentA6" : {"entity" : "connectionA6", "team" : "A", "class" : "BasicAgent"},
-    "agentA7" : {"entity" : "connectionA7", "team" : "A", "class" : "BasicAgent"},
-    "agentA8" : {"entity" : "connectionA8", "team" : "A", "class" : "BasicAgent"},
-    "agentA9" : {"entity" : "connectionA9", "team" : "A", "class" : "BasicAgent"},
-    "agentA10" : {"entity" : "connectionA10", "team" : "A", "class" : "BasicAgent"}
-  }
+  "agents" : [
+    {
+      "count":  20,
+      "start-index":  0,
+      "agent-prefix":  "A",
+      "entity-prefix":  "connectionA",
+      "team":  "A",
+      "class": "BasicAgent"
+    },
+    {
+      "count":  30,
+      "start-index":  20,
+      "agent-prefix":  "A",
+      "entity-prefix":  "connectionA",
+      "team":  "A",
+      "class": "BasicAgent"
+    },
+    {
+      "count":  50,
+      "start-index":  0,
+      "agent-prefix":  "B",
+      "entity-prefix":  "connectionB",
+      "team":  "B",
+      "class": "BasicAgent"
+    }
+  ]
 }

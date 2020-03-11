@@ -27,20 +27,20 @@ public class BasicAgent extends Agent {
 
     @Override
     public Action step() {
-        List<Percept> percepts = getPercepts();
-        percepts.stream()
-                .filter(p -> p.getName().equals("step"))
-                .findAny()
-                .ifPresent(p -> {
-                    Parameter param = p.getParameters().getFirst();
-                    if(param instanceof Identifier) say("Step " + ((Identifier) param).getValue());
-        });
-        if (getName().equals("agentA3")) {
-            return new Action("submit", new Identifier("test"));
-        }
-        if (getName().equals("agentA1")) {
-            return new Action("request", new Identifier("e"));
-        }
+//        List<Percept> percepts = getPercepts();
+//        percepts.stream()
+//                .filter(p -> p.getName().equals("step"))
+//                .findAny()
+//                .ifPresent(p -> {
+//                    Parameter param = p.getParameters().getFirst();
+//                    if(param instanceof Identifier) say("Step " + ((Identifier) param).getValue());
+//        });
+//        if (getName().equals("agentA3")) {
+//            return new Action("submit", new Identifier("test"));
+//        }
+//        if (getName().equals("agentA1")) {
+//            return new Action("request", new Identifier("e"));
+//        }
         return new Action("move", new Identifier("n"));
     }
 }
