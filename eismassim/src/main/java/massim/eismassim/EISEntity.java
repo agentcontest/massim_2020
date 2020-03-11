@@ -30,7 +30,8 @@ public abstract class EISEntity implements Runnable{
     private static boolean scheduling = false; // send only one action per action-id?
     private static boolean times = false; // annotate percepts with timestamp?
     private static boolean notifications = false; // send percepts as notifications?
-    private static boolean queued = false;
+    private static boolean queued = false; // only get one set of percepts per call
+    private static boolean onlyOnce = false; // clear percepts after retrieval
 
     // config for this entity
     private String name;
@@ -140,6 +141,13 @@ public abstract class EISEntity implements Runnable{
      */
     static void enablePerceptQueue() {
         queued = true;
+    }
+
+    /**
+     * If enabled, percepts will be cleared after each call to {@link #getAllPercepts}.
+     */
+    static void enableOnlyOnceRetrieval() {
+        onlyOnce = true;
     }
 
     /**
@@ -262,7 +270,7 @@ public abstract class EISEntity implements Runnable{
             long startTime = System.currentTimeMillis();
             while (currentActionId <= lastUsedActionIdPercept || currentActionId == -1 ) {
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(100);
                 } catch (InterruptedException ignored) {}
                 if (System.currentTimeMillis() - startTime >= timeout) {
                     throw new PerceiveException("timeout. no valid action-id available in time");
@@ -279,6 +287,12 @@ public abstract class EISEntity implements Runnable{
             ret.addAll(simEndPercepts);
             ret.addAll(byePercepts);
             if (useIILang) log(ret.toString());
+            if (onlyOnce) {
+                simStartPercepts.clear();
+                requestActionPercepts.clear();
+                simEndPercepts.clear();
+                byePercepts.clear();
+            }
             return ret;
         }
         else{

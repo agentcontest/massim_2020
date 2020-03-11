@@ -157,6 +157,11 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
             Log.log("Percept queue enabled.");
         }
 
+        if(config.optBoolean("only-once", false)){
+            EISEntity.enableOnlyOnceRetrieval();
+            Log.log("Only once retrieval enabled.");
+        }
+
         // parse entities
         JSONArray jsonEntities = config.optJSONArray("entities");
         if(jsonEntities == null) jsonEntities = new JSONArray();
