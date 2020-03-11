@@ -382,8 +382,6 @@ public class Server {
         Log.log(Log.Level.NORMAL, "Configuring launch type: " + config.launch);
         config.tournamentMode = serverJSON.getString("tournamentMode");
         Log.log(Log.Level.NORMAL, "Configuring tournament mode: " + config.tournamentMode);
-        config.teamSize = serverJSON.getInt("teamSize");
-        Log.log(Log.Level.NORMAL, "Configuring team size: " + config.teamSize);
         config.teamsPerMatch = serverJSON.getInt("teamsPerMatch");
         Log.log(Log.Level.NORMAL, "Configuring teams per match: " + config.teamsPerMatch);
         config.port = serverJSON.getInt("port");
@@ -403,33 +401,6 @@ public class Server {
         config.replayPath = serverJSON.getString("replayPath");
         Log.log(Log.Level.NORMAL, "Configuring replay path: " + config.replayPath);
 
-        // parse teams
-        JSONObject teamJSON = conf.getJSONObject("teams");
-        Set<String> allAgents = new HashSet<>();
-        if (teamJSON == null) Log.log(Log.Level.ERROR, "No teams configured.");
-        else{
-            teamJSON.keySet().forEach(name -> {
-                TeamConfig team = new TeamConfig(name);
-                config.teams.add(team);
-                JSONArray accounts = teamJSON.getJSONArray(name);
-                if (accounts != null){
-                    for (int i = 0; i < Math.min(accounts.length(), config.teamSize); i++) {
-                        JSONArray account = accounts.getJSONArray(i);
-                        if(account != null){
-                            String accName = account.getString(0);
-                            String accPw = account.getString(1);
-                            if(!accName.equals("") && !accPw.equals("")){
-                                if(!allAgents.add(accName))
-                                    Log.log(Log.Level.CRITICAL, "Agent " + accName + " occurs in multiple teams.");
-                                team.addAgent(accName, accPw);
-                                config.accounts.put(accName, accPw);
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
         // parse matches
         JSONArray matchJSON = conf.getJSONArray("match");
         if (matchJSON == null){
@@ -440,6 +411,41 @@ public class Server {
             JSONObject simConfig = matchJSON.getJSONObject(i);
             if (simConfig != null) {
                 config.simConfigs.add(simConfig);
+            }
+        }
+
+        // determine number of required agents (max. number of agents among all simulations)
+        int requiredAgents = 0;
+        for (int i = 0; i < matchJSON.length(); i++) {
+            var match = matchJSON.getJSONObject(i);
+            var entities = match.getJSONObject("entities");
+            int numberOfAgents = 0;
+            for (String role : entities.keySet()) {
+                numberOfAgents += entities.getInt(role);
+            }
+            requiredAgents = Math.max(requiredAgents, numberOfAgents);
+        }
+
+        // parse teams
+        var teamsJSON = conf.getJSONObject("teams");
+        var allAgents = new HashSet<String>();
+        if (teamsJSON == null) Log.log(Log.Level.ERROR, "No teams configured.");
+        else{
+            for (String teamName : teamsJSON.keySet()) {
+                TeamConfig team = new TeamConfig(teamName);
+                config.teams.add(team);
+                var teamJSON = teamsJSON.getJSONObject(teamName);
+                if (teamJSON != null) {
+                    var prefix = teamJSON.getString("prefix");
+                    var password = teamJSON.getString("password");
+                    for (int i = 0; i < requiredAgents; i++) {
+                        var agentName = prefix + teamName + i;
+                        if (!allAgents.add(agentName))
+                            Log.log(Log.Level.CRITICAL, "Agent " + agentName + " occurs in multiple teams.");
+                        team.addAgent(agentName, password);
+                        config.accounts.put(agentName, password);
+                    }
+                }
             }
         }
 

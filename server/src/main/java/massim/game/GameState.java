@@ -118,27 +118,17 @@ class GameState {
         grid = new Grid(config.getJSONObject("grid"), attachLimit);
 
         // create entities
-        JSONArray entities = config.getJSONArray("entities");
-        for (var type = 0; type < entities.length(); type++) {
-            var entityConf = entities.optJSONObject(type);
-            if (entityConf != null){
-                var roleName = entityConf.keys().next();
-                var amount = entityConf.optInt(roleName, 0);
-                for (var n = 0; n < amount; n++){
-                    var position = grid.findRandomFreePosition(); // entities from the same team start on the same spot
-                    for (TeamConfig team: matchTeams) {
-                        String agentName;
-                        if(n < team.getAgentNames().size()) {
-                            agentName = team.getAgentNames().get(n);
-                        }
-                        else {
-                            agentName = team.getName() + "-unconfigured-" + n;
-                            Log.log(Log.Level.ERROR, "Too few agents configured for team " + team.getName()
-                                    + ", using agent name " + agentName + ".");
-                        }
-                        createEntity(position, agentName, team.getName());
-                    }
+        var entities = config.getJSONObject("entities");
+        var it = entities.keys();
+        int agentCounter = 0;
+        while (it.hasNext()) {
+            var numberOfAgents = entities.getInt(it.next());
+            for (var n = 0; n < numberOfAgents; n++){
+                var position = grid.findRandomFreePosition(); // entities from the same team start in the same spot
+                for (TeamConfig team: matchTeams) {
+                    createEntity(position, team.getAgentNames().get(agentCounter), team.getName());
                 }
+                agentCounter++;
             }
         }
 

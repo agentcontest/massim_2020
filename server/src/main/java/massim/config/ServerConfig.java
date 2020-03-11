@@ -17,7 +17,6 @@ public class ServerConfig {
 
     public String tournamentMode;
     public String launch;
-    public int teamSize;
     public int teamsPerMatch;
     public List<TeamConfig> teams = new Vector<>();
     public List<JSONObject> simConfigs = new Vector<>();

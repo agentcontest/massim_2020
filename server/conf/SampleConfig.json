@@ -2,7 +2,7 @@
   "server" : {
     "tournamentMode" : "round-robin",
     "teamsPerMatch" : 2,
-    "teamSize" : 10,
+    "teamSize" : 50,
     "launch" : "key",
     "port" : 12300,
     "backlog" : 10000,
@@ -27,7 +27,7 @@
   ],
 
   "teams" : {
-    "A" : "$(teams/A.json)",
-    "B" : "$(teams/B.json)"
+    "A" : {"prefix" : "agent", "password" : "1"},
+    "B" : {"prefix" : "agent", "password" : "1"}
   }
 }

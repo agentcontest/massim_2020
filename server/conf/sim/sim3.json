@@ -4,7 +4,7 @@
     "steps" : 750,
     "randomSeed" : 17,
     "randomFail" : 1,
-    "entities" : [{"standard" : 50}],
+    "entities" : {"standard" : 50},
 
     "clearSteps" : 3,
     "clearEnergyCost" : 30,
