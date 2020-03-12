@@ -30,8 +30,13 @@
     "tasks" : {
       "size" : [2, 4],
       "duration" : [100, 200],
+<<<<<<< HEAD
       "probability" : 0.05,
       "taskboards" : 3
+=======
+      "probability" : 0.05, 
+      "rewardDecay" : [1, 5]
+>>>>>>> 50e6bf6c1fd39a19617707ece4b0a2e03fdd7644
     },
 
     "events" : {

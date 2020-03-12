@@ -15,11 +15,15 @@ public class Task {
     private Map<Position, String> requirements;
     private int deadline;
     private boolean completed = false;
+    private int reward;
+    private int rewardDecay;
 
-    public Task(String name, int deadline, Map<Position, String> requirements) {
+    public Task(String name, int deadline, Map<Position, String> requirements, int rewardDecay) {
         this.name = name;
         this.deadline = deadline;
         this.requirements = requirements;
+        this.reward = (int) (10 * Math.pow(requirements.size(), 2));
+        this.rewardDecay = rewardDecay;
     }
 
     public String getName() {
@@ -50,8 +54,15 @@ public class Task {
                 .collect(Collectors.joining(","));
     }
 
+    /**
+     * decrease reward
+     */
+    public void preStep() {
+        this.reward = (int) (this.reward*(100-this.rewardDecay))/100;
+    }
+
     public int getReward() {
-        return (int) (10 * Math.pow(requirements.size(), 2));
+        return this.reward;
     }
 
     public TaskInfo toPercept() {

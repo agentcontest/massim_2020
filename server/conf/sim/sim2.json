@@ -31,7 +31,8 @@
       "size" : [2, 4],
       "duration" : [100, 200],
       "probability" : 0.05,
-      "taskboards" : 4
+      "taskboards" : 4,
+      "rewardDecay" : [1, 5]
     },
 
     "events" : {
