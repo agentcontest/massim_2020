@@ -1,6 +1,7 @@
 package massim.game;
 
 import massim.game.environment.Attachable;
+import massim.game.environment.Task;
 import massim.protocol.data.Position;
 import massim.protocol.data.Thing;
 import massim.protocol.messages.ActionMessage;
@@ -33,6 +34,8 @@ public class Entity extends Attachable {
     private int clearCounter = 0;
 
     private int disabled = 0;
+
+    private Task acceptedTask;
 
     public Entity(Position xy, String agentName, String teamName) {
         super(xy);
@@ -125,5 +128,13 @@ public class Entity extends Attachable {
 
     void consumeClearEnergy() {
         energy -= clearEnergyCost;
+    }
+
+    void acceptTask(Task t) {
+        this.acceptedTask = t;
+    }
+
+    boolean hasAccepted(Task t) {
+        return t != null && t.equals(acceptedTask);
     }
 }

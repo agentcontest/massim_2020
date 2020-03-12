@@ -468,7 +468,8 @@ class GameState {
 
     String handleSubmitAction(Entity e, String taskName) {
         Task task = tasks.get(taskName);
-        if (task == null || task.isCompleted() || step > task.getDeadline()) return Actions.RESULT_F_TARGET;
+        if (task == null || task.isCompleted() || step > task.getDeadline() || !e.hasAccepted(task))
+            return Actions.RESULT_F_TARGET;
         Position ePos = e.getPosition();
         if (grid.getTerrain(ePos) != Terrain.GOAL) return Actions.RESULT_F;
         Set<Attachable> attachedBlocks = e.collectAllAttachments();
