@@ -35,6 +35,7 @@ class GameState {
     private Grid grid;
     private Map<Integer, GameObject> gameObjects = new HashMap<>();
     private Map<Position, Dispenser> dispensers = new HashMap<>();
+    private Map<Position, TaskBoard> taskboards = new HashMap<>();
     private Map<String, Task> tasks = new HashMap<>();
     private Set<String> blockTypes = new TreeSet<>();
     private Set<ClearEvent> clearEvents = new HashSet<>();
@@ -55,6 +56,7 @@ class GameState {
     private int eventCreateMin;
     private int eventCreateMax;
     private int eventCreatePerimeter;
+    private int numberOfTaskboards;
 
     private JSONArray logEvents = new JSONArray();
 
@@ -94,6 +96,8 @@ class GameState {
         taskSizeMax = taskSizeBounds.getInt(1);
         pNewTask = taskConfig.getDouble("probability");
         Log.log(Log.Level.NORMAL, "config.tasks.probability: " + pNewTask);
+        numberOfTaskboards = taskConfig.getInt("taskboards");
+        Log.log(Log.Level.NORMAL, "config.taskboards: " + numberOfTaskboards);
 
         var eventConfig = config.getJSONObject("events");
         eventChance = eventConfig.getInt("chance");
@@ -138,6 +142,9 @@ class GameState {
             for (var i = 0; i < numberOfDispensers; i++) {
                 createDispenser(grid.findRandomFreePosition(), block);
             }
+        }
+        for (var i = 0; i < numberOfTaskboards; i++) {
+            createTaskboard(grid.findRandomFreePosition());
         }
 
         // check for setup file
@@ -601,6 +608,16 @@ class GameState {
         registerGameObject(d);
         dispensers.put(xy, d);
         Log.log(Log.Level.NORMAL, "Created " + d);
+        return true;
+    }
+
+    boolean createTaskboard(Position xy) {
+        if (!grid.isUnblocked(xy)) return false;
+        if (taskboards.get(xy) != null) return false;
+        TaskBoard tb = new TaskBoard(xy);
+        registerGameObject(tb);
+        taskboards.put(xy, tb);
+        Log.log(Log.Level.NORMAL, "Created " + tb);
         return true;
     }
 

@@ -30,7 +30,8 @@
     "tasks" : {
       "size" : [2, 4],
       "duration" : [100, 200],
-      "probability" : 0.05
+      "probability" : 0.05,
+      "taskboards" : 4
     },
 
     "events" : {
