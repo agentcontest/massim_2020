@@ -47,6 +47,8 @@ class GameState {
     private int taskDurationMax;
     private int taskSizeMin;
     private int taskSizeMax;
+    private int taskRewardDecayMin;
+    private int taskRewardDecayMax;
     int clearSteps;
     private int eventChance;
     private int eventRadiusMin;
@@ -93,6 +95,10 @@ class GameState {
         taskSizeMin = taskSizeBounds.getInt(0);
         taskSizeMax = taskSizeBounds.getInt(1);
         pNewTask = taskConfig.getDouble("probability");
+        var taskRewardDecayBounds = taskConfig.getJSONArray("rewardDecay");
+        Log.log(Log.Level.NORMAL, "config.tasks.rewardDecay: " + taskRewardDecayBounds);
+        taskRewardDecayMin = taskRewardDecayBounds.getInt(0);
+        taskRewardDecayMax = taskRewardDecayBounds.getInt(1);
         Log.log(Log.Level.NORMAL, "config.tasks.probability: " + pNewTask);
 
         var eventConfig = config.getJSONObject("events");
@@ -286,6 +292,9 @@ class GameState {
 
         //handle entities
         agentToEntity.values().forEach(Entity::preStep);
+
+        //handle activated tasks
+        tasks.values().forEach(Task::preStep);
 
         //handle (map) events
         if (RNG.nextInt(100) < eventChance) {
@@ -560,14 +569,14 @@ class GameState {
             }
             requirements.put(lastPosition, blockList.get(index));
         }
-        Task t = new Task(name, step + duration, requirements);
+        Task t = new Task(name, step + duration, requirements, RNG.betweenClosed(this.taskRewardDecayMin, this.taskRewardDecayMax));
         tasks.put(t.getName(), t);
         return t;
     }
 
     Task createTask(String name, int duration, Map<Position, String> requirements) {
         if (requirements.size() == 0) return null;
-        Task t = new Task(name, step + duration, requirements);
+        Task t = new Task(name, step + duration, requirements, RNG.betweenClosed(this.taskRewardDecayMin, this.taskRewardDecayMax));
         tasks.put(t.getName(), t);
         return t;
     }
