@@ -153,7 +153,7 @@ public class Scheduler implements AgentListener, EnvironmentListener{
         });
 
         if(newPerceptAgents.size() == 0) try {
-            Thread.sleep(2000); // wait a bit in case no agents have been executed
+            Thread.sleep(100); // wait a bit in case no agents have been executed
         } catch (InterruptedException ignored) {}
     }
 
