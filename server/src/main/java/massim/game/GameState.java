@@ -352,6 +352,8 @@ class GameState {
                 });
                 var d = dispensers.get(currentPos);
                 if (d != null) visibleThings.add(d.toPercept(pos));
+                var tb = taskboards.get(currentPos);
+                if (tb != null) visibleThings.add(tb.toPercept(pos));
                 var terrain = grid.getTerrain(currentPos);
                 if (terrain != Terrain.EMPTY) {
                     visibleTerrain.computeIfAbsent(terrain.name,
