@@ -248,6 +248,8 @@ The following percepts might be included in a `REQUEST-ACTION` message. Most of 
   * n : Numeral - the agent's energy level
 * `disabled(b)`
   * b : Identifier - true if the agent is disabled (else false)
+* `accepted(t)`
+  * t : Identifier - the task that the agent is currently committed to
 
 #### SIM-END percepts
 

@@ -86,6 +86,9 @@ Tasks have to be completed to get score points. They appear randomly during the 
   * __x/y__: the coordinates of the block (the agent being (0,0))
   * __type__: the required type of the block
 
+An agent can *accept* a task if it is near a *task board* (distance <=2). Each agent can only hold one task at a time.
+Tasks have to be submitted in goal zones. Only an agent, who has accepted the task before, can also submit it.
+
 ## Actions
 
 In each step, an agent may execute _exactly one_ action. The actions are gathered and executed in random order.
@@ -241,6 +244,21 @@ failed_status | The agent's energy is too low.
 * `Config: match.clearSteps` - number of action required for a successful clear
 * `Config: match.clearEnergyCost` - energy cost for a clear action (subtracted when the clear actually resolves)
 
+### accept
+
+Accepts a task. The agent is then allowed to submit the task. Performing the action again will replace the accepted task. A task will remain accepted regardless of its status (i.e. even if it already passed its deadline or was completed by another agent).
+
+To accept a task, an agent has to be near a taskboard (distance <= 2).
+
+No | Parameter | Meaning
+--- | --- | ---
+0 | task | Name of the task to accept.
+
+Failure Code | Reason
+--- | ---
+failed_target | No task parameter given or no such task found.
+failed_status | The agent is not close to a task board.
+
 ### all actions
 
 All actions can also have the following failure codes:
@@ -304,6 +322,7 @@ Example (complete request-action message):
          "lastActionParams": ["n"],
          "energy": 300,
          "disabled": false,
+         "task": "task95",
          "things": [
             {
                "x": 0,
@@ -328,6 +347,12 @@ Example (complete request-action message):
                "y": -1,
                "type": "marker",
                "details" : "clear"
+            },
+            {
+               "x": 3,
+               "y": 4,
+               "details": "",
+               "type": "taskboard"
             }
          ],
          "terrain": {
@@ -373,6 +398,7 @@ Example (complete request-action message):
 * __lastActionParams__: the parameters of that action
 * __energy__: the agent's current energy level
 * __disabled__: whether the agent is disabled
+* __task__: the most recently accepted task (by the agent)
 * __things__: things in the simulation visible to the agent
   * __x/y__: position of the thing _relative_ to the agent
   * __type__: the type of the thing (entity, block, dispenser, marker,...)
