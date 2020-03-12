@@ -224,6 +224,11 @@ public class Simulation {
                             state.handleDisconnectAction(entity, Position.of(x1, y1), Position.of(x2, y2)));
                     continue;
 
+                case ACCEPT:
+                    var task = getStringParam(params, 0);
+                    entity.setLastActionResult(state.handleAcceptAction(entity, task));
+                    continue;
+
                 default:
                     entity.setLastActionResult(UNKNOWN_ACTION);
             }
@@ -235,6 +240,9 @@ public class Simulation {
         return Util.tryParseInt(params.get(index));
     }
 
+    /**
+     * @return the string parameter at the given index or null if there is no such parameter
+     */
     private String getStringParam(List<String> params, int index) {
         if (index >= params.size()) return null;
         try {

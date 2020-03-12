@@ -528,6 +528,25 @@ class GameState {
         return Actions.RESULT_SUCCESS;
     }
 
+    public String handleAcceptAction(Entity entity, String taskName) {
+        if (taskName == null || taskName.equals("")) return Actions.RESULT_F_TARGET;
+        var task = tasks.get(taskName);
+        if (task == null) return Actions.RESULT_F_TARGET;
+
+        var nearTaskboard = false;
+        var pos = entity.getPosition();
+        for (var tb: taskboards.values()) {
+            if (tb.getPosition().distanceTo(pos) <= 2) {
+                nearTaskboard = true;
+                break;
+            }
+        }
+        if (!nearTaskboard) return Actions.RESULT_F_STATUS;
+
+        entity.acceptTask(task);
+        return Actions.RESULT_SUCCESS;
+    }
+
     int clearArea(Position center, int radius) {
         var removed = 0;
         for (var position : center.spanArea(radius)) {
