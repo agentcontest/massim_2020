@@ -134,7 +134,8 @@ public class Entity extends Attachable {
         this.acceptedTask = t;
     }
 
-    boolean hasAccepted(Task t) {
-        return t != null && t.equals(acceptedTask);
+    String getTask() {
+        if (acceptedTask == null) return "";
+        return acceptedTask.getName();
     }
 }

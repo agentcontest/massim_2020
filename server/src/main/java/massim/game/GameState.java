@@ -362,7 +362,7 @@ class GameState {
             }
             var percept = new StepPercept(step, teams.get(entity.getTeamName()).getScore(),
                     visibleThings, visibleTerrain, allTasks, entity.getLastAction(), entity.getLastActionParams(),
-                    entity.getLastActionResult(), attachedThings);
+                    entity.getLastActionResult(), attachedThings, entity.getTask());
             percept.energy = entity.getEnergy();
             percept.disabled = entity.isDisabled();
             result.put(entity.getAgentName(), percept);
@@ -468,7 +468,7 @@ class GameState {
 
     String handleSubmitAction(Entity e, String taskName) {
         Task task = tasks.get(taskName);
-        if (task == null || task.isCompleted() || step > task.getDeadline() || !e.hasAccepted(task))
+        if (task == null || task.isCompleted() || step > task.getDeadline() || !e.getTask().equals(taskName))
             return Actions.RESULT_F_TARGET;
         Position ePos = e.getPosition();
         if (grid.getTerrain(ePos) != Terrain.GOAL) return Actions.RESULT_F;
