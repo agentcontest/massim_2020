@@ -334,7 +334,7 @@ class AgentManager {
          * @param message the message document to send
          */
         private void sendMessage(Message message){
-            if (sendQueue.size() > sendBufferSize)
+            while (sendQueue.size() > sendBufferSize)
                 sendQueue.poll();
 
             try {
