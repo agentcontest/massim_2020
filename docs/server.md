@@ -147,7 +147,8 @@ The teams block describes the teams and their credentials. The teams listed here
   }
 ```
 
-Each key in the ```teams``` JSON object is the name of a team. It points to an object containing the team details. Each agent's (user)name is constructed as `prefix+teamName+index`, where the index starts at 0 and goes to the maximum number of agents required in any simulation configured. E.g. if 3 simulations with 15, 30 and 50 agents each are configured, 50 agent accounts will be created before the first simulation and stay active until all simulations are played (though only the first X agents will receive any message during a simulation if X agents are configured for that simulation).
+Each key in the ```teams``` JSON object is the name of a team. It points to an object containing the team details. Each agent's (user)name is constructed as `prefix+teamName+index`, where the index starts at 0 and goes to the maximum number of agents required in any simulation configured. 
+E.g. if 3 simulations with 15, 30 and 50 agents each are configured, 50 agent accounts will be created before the first simulation and stay active until all simulations are played (though only the first X agents will receive any message during a simulation if X agents are configured for that simulation).
 
 ### JSON include mechanism
 
