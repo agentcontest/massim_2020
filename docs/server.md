@@ -57,7 +57,6 @@ The server block contains information about the server in general, which will ho
 "server" : {
     "tournamentMode" : "round-robin",
     "teamsPerMatch" : 2,
-    "teamSize" : 34,
     "launch" : "key",
     "port" : 12300,
     "backlog" : 10000,
@@ -77,7 +76,6 @@ The server block contains information about the server in general, which will ho
   * `random`: For each match, the participating teams are picked randomly until enough teams to play the match have been determined. This is repeated until the server is terminated manually.
 
 * __teamsPerMatch__: How many teams play simultaneously in one simulation
-* __teamSize__: How many agents a team contains
 * __launch__: How the start of the matches is delayed
   * `key`: The server will wait for the ENTER key to start.
   * `[Int]s`": The server will start after [Int] seconds (e.g. 60s).
@@ -143,23 +141,13 @@ The teams block describes the teams and their credentials. The teams listed here
 
 ```JSON
 "teams" : {
-    "A" :
-      [
-        ["agentA1", "1"],
-        ["agentA2", "1"],
-        ["agentA3", "1"],
-        ["agentA4", "1"],
-        ["agentA5", "1"],
-        ["agentA6", "1"]
-      ],
-    "B" : "$(teams/B.json)",
-    "C" : "$(teams/C.json)"
+    "A" : {"prefix" : "agent", "password" : "1"},
+    "B" : {"prefix" : "agent", "password" : "2"},
+    ...
   }
 ```
 
-Each key in the ```teams``` JSON object is the name of a team. It points to an array of single agent accounts. Each account is represented by an array, where the fist entry is the agent's username, and the second its password.
-
-Here, for teams B to E we used a custom JSON include mechanism that will be explained in the next section.
+Each key in the ```teams``` JSON object is the name of a team. It points to an object containing the team details. Each agent's (user)name is constructed as `prefix+teamName+index`, where the index starts at 0 and goes to the maximum number of agents required in any simulation configured. E.g. if 3 simulations with 15, 30 and 50 agents each are configured, 50 agent accounts will be created before the first simulation and stay active until all simulations are played (though only the first X agents will receive any message during a simulation if X agents are configured for that simulation).
 
 ### JSON include mechanism
 
