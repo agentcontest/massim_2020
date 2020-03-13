@@ -70,7 +70,7 @@ public final class Position {
 
     @Override
     public String toString() {
-        return "P(" + x + "," + y + ")";
+        return "(" + x + "," + y + ")";
     }
 
     public Position translate(int x, int y) {

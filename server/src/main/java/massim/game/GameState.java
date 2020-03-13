@@ -104,6 +104,8 @@ class GameState {
         Log.log(Log.Level.NORMAL, "config.tasks.probability: " + pNewTask);
         numberOfTaskboards = taskConfig.getInt("taskboards");
         Log.log(Log.Level.NORMAL, "config.taskboards: " + numberOfTaskboards);
+        int distanceToTaskboards = taskConfig.getInt("distanceToTaskboards");
+        Log.log(Log.Level.NORMAL, "config.distanceToTaskboards: " + distanceToTaskboards);
 
         var eventConfig = config.getJSONObject("events");
         eventChance = eventConfig.getInt("chance");
@@ -125,7 +127,7 @@ class GameState {
         matchTeams.forEach(team -> teams.put(team.getName(), new Team(team.getName())));
 
         // create grid environment
-        grid = new Grid(config.getJSONObject("grid"), attachLimit);
+        grid = new Grid(config.getJSONObject("grid"), attachLimit, distanceToTaskboards);
 
         // create entities
         var entities = config.getJSONObject("entities");
@@ -150,7 +152,7 @@ class GameState {
             }
         }
         for (var i = 0; i < numberOfTaskboards; i++) {
-            createTaskboard(grid.findRandomFreePosition());
+            createTaskboard(grid.findNewTaskboardPosition());
         }
 
         // check for setup file

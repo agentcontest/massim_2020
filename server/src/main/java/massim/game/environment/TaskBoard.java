@@ -14,4 +14,9 @@ public class TaskBoard extends Positionable {
         var local = getPosition().relativeTo(entity);
         return new Thing(local.x, local.y, Thing.TYPE_TASKBOARD, "");
     }
+
+    @Override
+    public String toString() {
+        return "Taskboard" + getPosition();
+    }
 }

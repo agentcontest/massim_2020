@@ -26,8 +26,9 @@ public class Grid {
     private Map<Position, Set<Positionable>> thingsMap;
     private Terrain[][] terrainMap;
     private List<Marker> markers = new ArrayList<>();
+    private Map<String,Boolean> blockedForTaskBoards = new HashMap<>();
 
-    public Grid(JSONObject gridConf, int attachLimit) {
+    public Grid(JSONObject gridConf, int attachLimit, int distanceToTaskboards) {
         this.attachLimit = attachLimit;
         dimX = gridConf.getInt("width");
         dimY = gridConf.getInt("height");
@@ -94,7 +95,32 @@ public class Grid {
             var centerPos = findRandomFreePosition();
             var size = RNG.betweenClosed(goalSizeMin, goalSizeMax);
             for (var pos : centerPos.spanArea(size)) setTerrain(pos, Terrain.GOAL);
+
+            for (var pos : centerPos.spanArea(size + distanceToTaskboards))
+                blockedForTaskBoards.put(pos.toString(), true);
         }
+    }
+
+    public Position findNewTaskboardPosition() {
+        var start = findRandomFreePosition();
+        var pos = start;
+        while (blockedForTaskBoards.getOrDefault(pos.toString(), false)) {
+            var x = pos.x + 1;
+            var y = pos.y;
+            if (x >= dimX) {
+                x = 0;
+                y += 1;
+                if (y >= dimY) {
+                    y = 0;
+                }
+            }
+            pos = Position.of(x,y);
+            if (pos.equals(start)) {
+                Log.log(Log.Level.ERROR, "Grid too small to place all things.");
+                return null;
+            }
+        }
+        return pos;
     }
 
     private void doCaveIteration(int createLimit, int destroyLimit) {

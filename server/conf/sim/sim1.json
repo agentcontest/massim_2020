@@ -32,7 +32,8 @@
       "duration" : [100, 200],
       "probability" : 0.05,
       "taskboards" : 3,
-      "rewardDecay" : [1, 5]
+      "rewardDecay" : [1, 5],
+      "distanceToTaskboards" : 8
     },
 
     "events" : {
