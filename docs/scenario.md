@@ -217,7 +217,7 @@ No | Parameter | Meaning
 
 Failure Code | Reason
 --- | ---
-failed_target | No _active_ task could be associated with first parameter.
+failed_target | No _active_ task could be associated with first parameter, or task has not been accepted by the agent.
 failed | One or more of the requested blocks are missing OR the agent is not on a goal terrain.
 
 ### clear

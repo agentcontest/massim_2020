@@ -20,7 +20,7 @@ public class GameStateTest {
             "      \"steps\" : 500,\n" +
             "      \"NOrandomSeed\" : 17,\n" +
             "      \"randomFail\" : 1,\n" +
-            "      \"entities\" : [{\"standard\" : 10}],\n" +
+            "      \"entities\" : {\"standard\" : 10},\n" +
             "\n" +
             "      \"clearSteps\" : 3,\n" +
             "      \"clearEnergyCost\" : 30,\n" +
@@ -46,7 +46,10 @@ public class GameStateTest {
             "      \"tasks\" : {\n" +
             "        \"size\" : [2, 4],\n" +
             "        \"duration\" : [100, 200],\n" +
-            "        \"probability\" : 0.05\n" +
+            "        \"probability\" : 0.05,\n" +
+            "        \"taskboards\" : 5,\n" +
+            "        \"rewardDecay\" : [1,5],\n" +
+            "        \"distanceToTaskboards\" : 10\n" +
             "      },\n" +
             "\n" +
             "      \"events\" : {\n" +
@@ -94,17 +97,23 @@ public class GameStateTest {
     }
 
     @org.junit.Test
-    public void handleSubmitAction() {
+    public void taskSubmissionWorks() {
+        var a1 = state.getEntityByName("A1");
         state.setTerrain(Position.of(15,15), Terrain.GOAL);
-        assert(state.teleport("A1", Position.of(15,15)));
+        assert state.teleport("A1", Position.of(15,15));
         String blockType = state.getBlockTypes().iterator().next();
-        assert(state.createBlock(Position.of(15,16), blockType) != null);
-        assert(state.createBlock(Position.of(14,16), blockType) != null);
-        assert(state.createTask("testTask1", 10,
-                Map.of(Position.of(0, 1), blockType, Position.of(-1, 1), blockType)) != null);
-        assert(state.attach(Position.of(15,15), Position.of(15,16)));
-        assert(state.attach(Position.of(15,16), Position.of(14,16)));
-        assert(state.handleSubmitAction(state.getEntityByName("A1"), "testTask1").equals(Actions.RESULT_SUCCESS));
+        assert state.createBlock(Position.of(15,16), blockType) != null;
+        assert state.createBlock(Position.of(14,16), blockType) != null;
+        assert state.createTask("testTask1", 10,
+                Map.of(Position.of(0, 1), blockType, Position.of(-1, 1), blockType)) != null;
+        assert state.attach(Position.of(15,15), Position.of(15,16));
+        assert state.attach(Position.of(15,16), Position.of(14,16));
+        assert state.handleSubmitAction(a1, "testTask1").equals(Actions.RESULT_F_TARGET);
+        state.createTaskboard(Position.of(15,18));
+        assert state.handleAcceptAction(a1, "testTask1").equals(Actions.RESULT_F_STATUS);
+        state.createTaskboard(Position.of(15,17));
+        assert state.handleAcceptAction(a1, "testTask1").equals(Actions.RESULT_SUCCESS);
+        assert state.handleSubmitAction(a1, "testTask1").equals(Actions.RESULT_SUCCESS);
     }
 
     @org.junit.Test
@@ -120,7 +129,7 @@ public class GameStateTest {
         state.attach(a1.getPosition(), a2.getPosition());
         state.attach(a2.getPosition(), block.getPosition());
 
-        var percept = new StepPercept(((StepPercept)state.getStepPercepts().get("A1")).toJson().getJSONObject("content"));
+        var percept = new StepPercept(state.getStepPercepts().get("A1").toJson().getJSONObject("content"));
         assert(percept.attachedThings.contains(a2.getPosition().relativeTo(a1.getPosition())));
         assert(percept.attachedThings.contains(block.getPosition().relativeTo(a1.getPosition())));
     }
