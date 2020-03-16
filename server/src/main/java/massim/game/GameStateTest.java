@@ -21,6 +21,7 @@ public class GameStateTest {
             "      \"NOrandomSeed\" : 17,\n" +
             "      \"randomFail\" : 1,\n" +
             "      \"entities\" : {\"standard\" : 10},\n" +
+            "      \"clusterSize\" : 10,\n" +
             "\n" +
             "      \"clearSteps\" : 3,\n" +
             "      \"clearEnergyCost\" : 30,\n" +
