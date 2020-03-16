@@ -70,6 +70,8 @@ class GameState {
         Log.log(Log.Level.NORMAL, "config.attachLimit: " + attachLimit);
         clearSteps = config.getInt("clearSteps");
         Log.log(Log.Level.NORMAL, "config.clearSteps: " + clearSteps);
+        int clusterSize = config.getInt("clusterSize"); 
+        Log.log(Log.Level.NORMAL, "config.clusterSize: " + clusterSize);
 
         Entity.clearEnergyCost = config.getInt("clearEnergyCost");
         Log.log(Log.Level.NORMAL, "config.clearEnergyCost: " + Entity.clearEnergyCost);
@@ -135,12 +137,15 @@ class GameState {
         int agentCounter = 0;
         while (it.hasNext()) {
             var numberOfAgents = entities.getInt(it.next());
-            for (var n = 0; n < numberOfAgents; n++){
-                var position = grid.findRandomFreePosition(); // entities from the same team start in the same spot
-                for (TeamConfig team: matchTeams) {
-                    createEntity(position, team.getAgentNames().get(agentCounter), team.getName());
-                }
-                agentCounter++;
+            for (var n = 0; n < Math.max(1,Math.ceil((double) numberOfAgents/clusterSize)); n++){
+                ArrayList<Position> cluster = grid.findRandomFreeClusterPosition(clusterSize);
+                for (Position p : cluster) {
+                    for (TeamConfig team: matchTeams) {
+                        createEntity(p, team.getAgentNames().get(agentCounter), team.getName());
+                    }
+                    agentCounter++;
+                    if (agentCounter == numberOfAgents) break;
+                }                
             }
         }
 
