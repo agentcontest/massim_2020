@@ -31,7 +31,7 @@ public class GridTest {
     }
 
     @org.junit.Test
-    public void findRandomFreePosition() {
+    public void findRandomFreeClusterPosition() {
         this.gridjson.put("height", 5);
         this.gridjson.put("width", 5);
         System.out.println(this.gridjson.toString());
@@ -39,16 +39,28 @@ public class GridTest {
 
         printGridTerrain(grid);
         
-        ArrayList<Position> cluster = grid.findRandomFreePosition(3);
+        System.out.println("Testing cluster size 1");
+        RNG.initialize(15);
+        ArrayList<Position> cluster = grid.findRandomFreeClusterPosition(1);
         assertNotNull(cluster);
-        assert(cluster.size()==3);
+        assert(cluster.size()==1);
 
         assert(grid.getTerrain(cluster.get(0)) == Terrain.EMPTY);
         assert(cluster.get(0).toString().equals("(2,2)"));
-        assert(grid.getTerrain(cluster.get(1)) == Terrain.EMPTY);
-        assert(cluster.get(1).toString().equals("(1,2)"));
-        assert(grid.getTerrain(cluster.get(2)) == Terrain.EMPTY);
-        assert(cluster.get(2).toString().equals("(1,1)"));
+
+        System.out.println("Testing cluster size 3");
+        RNG.initialize(15);
+        printGridTerrain(grid);
+        ArrayList<Position> cluster3 = grid.findRandomFreeClusterPosition(3);
+        assertNotNull(cluster3);
+        assert(cluster3.size()==3);
+
+        assert(grid.getTerrain(cluster3.get(0)) == Terrain.EMPTY);
+        assert(cluster3.get(0).toString().equals("(3,0)"));
+        assert(grid.getTerrain(cluster3.get(1)) == Terrain.EMPTY);
+        assert(cluster3.get(1).toString().equals("(3,1)"));
+        assert(grid.getTerrain(cluster3.get(2)) == Terrain.EMPTY);
+        assert(cluster3.get(2).toString().equals("(4,0)"));
     }
 
     private void printGridTerrain(Grid grid){

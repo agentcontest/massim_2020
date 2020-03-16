@@ -6,6 +6,7 @@ import massim.util.Log;
 import massim.util.RNG;
 import org.json.JSONObject;
 
+
 import javax.imageio.ImageIO;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
@@ -356,6 +357,37 @@ public class Grid {
             }
         }
         return Position.of(x, y);
+    }
+    
+    public ArrayList<Position> findRandomFreeClusterPosition(int clusterSize) {
+        ArrayList<Position> cluster = new ArrayList<Position>();
+        int x = RNG.nextInt(dimX);
+        int y = RNG.nextInt(dimY);
+        final int radius = (int) (Math.log(clusterSize)/Math.log(2)); 
+        final int startX = x;
+        final int startY = y;
+        
+        while (!isUnblocked(Position.of(x,y)) || terrainMap[x][y] != Terrain.EMPTY || !hasEnoughFreeSpots(Position.of(x,y),radius,clusterSize)) {
+            if (++x >= dimX) {
+                x = 0;
+                if (++y >= dimY) y = 0;
+            }
+            if (x == startX && y == startY) {
+                Log.log(Log.Level.ERROR, "No free position");
+                return null;
+            }
+        }
+
+        Position.of(x, y).spanArea(radius).forEach((p) -> {if(cluster.size() == clusterSize) return;  if(getTerrain(p) == Terrain.EMPTY) cluster.add(p);});
+
+        return cluster;
+    }
+    private boolean hasEnoughFreeSpots(Position origin, int radius, int numberPositionNeeded){
+        int freeSpots = 0;
+        for (Position p : origin.spanArea(radius)) 
+            if (getTerrain(p) == Terrain.EMPTY)
+                freeSpots++;
+        return freeSpots >= numberPositionNeeded;
     }
 
     public Position findRandomFreePosition(Position center, int maxDistance) {
