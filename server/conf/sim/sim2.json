@@ -29,11 +29,11 @@
     "dispensers" : [5, 10],
 
     "tasks" : {
-      "size" : [2, 4],
+      "size" : [1, 4],
       "duration" : [100, 200],
       "probability" : 0.05,
       "taskboards" : 4,
-      "rewardDecay" : [1, 5],
+      "rewardDecay" : [1, 2],
       "distanceToTaskboards" : 9
     },
 

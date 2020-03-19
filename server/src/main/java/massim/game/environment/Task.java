@@ -22,7 +22,7 @@ public class Task {
         this.name = name;
         this.deadline = deadline;
         this.requirements = requirements;
-        this.reward = (int) (10 * Math.pow(requirements.size(), 2));
+        this.reward = (int) (10 * Math.pow(requirements.size(), 3));
         this.rewardDecay = rewardDecay;
     }
 
