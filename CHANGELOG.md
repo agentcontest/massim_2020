@@ -4,7 +4,20 @@
 
 ### MASSim 2.2 - Initial release 2020
 
-* the grid now *loops* horizontally and vertically (is it a donut?)
+* general
+  * update to Java 13
+* scenario
+  * the grid now *loops* horizontally and vertically (is it a donut?)
+  * new taskboards
+  * task rewards now decrease over time
+  * agents may now start close to another agent
+* server
+  * simpler team configuration (create many "accounts" at once)
+    * similar adjustments to eismassim and javaagents
+  * new option to add a pause between consecutive simulations
+* eismassim
+  * update to newest EIS version
+  * new option that delivers percepts only once 
 
 ## 2019
 
