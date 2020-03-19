@@ -34,6 +34,7 @@
       "taskboards" : 5,
       "probability" : 0.05,
       "rewardDecay" : [1, 2],
+      "lowerRewardLimit" : 10,
       "distanceToTaskboards" : 10
     },
 
