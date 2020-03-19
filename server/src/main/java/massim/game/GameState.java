@@ -59,6 +59,8 @@ class GameState {
     private int eventCreateMax;
     private int eventCreatePerimeter;
     private int numberOfTaskboards;
+    /** Minimum percentage of a reward to not decay beyond - range: [0,100] */
+    private int lowerRewardLimit;
 
     private JSONArray logEvents = new JSONArray();
 
@@ -108,6 +110,8 @@ class GameState {
         Log.log(Log.Level.NORMAL, "config.taskboards: " + numberOfTaskboards);
         int distanceToTaskboards = taskConfig.getInt("distanceToTaskboards");
         Log.log(Log.Level.NORMAL, "config.distanceToTaskboards: " + distanceToTaskboards);
+        lowerRewardLimit = taskConfig.getInt("lowerRewardLimit");
+        Log.log(Log.Level.NORMAL, "config.tasks.lowerRewardLimit: " + lowerRewardLimit);
 
         var eventConfig = config.getJSONObject("events");
         eventChance = eventConfig.getInt("chance");
@@ -124,6 +128,9 @@ class GameState {
         Log.log(Log.Level.NORMAL, "config.events.create: " + eventCreateMin + " - " + eventCreateMax);
         eventCreatePerimeter = eventConfig.getInt("perimeter");
         Log.log(Log.Level.NORMAL, "config.events.perimeter: " + eventCreatePerimeter);
+
+        // set config values
+        Task.setLowerRewardLimit(lowerRewardLimit);
 
         // create teams
         matchTeams.forEach(team -> teams.put(team.getName(), new Team(team.getName())));

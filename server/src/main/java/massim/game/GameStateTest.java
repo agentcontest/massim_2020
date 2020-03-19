@@ -50,6 +50,7 @@ public class GameStateTest {
             "        \"probability\" : 0.05,\n" +
             "        \"taskboards\" : 5,\n" +
             "        \"rewardDecay\" : [1,5],\n" +
+            "        \"lowerRewardLimit\" : 10,\n" +
             "        \"distanceToTaskboards\" : 10\n" +
             "      },\n" +
             "\n" +

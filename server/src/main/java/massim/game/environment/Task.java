@@ -11,12 +11,15 @@ import java.util.stream.Collectors;
 
 public class Task {
 
+    private static int lowerRewardLimit;
+
     private String name;
     private Map<Position, String> requirements;
     private int deadline;
     private boolean completed = false;
     private int reward;
     private int rewardDecay;
+    private int minimumReward;
 
     public Task(String name, int deadline, Map<Position, String> requirements, int rewardDecay) {
         this.name = name;
@@ -24,6 +27,11 @@ public class Task {
         this.requirements = requirements;
         this.reward = (int) (10 * Math.pow(requirements.size(), 2));
         this.rewardDecay = rewardDecay;
+        this.minimumReward = (int) Math.ceil(reward/100. * lowerRewardLimit);
+    }
+
+    public static void setLowerRewardLimit(int newLimit) {
+        lowerRewardLimit = newLimit;
     }
 
     public String getName() {
@@ -58,7 +66,8 @@ public class Task {
      * decrease reward
      */
     public void preStep() {
-        this.reward = (int) (this.reward*(100-this.rewardDecay))/100;
+        this.reward = (this.reward*(100-this.rewardDecay)) / 100;
+        if (this.reward <= minimumReward) reward = minimumReward;
     }
 
     public int getReward() {
