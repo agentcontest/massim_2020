@@ -464,7 +464,10 @@ Example:
   "tasks" : {
     "size" : [2, 4],
     "duration" : [100, 200],
-    "probability" : 0.05
+    "probability" : 0.05,
+    "rewardDecay" : [1, 2],
+    "lowerRewardLimit" : 10,
+    "distanceToTaskboards" : 10
   },
 
   "events" : {
@@ -513,6 +516,9 @@ For each simulation, the following parameters may be specified:
   * __size__: bounds for the size of a tasks (i.e. number of blocks)
   * __duration__: bounds for a task's duration (i.e. number of steps)
   * __probability__: probability to create a new task in any step (0-1)
+  * __rewardDecay__: bounds for how many percent a task's current reward may decrease per step
+  * __lowerRewardLimit__: percentage of a task's initial reward after which the reward should not decrease anymore
+  * __distanceToTaskBoards__: minimum distance between task boards and goal zones
 * __events__:
   * __chance__: chance to generate an event in any step (0-100)
   * __radius__: bounds for the event radius
