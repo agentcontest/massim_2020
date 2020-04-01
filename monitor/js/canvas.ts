@@ -188,6 +188,12 @@ function renderDynamic(ctx: CanvasRenderingContext2D, st: StaticWorld, dynamic: 
     ctx.fillText(`[${dispenser.type}]`, (dispenser.x + 0.5) * GRID, (dispenser.y + 0.5) * GRID);
   }
 
+  // task boards
+  for (let board of dynamic.taskboards) {
+    ctx.lineWidth = GRID / 20;
+    drawBlock(ctx, rect(ctx, GRID, board.x, board.y, ctx.lineWidth / 2), styles.board, 'white', 'black');
+  }
+
   // blocks
   renderBlocks(ctx, st, dynamic.blocks, GRID);
 

@@ -721,6 +721,8 @@ class GameState {
         snapshot.put("blocks", blocks);
         JSONArray dispensers = new JSONArray();
         snapshot.put("dispensers", dispensers);
+        JSONArray taskboardsArr = new JSONArray();
+        snapshot.put("taskboards", taskboardsArr);
         JSONArray taskArr = new JSONArray();
         snapshot.put("tasks", taskArr);
         JSONArray cells = new JSONArray();
@@ -770,6 +772,8 @@ class GameState {
                 obj.put("id", o.getID());
                 obj.put("type", ((Dispenser) o).getBlockType());
                 dispensers.put(obj);
+            } else if (o instanceof TaskBoard) {
+                taskboardsArr.put(obj);
             }
         }
         for (ClearEvent e : clearEvents) {

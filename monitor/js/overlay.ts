@@ -79,6 +79,13 @@ function hover(world: DynamicWorld, pos: Pos): VNode | undefined {
     }
   }
 
+  // task boards
+  for (let board of world.taskboards) {
+    if (board.x == pos.x && board.y == pos.y) {
+      r.push(h('li', 'task board'));
+    }
+  }
+
   // blocks
   for (let block of world.blocks) {
     if (block.x == pos.x && block.y == pos.y) {

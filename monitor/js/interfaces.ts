@@ -53,16 +53,20 @@ export interface DynamicWorld {
   entities: Agent[]
   blocks: Block[]
   dispensers: Dispenser[]
+  taskboards: TaskBoard[]
   tasks: Task[]
   clear: ClearEvent[]
   cells: Terrain[][]
   scores: { [team: string]: number }
 }
 
-export interface Agent {
-  id: number
+export interface Positionable {
   x: number
   y: number
+}
+
+export interface Agent extends Positionable {
+  id: number
   name: string
   team: string
   energy: number
@@ -74,19 +78,17 @@ export interface Agent {
   actionResult: string
 }
 
-export interface Block {
-  x: number
-  y: number
+export interface Block extends Positionable {
   type: BlockType
   attached?: Pos[]
 }
 
-export interface Dispenser {
+export interface Dispenser extends Positionable {
   id: number
-  x: number
-  y: number
   type: BlockType
 }
+
+export type TaskBoard = Positionable
 
 export interface Task {
   reward: number
@@ -95,9 +97,7 @@ export interface Task {
   requirements: Block[]
 }
 
-export interface ClearEvent {
-  x: number
-  y: number
+export interface ClearEvent extends Positionable {
   radius: number
 }
 
@@ -110,7 +110,4 @@ export interface Rect {
   height: number
 }
 
-export interface Pos {
-  x: number
-  y: number
-}
+export type Pos = Positionable
