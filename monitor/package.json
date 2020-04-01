@@ -5,14 +5,15 @@
   "author": "Niklas Fiekas",
   "license": "AGPL-3.0",
   "dependencies": {
-    "browserify": "^16.2.3",
-    "gulp": "^4.0.1",
-    "snabbdom": "^0.7.3",
+    "snabbdom": "^0.7.4"
+  },
+  "devDependencies": {
+    "browserify": "^16.5.1",
+    "gulp": "^4.0.2",
     "tsify": "^4.0.1",
-    "typescript": "^3.4.5",
+    "typescript": "^3.8.3",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
     "watchify": "^3.11.1"
-  },
-  "devDependencies": {}
+  }
 }
