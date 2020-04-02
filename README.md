@@ -1,7 +1,7 @@
 MASSim 2020: Agents Assemble
 ============================
 
-[![Build Status](https://travis-ci.org/agentcontest/massim_2019.svg?branch=master)](https://travis-ci.org/agentcontest/massim_2019)
+![Continuous Integration](https://github.com/agentcontest/massim_2020/workflows/Continuous%20Integration/badge.svg)
 
 _MASSim_ (Multi-Agent Systems Simulation Platform), the simulation (server)
 software used in the
@@ -22,12 +22,12 @@ Download
 
 We upload **binary releases** to GitHub: https://github.com/agentcontest/massim_2020/releases
 
-There also are (potentially unstable) [development snapshots](https://s3-eu-west-1.amazonaws.com/agentcontest/massim/massim-master.tar.gz) built after each commit.
+There also are (potentially unstable) [development snapshots](https://github.com/agentcontest/massim_2020/actions) attached as artifacts to each commit.
 
 Building MASSim
 ---------------
 
-The build requires Maven.
+The build requires Maven and OpenJDK 13.
 
 Run `mvn package` in the main directory. Maven should automatically
 fetch all nescessary dependencies.
