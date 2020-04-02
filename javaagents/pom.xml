@@ -6,7 +6,7 @@
 
     <groupId>massim</groupId>
     <artifactId>javaagents</artifactId>
-    <version>2019-1.0</version>
+    <version>2020-1.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>massim</groupId>
             <artifactId>eismassim</artifactId>
-            <version>4.1</version>
+            <version>4.2</version>
         </dependency>
     </dependencies>
 

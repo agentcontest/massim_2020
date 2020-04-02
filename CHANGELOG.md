@@ -2,7 +2,7 @@
 
 ## 2020
 
-### MASSim 2.2 - Initial release 2020
+### MASSim 2020-1.0 - Initial release
 
 * general
   * update to Java 13
