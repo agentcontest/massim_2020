@@ -11,8 +11,8 @@ jobs:
       with:
         java-version: 13
     - run: mvn package
-    - run: mv target/massim-*.tar.gz target/massim-2020-dev.tar.gz
+    - run: tar -xvzf target/massim-*.tar.gz
     - uses: actions/upload-artifact@v2-preview
       with:
-        name: massim-2020-dev.tar.gz
-        path: target/massim-2020-dev.tar.gz
+        name: massim-2020-dev.zip
+        path: massim-*
