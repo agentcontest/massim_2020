@@ -10,8 +10,8 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: 13
-    - run: mvn package
     - run: mvn test
+    - run: mvn package
     - run: tar -xvzf target/massim-*.tar.gz
     - uses: actions/upload-artifact@v2-preview
       with:
