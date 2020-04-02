@@ -91,7 +91,7 @@ Configuration example:
 
 ```JSON
 {
-  "scenario": "assemble2019",
+  "scenario": "assemble2020",
   "host": "localhost",
   "port": 12300,
   "scheduling": true,
@@ -176,7 +176,7 @@ Actions and percepts in _EISMASSim_ use the _Interface Intermediate Language_ (I
 
 Thus, any IILang _DataContainer_ forms a tree structure that can also be represented with Prolog-like syntax. For example, `car(red, 2007, [ac, radio], wheels(4))` could be a _Percept_ with the name `car`, an _Identifier_ (parameter) `red`, a _Numeral_ 2007, a _ParameterList_ containing 2 _Identifiers_ and a _Function_ named `wheels` containing a final _Numeral_.
 
-## MAPC 2019 scenario
+## MAPC 2020 scenario
 
 ### Actions
 
