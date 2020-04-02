@@ -11,6 +11,7 @@ jobs:
       with:
         java-version: 13
     - run: mvn package
+    - run: mvn test
     - run: tar -xvzf target/massim-*.tar.gz
     - uses: actions/upload-artifact@v2-preview
       with:
