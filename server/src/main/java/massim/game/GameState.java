@@ -532,7 +532,7 @@ class GameState {
     String handleClearAction(Entity entity, Position xy) {
         var target = xy.translate(entity.getPosition());
         if (target.distanceTo(entity.getPosition()) > entity.getVision()) return Actions.RESULT_F_TARGET;
-        if (entity.getEnergy() < Entity.clearEnergyCost) return Actions.RESULT_F_STATUS;
+        if (entity.getEnergy() < Entity.clearEnergyCost) return Actions.RESULT_F_RESOURCES;
 
         var previousPos = entity.getPreviousClearPosition();
         if(entity.getPreviousClearStep() != step - 1 || previousPos.x != target.x || previousPos.y != target.y) {
@@ -564,7 +564,7 @@ class GameState {
                 break;
             }
         }
-        if (!nearTaskboard) return Actions.RESULT_F_STATUS;
+        if (!nearTaskboard) return Actions.RESULT_F_LOCATION;
 
         entity.acceptTask(task);
         return Actions.RESULT_SUCCESS;

@@ -32,5 +32,6 @@ public abstract class Actions {
     public final static String RESULT_F_TARGET = "failed_target";
     public static final String RESULT_F_BLOCKED = "failed_blocked";
     public static final String RESULT_F_STATUS = "failed_status";
-    public static final String RESULT_F_FORBIDDEN = "failed_forbidden";
+    public static final String RESULT_F_RESOURCES = "failed_resources";
+    public static final String RESULT_F_LOCATION = "failed_location";
 }

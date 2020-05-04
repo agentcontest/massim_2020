@@ -239,7 +239,7 @@ Failure Code | Reason
 --- | ---
 failed_parameter | No valid integer coordinates given.
 failed_target | Target location is not within the agent's vision radius or outside the grid.
-failed_status | The agent's energy is too low.
+failed_resources | The agent's energy is too low.
 
 * `Config: match.clearSteps` - number of action required for a successful clear
 * `Config: match.clearEnergyCost` - energy cost for a clear action (subtracted when the clear actually resolves)
@@ -257,7 +257,7 @@ No | Parameter | Meaning
 Failure Code | Reason
 --- | ---
 failed_target | No task parameter given or no such task found.
-failed_status | The agent is not close to a task board.
+failed_location | The agent is not close to a task board.
 
 ### all actions
 
