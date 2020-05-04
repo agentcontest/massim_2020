@@ -112,7 +112,7 @@ public class GameStateTest {
         assert state.attach(Position.of(15,16), Position.of(14,16));
         assert state.handleSubmitAction(a1, "testTask1").equals(Actions.RESULT_F_TARGET);
         state.createTaskboard(Position.of(15,18));
-        assert state.handleAcceptAction(a1, "testTask1").equals(Actions.RESULT_F_STATUS);
+        assert state.handleAcceptAction(a1, "testTask1").equals(Actions.RESULT_F_LOCATION);
         state.createTaskboard(Position.of(15,17));
         assert state.handleAcceptAction(a1, "testTask1").equals(Actions.RESULT_SUCCESS);
         assert state.handleSubmitAction(a1, "testTask1").equals(Actions.RESULT_SUCCESS);
