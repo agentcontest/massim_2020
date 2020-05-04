@@ -119,6 +119,32 @@ public class GameStateTest {
     }
 
     @org.junit.Test
+    public void handleAccept() {
+        var a1 = state.getEntityByName("A1");
+        state.teleport("A1", Position.of(10, 10));
+        String blockType = state.getBlockTypes().iterator().next();
+        var task = state.createTask("testTask1", 10,
+                Map.of(Position.of(0, 1), blockType, Position.of(-1, 1), blockType));
+
+        assert a1.getPosition().equals(Position.of(10, 10));
+        assert task != null;
+
+        assert state.handleAcceptAction(a1, "wrongtaskname").equals(Actions.RESULT_F_TARGET);
+        assert state.handleAcceptAction(a1, task.getName()).equals(Actions.RESULT_F_LOCATION);
+
+        assert state.createTaskboard(Position.of(10,11));
+        assert state.handleAcceptAction(a1, task.getName()).equals(Actions.RESULT_SUCCESS);
+        assert state.handleAcceptAction(a1, task.getName()).equals(Actions.RESULT_SUCCESS);
+
+        state.teleport("A1", Position.of(10, 11));
+        assert state.handleAcceptAction(a1, task.getName()).equals(Actions.RESULT_SUCCESS);
+        state.teleport("A1", Position.of(10, 9));
+        assert state.handleAcceptAction(a1, task.getName()).equals(Actions.RESULT_SUCCESS);
+        state.teleport("A1", Position.of(10, 8));
+        assert state.handleAcceptAction(a1, task.getName()).equals(Actions.RESULT_F_LOCATION);
+    }
+
+    @org.junit.Test
     public void getStepPercepts() {
         var a1 = state.getEntityByName("A1");
         var a2 = state.getEntityByName("A2");
