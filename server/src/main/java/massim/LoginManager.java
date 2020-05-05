@@ -121,6 +121,7 @@ class LoginManager {
                             + auth.getPassword() + " address=" + s.getInetAddress().getHostAddress());
                     // check credentials and act accordingly
                     if (agentManager.auth(auth.getUsername(), auth.getPassword())) {
+                        Log.log(Log.Level.NORMAL, auth.getUsername() + " authentication successful");
                         sendAuthResponse(s, AuthResponseMessage.OK);
                         agentManager.handleNewConnection(s, auth.getUsername());
                     } else {
