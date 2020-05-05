@@ -448,7 +448,7 @@ public class Server {
                 if (teamJSON != null) {
                     var prefix = teamJSON.getString("prefix");
                     var password = teamJSON.getString("password");
-                    for (int i = 0; i < requiredAgents; i++) {
+                    for (int i = 1; i <= requiredAgents; i++) {
                         var agentName = prefix + teamName + i;
                         if (!allAgents.add(agentName))
                             Log.log(Log.Level.CRITICAL, "Agent " + agentName + " occurs in multiple teams.");

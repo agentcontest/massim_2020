@@ -2,7 +2,7 @@
   "agents" : [
     {
       "count":  20,
-      "start-index":  0,
+      "start-index":  1,
       "agent-prefix":  "A",
       "entity-prefix":  "connectionA",
       "team":  "A",
@@ -10,7 +10,7 @@
     },
     {
       "count":  30,
-      "start-index":  20,
+      "start-index":  21,
       "agent-prefix":  "A",
       "entity-prefix":  "connectionA",
       "team":  "A",
@@ -18,7 +18,7 @@
     },
     {
       "count":  50,
-      "start-index":  0,
+      "start-index":  1,
       "agent-prefix":  "B",
       "entity-prefix":  "connectionB",
       "team":  "B",
