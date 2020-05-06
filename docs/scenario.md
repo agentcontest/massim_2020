@@ -288,6 +288,7 @@ Complete Example (with bogus values):
     "percept": {
       "name": "agentA1",
       "team": "A",
+      "teamSize": 15,
       "steps": 700,
       "vision": 5
     }
@@ -297,7 +298,9 @@ Complete Example (with bogus values):
 
 * __name__: the agent's name
 * __team__: the name of the agent's team
+* __teamSize__: number of agents in the agent's team in the current round
 * __steps__: the sim's total number of steps
+* __vision__: vision range of the agent
 
 ### Step percept
 

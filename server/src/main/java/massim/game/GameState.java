@@ -32,6 +32,7 @@ class GameState {
     private Map<Entity, String> entityToAgent = new HashMap<>();
 
     private int step = -1;
+    private int teamSize;
     private Grid grid;
     private Map<Integer, GameObject> gameObjects = new HashMap<>();
     private Map<Position, Dispenser> dispensers = new HashMap<>();
@@ -155,6 +156,7 @@ class GameState {
                 }                
             }
         }
+        teamSize = agentCounter;
 
         // create env. things
         for (var block : blockTypes) {
@@ -291,7 +293,7 @@ class GameState {
     Map<String, SimStartMessage> getInitialPercepts(int steps) {
         Map<String, SimStartMessage> result = new HashMap<>();
         for (Entity e: entityToAgent.keySet()) {
-            result.put(e.getAgentName(), new InitialPercept(e.getAgentName(), e.getTeamName(), steps, e.getVision()));
+            result.put(e.getAgentName(), new InitialPercept(e.getAgentName(), e.getTeamName(), teamSize, steps, e.getVision()));
         }
         return result;
     }

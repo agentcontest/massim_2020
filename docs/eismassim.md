@@ -203,6 +203,8 @@ The following percepts might be included in a `SIM-START` message:
   * s : Identifier - name of the agent
 * `team(s)`
   * s : Identifier - name of the agent's team
+* `teamSize(n)`
+  * n : Numeral - number of agents in the agent's team in the current round
 * `steps(n)`
   * n : Numeral - number of steps
 * `vision(n)`
