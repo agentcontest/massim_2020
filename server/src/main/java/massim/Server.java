@@ -30,7 +30,7 @@ public class Server {
     private ServerConfig config;
 
     private final InputManager inputManager = new InputManager();
-    private LoginManager loginManager;
+    private FrontDesk frontDesk;
     private AgentManager agentManager;
     private Monitor monitor;
     private ReplayWriter replayWriter;
@@ -135,7 +135,7 @@ public class Server {
      */
     private void close() {
         Log.log(Log.Level.NORMAL, "All simulations run - server ending now.");
-        if (loginManager != null) loginManager.stop();
+        if (frontDesk != null) frontDesk.close();
         if (agentManager != null) agentManager.stop();
         inputManager.stop();
     }
@@ -163,8 +163,8 @@ public class Server {
         // setup backend
         agentManager = new AgentManager(config.teams, config.agentTimeout, config.maxPacketLength);
         try {
-            loginManager = new LoginManager(agentManager, config.port, config.backlog);
-            loginManager.start();
+            frontDesk = new FrontDesk(agentManager, config.port, config.backlog);
+            frontDesk.open();
         } catch (IOException e) {
             Log.log(Log.Level.CRITICAL, "Cannot open server socket.");
             return;

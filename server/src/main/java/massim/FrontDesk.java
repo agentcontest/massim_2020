@@ -17,10 +17,9 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Responsible for network actions.
- * Created in 2017.
  * @author ta10
  */
-class LoginManager {
+class FrontDesk {
 
     private boolean stopped = false;
     private ServerSocket serverSocket;
@@ -35,7 +34,7 @@ class LoginManager {
      * @param agentMng the agent connection manager
      * @throws IOException if socket with the given data cannot be opened
      */
-    LoginManager(AgentManager agentMng, int port, int backlog) throws IOException {
+    FrontDesk(AgentManager agentMng, int port, int backlog) throws IOException {
         agentManager = agentMng;
         serverSocket = new ServerSocket(port, backlog, null);
         thread = new Thread(() -> {
@@ -56,14 +55,14 @@ class LoginManager {
     /**
      * Starts listening on the socket.
      */
-    void start() {
+    void open() {
         thread.start();
     }
 
     /**
      * Stops listening.
      */
-    void stop() {
+    void close() {
         try {
             stopped = true;
             serverSocket.close();
