@@ -13,6 +13,8 @@ public abstract class Message {
     public final static String TYPE_SIM_START = "sim-start";
     public final static String TYPE_SIM_END = "sim-end";
     public final static String TYPE_BYE = "bye";
+    public final static String TYPE_STATUS_REQUEST = "status-request";
+    public final static String TYPE_STATUS_RESPONSE = "status-response";
 
     public abstract String getMessageType();
 
@@ -38,6 +40,8 @@ public abstract class Message {
             case TYPE_BYE: return new ByeMessage(content);
             case TYPE_SIM_START: return new InitialPercept(content);
             case TYPE_SIM_END: return new SimEndMessage(content);
+            case TYPE_STATUS_REQUEST: return new StatusRequestMessage();
+            case TYPE_STATUS_RESPONSE: return new StatusResponseMessage(content);
             default: System.out.println("Message of type " + type + " cannot be build.");
         }
         return null;

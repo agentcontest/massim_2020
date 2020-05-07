@@ -17,6 +17,9 @@ If the result was positive, the server now sends various messages over the socke
 
 An agent should respond with an `ACTION` message to all `REQUEST-ACTION` messages it receives (within the time limit).
 
+
+Aside from these necessary messages, the clients may also send optional `STATUS-REQUEST` messages which are answered by `STATUS-RESPONSE` messages containing some information about the current server configuration.
+
 ## Reconnection
 
 If an agent loses the connection to the server, it may reconnect using the standard `AUTH-REQUEST` message. Auhtentication proceeds as before. If authentication was successful and the agent reconnects into a running simulation, the `SIM-START` message is sent again. If it coincides with a new simulation step, the order of `SIM-START` and `REQUEST-ACTION` messages is not guaranteed.
@@ -167,3 +170,37 @@ The contents of the percept object depend on the scenario (see Percepts section 
   "content": {}
 }
 ```
+
+### STATUS-REQUEST
+
+* Who? - Agent
+* Why? - Ask about current server configuration.
+
+```json
+{
+  "type": "status-request",
+  "content": {}
+}
+```
+
+### STATUS-RESPONSE
+
+* Who? - Server
+* Why? - Answers a status request.
+
+```json
+{
+  "type": "status-response",
+  "content": {
+    "teams":["A","B"],
+    "time":1588865434131,
+    "teamSizes":[15,30,50],
+    "currentSimulation":0
+  }
+}
+```
+
+* __teams__: the teams that are currently playing (empty if the simulation hasn't started yet)
+* __time__: the server time when the message was created
+* __teamSizes__: how many agents play in each simulation per team (the size of this array corresponds to the number of simulations)
+* __currentSimulation__: the index of the current simulation (starts at 0, will be -1 if the first simulation has not started yet)

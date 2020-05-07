@@ -18,8 +18,8 @@ public class ServerConfig {
     public String tournamentMode;
     public String launch;
     public int teamsPerMatch;
-    public List<TeamConfig> teams = new Vector<>();
-    public List<JSONObject> simConfigs = new Vector<>();
+    public List<TeamConfig> teams = new ArrayList<>();
+    public List<JSONObject> simConfigs = new ArrayList<>();
     public int port;
     public int backlog;
     public Map<String, String> accounts = new HashMap<>();
@@ -56,4 +56,9 @@ public class ServerConfig {
      * The amount of ms to pause between simulations.
      */
     public int waitBetweenSimulations = 0;
+
+    /**
+     * Actual number of agents required in each simulation.
+     */
+    public List<Integer> teamSizes = new ArrayList<>();
 }

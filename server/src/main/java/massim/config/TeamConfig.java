@@ -49,7 +49,11 @@ public class TeamConfig {
      * Creates a new list containing the names of all agents in this team.
      * @return the new set
      */
-    public Vector<String> getAgentNames(){
-        return new Vector<>(agents);
+    public ArrayList<String> getAgentNames(){
+        return new ArrayList<>(agents);
+    }
+
+    public int size() {
+        return agents.size();
     }
 }

@@ -1,8 +1,7 @@
 package massim;
 
-import massim.protocol.messages.AuthRequestMessage;
-import massim.protocol.messages.AuthResponseMessage;
-import massim.protocol.messages.Message;
+import massim.config.ServerConfig;
+import massim.protocol.messages.*;
 import massim.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,29 +13,31 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
 
 /**
- * Responsible for network actions.
+ * This is where all initial network requests go in.
  * @author ta10
  */
 class FrontDesk {
 
     private boolean stopped = false;
-    private ServerSocket serverSocket;
-    private Thread thread;
-    private AgentManager agentManager;
+    private final ServerSocket serverSocket;
+    private final Thread thread;
+    private final AgentManager agentManager;
 
+    private final Status simStatus = new Status();
 
     /**
      * Creates a new listener waiting for incoming connections.
-     * @param port the port on which to listen
-     * @param backlog the backlog of the socket
      * @param agentMng the agent connection manager
      * @throws IOException if socket with the given data cannot be opened
      */
-    FrontDesk(AgentManager agentMng, int port, int backlog) throws IOException {
+    FrontDesk(AgentManager agentMng, ServerConfig config) throws IOException {
+        setTeamSizes(config.teamSizes.toArray(new Integer[0]));
         agentManager = agentMng;
-        serverSocket = new ServerSocket(port, backlog, null);
+        serverSocket = new ServerSocket(config.port, config.backlog, null);
         thread = new Thread(() -> {
             while (!stopped) {
                 try {
@@ -77,13 +78,20 @@ class FrontDesk {
      * @param result whether the authentication was successful
      */
     private void sendAuthResponse(Socket s, String result) {
+        sendMessage(s, new AuthResponseMessage(System.currentTimeMillis(), result));
+    }
+
+    private void sendStatusResponse(Socket s) {
+        sendMessage(s, buildStatusResponse());
+    }
+
+    private void sendMessage(Socket s, Message msg) {
         try {
-            OutputStream out = s.getOutputStream();
-            AuthResponseMessage msg = new AuthResponseMessage(System.currentTimeMillis(), result);
+            var out = s.getOutputStream();
             out.write(msg.toJson().toString().getBytes());
             out.write(0);
         } catch (IOException e) {
-            Log.log(Log.Level.CRITICAL, "Auth response could not be sent.");
+            Log.log(Log.Level.CRITICAL, msg.getMessageType() + " message could not be sent.");
             e.printStackTrace();
         }
     }
@@ -131,6 +139,10 @@ class FrontDesk {
                         } catch (IOException ignored) {}
                     }
                 }
+                else if (msg instanceof StatusRequestMessage) {
+                    Log.log(Log.Level.DEBUG, "Got status request from: " + s.getInetAddress().getHostAddress());
+                    sendStatusResponse(s);
+                }
                 else{
                     Log.log(Log.Level.ERROR, "Expected AuthRequest, Received message of type: " + msg.getClass());
                 }
@@ -142,5 +154,36 @@ class FrontDesk {
             Log.log(Log.Level.ERROR, "Error while receiving authentication message");
             e.printStackTrace();
         }
+    }
+
+    public void setTeams(String[] teams) {
+        synchronized (simStatus) {
+            simStatus.teams = teams;
+        }
+    }
+
+    private void setTeamSizes(Integer[] teamSizes) {
+        synchronized (simStatus) {
+            simStatus.teamSizes = teamSizes;
+        }
+    }
+
+    public void setCurrentSimulation(int currentSimulation) {
+        synchronized (simStatus) {
+            simStatus.currentSimulation = currentSimulation;
+        }
+    }
+
+    private StatusResponseMessage buildStatusResponse() {
+        synchronized (simStatus) {
+            return new StatusResponseMessage(System.currentTimeMillis(), simStatus.teams, simStatus.teamSizes,
+                    simStatus.currentSimulation);
+        }
+    }
+
+    static class Status {
+        String[] teams = new String[0];
+        Integer[] teamSizes = new Integer[0];
+        int currentSimulation = -1;
     }
 }

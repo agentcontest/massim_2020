@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -163,7 +164,7 @@ public class Server {
         // setup backend
         agentManager = new AgentManager(config.teams, config.agentTimeout, config.maxPacketLength);
         try {
-            frontDesk = new FrontDesk(agentManager, config.port, config.backlog);
+            frontDesk = new FrontDesk(agentManager, config);
             frontDesk.open();
         } catch (IOException e) {
             Log.log(Log.Level.CRITICAL, "Cannot open server socket.");
@@ -276,9 +277,15 @@ public class Server {
      */
     private void runMatch(Set<TeamConfig> matchTeams) {
 
+        frontDesk.setTeams(matchTeams.stream().map(TeamConfig::getName).toArray(String[]::new));
+
         var startTime = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
         var result = new JSONObject();
-        for (JSONObject simConfig: config.simConfigs){
+
+        for (var simIndex = 0; simIndex < config.simConfigs.size(); simIndex++){
+            frontDesk.setCurrentSimulation(simIndex);
+            var simConfig = config.simConfigs.get(simIndex);
+
             // initialize random
             long randomSeed = simConfig.optLong("randomSeed", System.currentTimeMillis());
             Log.log(Log.Level.NORMAL, "Configuring random seed: " + randomSeed);
@@ -314,7 +321,7 @@ public class Server {
             if (config.waitBetweenSimulations > 0) {
                 Log.log(Log.Level.NORMAL, "Waiting " + config.waitBetweenSimulations + "ms before starting the next round.");
                 try {
-                    Thread.sleep(config.waitBetweenSimulations);
+                    TimeUnit.MILLISECONDS.sleep(config.waitBetweenSimulations);
                 } catch (InterruptedException ignored) {}
             }
         }
@@ -433,6 +440,7 @@ public class Server {
             for (String role : entities.keySet()) {
                 numberOfAgents += entities.getInt(role);
             }
+            config.teamSizes.add(numberOfAgents);
             requiredAgents = Math.max(requiredAgents, numberOfAgents);
         }
 
