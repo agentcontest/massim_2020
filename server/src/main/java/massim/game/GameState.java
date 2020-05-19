@@ -21,6 +21,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * State of the game.
@@ -145,11 +146,13 @@ class GameState {
         int agentCounter = 0;
         while (it.hasNext()) {
             var numberOfAgents = entities.getInt(it.next());
+            List<Integer> agents_range = IntStream.rangeClosed(0, numberOfAgents-1).boxed().collect(Collectors.toList());
             for (var n = 0; n < Math.max(1,Math.ceil((double) numberOfAgents/clusterSize)); n++){
                 ArrayList<Position> cluster = grid.findRandomFreeClusterPosition(clusterSize);
                 for (Position p : cluster) {
-                    for (TeamConfig team: matchTeams) {
-                        createEntity(p, team.getAgentNames().get(agentCounter), team.getName());
+                    int index = agents_range.remove(RNG.nextInt(agents_range.size()));
+                    for (TeamConfig team: matchTeams) {                      
+                        createEntity(p, team.getAgentNames().get(index), team.getName());
                     }
                     agentCounter++;
                     if (agentCounter == numberOfAgents) break;
