@@ -13,7 +13,6 @@ export interface CanvasVm {
 }
 
 export function makeMonitorNextCtrl(redraw: Redraw): MonitorNextCtrl {
-  setInterval(redraw, 1000);
   return {
     vm: {}
   };
@@ -21,28 +20,57 @@ export function makeMonitorNextCtrl(redraw: Redraw): MonitorNextCtrl {
 
 export function monitorNextView(ctrl: MonitorNextCtrl): VNode {
   return h('div#monitor', [
+    h('br'),
     h('canvas', {
+      attrs: {
+        width: 800,
+        height: 300,
+      },
       hook: {
         insert(vnode) {
           render(vnode.elm as HTMLCanvasElement, ctrl.vm);
+          if (!vnode.data) vnode.data = {};
+          let redrawing = false;
+
+          vnode.data.massim = {
+            mouseup(ev: MouseEvent) {
+              ctrl.vm.mousemove = [ev.offsetX, ev.offsetY];
+              ctrl.vm.mousedown = undefined;
+              requestAnimationFrame(() => {
+                render(vnode.elm as HTMLCanvasElement, ctrl.vm);
+                redrawing = false;
+              });
+            },
+            mousemove(ev: MouseEvent) {
+              if (ctrl.vm.mousedown) {
+                ctrl.vm.mousemove = [ev.offsetX, ev.offsetY];
+                if (redrawing) return;
+                redrawing = true;
+                requestAnimationFrame(() => {
+                  render(vnode.elm as HTMLCanvasElement, ctrl.vm);
+                  redrawing = false;
+                });
+              }
+            }
+          };
+          document.addEventListener('mouseup', vnode.data.massim.mouseup);
+          document.addEventListener('mousemove', vnode.data.massim.mousemove);
         },
         update(_, vnode) {
+          console.log('update');
           render(vnode.elm as HTMLCanvasElement, ctrl.vm);
-        }
+        },
+        destroy(vnode) {
+          if (vnode.data) {
+            document.removeEventListener('mouseup', vnode.data.massim.mouseup);
+            document.removeEventListener('mousemove', vnode.data.massim.mousemove);
+          }
+        },
       },
       on: {
         mousedown(ev) {
           ctrl.vm.mousedown = [ev.offsetX, ev.offsetY];
         },
-        mousemove(ev) {
-          ctrl.vm.mousemove = [ev.offsetX, ev.offsetY];
-          render(ev.target as HTMLCanvasElement, ctrl.vm);
-        },
-        mouseup(ev) {
-          ctrl.vm.mousemove = [ev.offsetX, ev.offsetY];
-          render(ev.target as HTMLCanvasElement, ctrl.vm);
-          ctrl.vm.mousedown = undefined;
-        }
       }
     })
   ]);
