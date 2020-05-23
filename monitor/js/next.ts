@@ -9,6 +9,7 @@ export interface MonitorNextCtrl {
 
 export interface CanvasVm {
   mousedown?: [number, number];
+  mousemove?: [number, number];
 }
 
 export function makeMonitorNextCtrl(redraw: Redraw): MonitorNextCtrl {
@@ -23,35 +24,46 @@ export function monitorNextView(ctrl: MonitorNextCtrl): VNode {
     h('canvas', {
       hook: {
         insert(vnode) {
-          render(vnode);
+          render(vnode.elm as HTMLCanvasElement, ctrl.vm);
         },
         update(_, vnode) {
-          render(vnode);
+          render(vnode.elm as HTMLCanvasElement, ctrl.vm);
         }
       },
       on: {
         mousedown(ev) {
-          console.log(ev);
+          ctrl.vm.mousedown = [ev.offsetX, ev.offsetY];
+        },
+        mousemove(ev) {
+          ctrl.vm.mousemove = [ev.offsetX, ev.offsetY];
+          render(ev.target as HTMLCanvasElement, ctrl.vm);
+        },
+        mouseup(ev) {
+          ctrl.vm.mousemove = [ev.offsetX, ev.offsetY];
+          render(ev.target as HTMLCanvasElement, ctrl.vm);
+          ctrl.vm.mousedown = undefined;
         }
       }
     })
   ]);
 }
 
-function render(vnode: VNode) {
-  const canvas = vnode.elm as HTMLCanvasElement;
+function render(canvas: HTMLCanvasElement, vm: CanvasVm) {
   const ctx = canvas.getContext('2d')!;
   ctx.save();
-
-
-  const width = canvas.width, height = canvas.height;
-  console.log(width, height);
 
   // fill background
   ctx.beginPath();
   ctx.fillStyle = '#eee';
   ctx.rect(0, 0, canvas.width, canvas.height);
   ctx.fill();
+
+  const width = canvas.width, height = canvas.height;
+  console.log(width, height);
+
+  if (vm.mousemove && vm.mousedown) {
+    ctx.translate(-vm.mousedown[0] + vm.mousemove[0], -vm.mousedown[1] + vm.mousemove[1]);
+  }
 
   ctx.scale(20, 20);
   ctx.translate(0.5, 0.5);
