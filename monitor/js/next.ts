@@ -9,12 +9,19 @@ export interface MonitorNextCtrl {
 
 export interface CanvasVm {
   mousedown?: [number, number];
-  mousemove?: [number, number];
+
+  translate: [number, number];
+  offset: [number, number];
+  scale: number;
 }
 
 export function makeMonitorNextCtrl(redraw: Redraw): MonitorNextCtrl {
   return {
-    vm: {}
+    vm: {
+      translate: [0, 0],
+      offset: [0, 0],
+      scale: 20,
+    }
   };
 }
 
@@ -28,26 +35,33 @@ export function monitorNextView(ctrl: MonitorNextCtrl): VNode {
       },
       hook: {
         insert(vnode) {
-          render(vnode.elm as HTMLCanvasElement, ctrl.vm);
+          const elm = vnode.elm as HTMLCanvasElement;
+          render(elm, ctrl.vm);
           if (!vnode.data) vnode.data = {};
           let redrawing = false;
 
           vnode.data.massim = {
             mouseup(ev: MouseEvent) {
-              ctrl.vm.mousemove = [ev.offsetX, ev.offsetY];
-              ctrl.vm.mousedown = undefined;
-              requestAnimationFrame(() => {
-                render(vnode.elm as HTMLCanvasElement, ctrl.vm);
-                redrawing = false;
-              });
+              if (ctrl.vm.mousedown) {
+                const bounds = elm.getBoundingClientRect();
+                ctrl.vm.translate[0] += ev.clientX - bounds.left - ctrl.vm.mousedown[0];
+                ctrl.vm.translate[1] += ev.clientY - bounds.top - ctrl.vm.mousedown[1];
+                ctrl.vm.offset = [0, 0];
+                ctrl.vm.mousedown = undefined;
+                requestAnimationFrame(() => {
+                  render(elm, ctrl.vm);
+                  redrawing = false;
+                });
+              }
             },
             mousemove(ev: MouseEvent) {
               if (ctrl.vm.mousedown) {
-                ctrl.vm.mousemove = [ev.offsetX, ev.offsetY];
+                const bounds = elm.getBoundingClientRect();
+                ctrl.vm.offset = [ev.clientX - bounds.left - ctrl.vm.mousedown[0], ev.clientY - bounds.top - ctrl.vm.mousedown[1]];
                 if (redrawing) return;
                 redrawing = true;
                 requestAnimationFrame(() => {
-                  render(vnode.elm as HTMLCanvasElement, ctrl.vm);
+                  render(elm, ctrl.vm);
                   redrawing = false;
                 });
               }
@@ -89,12 +103,8 @@ function render(canvas: HTMLCanvasElement, vm: CanvasVm) {
   const width = canvas.width, height = canvas.height;
   console.log(width, height);
 
-  if (vm.mousemove && vm.mousedown) {
-    ctx.translate(-vm.mousedown[0] + vm.mousemove[0], -vm.mousedown[1] + vm.mousemove[1]);
-  }
-
-  ctx.scale(20, 20);
-  ctx.translate(0.5, 0.5);
+  ctx.translate(vm.offset[0] + vm.translate[0], vm.offset[1] + vm.translate[1]);
+  ctx.scale(vm.scale, vm.scale);
 
   // draw grid
   ctx.beginPath();
