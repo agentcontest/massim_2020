@@ -11,6 +11,8 @@ import makeCtrl from './ctrl';
 import { render, invClientPos } from './canvas';
 import overlay from './overlay';
 
+import { MonitorNextCtrl, makeMonitorNextCtrl, monitorNextView } from './next';
+
 import { StatusCtrl } from './statusInterfaces';
 import makeStatusCtrl from './statusCtrl';
 import statusView from './statusView';
@@ -58,6 +60,25 @@ export default function Monitor(overlayTarget: Element, canvas: HTMLCanvasElemen
   canvas.addEventListener('mouseleave', e => {
     ctrl.setHover(undefined);
   });
+}
+
+export function Next(target: Element) {
+  let vnode: VNode | Element = target;
+  let ctrl: MonitorNextCtrl;
+
+  let redrawRequested = false;
+  const redraw = () => {
+    if (redrawRequested) return;
+    redrawRequested = true;
+    requestAnimationFrame(() => {
+      redrawRequested = false;
+      vnode = patch(vnode, monitorNextView(ctrl));
+    });
+  };
+
+  ctrl = makeMonitorNextCtrl(redraw);
+
+  redraw();
 }
 
 export function Status(target: Element) {
