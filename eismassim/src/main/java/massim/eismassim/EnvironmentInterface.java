@@ -245,6 +245,9 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
     @Override
     public void run() {
+
+        entities.values().stream().filter(e -> e instanceof StatusEntity).forEach(e -> ((StatusEntity)e).start());
+
         while (this.getState() != EnvironmentState.KILLED) {
 
             // check connections and attempt to reconnect if necessary
