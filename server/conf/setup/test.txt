@@ -1,5 +1,7 @@
 # simple setup file for testing
 
+add 5 5 taskboard
+
 stop    # stops further setup execution
 
 move 3 3 agentA1

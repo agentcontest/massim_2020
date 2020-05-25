@@ -216,7 +216,7 @@ class GameState {
                 break;
 
             case "add":
-                if (command.length != 5) break;
+                if (command.length < 4 || command.length > 5) break;
                 x = Util.tryParseInt(command[1]);
                 y = Util.tryParseInt(command[2]);
                 if (x == null || y == null) break;
@@ -228,6 +228,9 @@ class GameState {
                     case "dispenser":
                         blockType = command[4];
                         createDispenser(Position.of(x, y), blockType);
+                        break;
+                    case "taskboard":
+                        createTaskboard(Position.of(x, y));
                         break;
                     default:
                         Log.log(Log.Level.ERROR, "Cannot add " + command[3]);
