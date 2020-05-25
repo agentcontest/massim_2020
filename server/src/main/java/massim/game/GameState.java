@@ -173,8 +173,7 @@ class GameState {
         var setupFilePath = config.optString("setup");
         if (!setupFilePath.equals("")){
             Log.log(Log.Level.NORMAL, "Running setup actions");
-            try {
-                var b = new BufferedReader(new FileReader(setupFilePath));
+            try (var b = new BufferedReader(new FileReader(setupFilePath));){
                 var line = "";
                 while ((line = b.readLine()) != null) {
                     if (line.startsWith("#") || line.isEmpty()) continue;

@@ -1,20 +1,22 @@
 package massim;
 
-import massim.config.ServerConfig;
-import massim.protocol.messages.*;
-import massim.util.Log;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import massim.config.ServerConfig;
+import massim.protocol.messages.AuthRequestMessage;
+import massim.protocol.messages.AuthResponseMessage;
+import massim.protocol.messages.Message;
+import massim.protocol.messages.StatusRequestMessage;
+import massim.protocol.messages.StatusResponseMessage;
+import massim.util.Log;
 
 /**
  * This is where all initial network requests go in.
