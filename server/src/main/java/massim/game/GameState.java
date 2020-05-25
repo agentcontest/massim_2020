@@ -74,8 +74,10 @@ class GameState {
         Log.log(Log.Level.NORMAL, "config.attachLimit: " + attachLimit);
         clearSteps = config.getInt("clearSteps");
         Log.log(Log.Level.NORMAL, "config.clearSteps: " + clearSteps);
-        int clusterSize = config.getInt("clusterSize"); 
-        Log.log(Log.Level.NORMAL, "config.clusterSize: " + clusterSize);
+        var clusterSizes = config.getJSONArray("clusterBounds");
+        int clusterSizeMin = clusterSizes.getInt(0);
+        int clusterSizeMax = clusterSizes.getInt(1);
+        Log.log(Log.Level.NORMAL, "config.clusterBOunds: " + clusterSizeMin + ", " + clusterSizeMax);
 
         Entity.clearEnergyCost = config.getInt("clearEnergyCost");
         Log.log(Log.Level.NORMAL, "config.clearEnergyCost: " + Entity.clearEnergyCost);
@@ -146,17 +148,18 @@ class GameState {
         int agentCounter = 0;
         while (it.hasNext()) {
             var numberOfAgents = entities.getInt(it.next());
-            List<Integer> agents_range = IntStream.rangeClosed(0, numberOfAgents-1).boxed().collect(Collectors.toList());
-            for (var n = 0; n < Math.max(1,Math.ceil((double) numberOfAgents/clusterSize)); n++){
+            List<Integer> agentsRange = IntStream.rangeClosed(0, numberOfAgents-1).boxed().collect(Collectors.toList());
+            while (!agentsRange.isEmpty()) {
+                int clusterSize = Math.min(RNG.betweenClosed(clusterSizeMin, clusterSizeMax), agentsRange.size());
                 ArrayList<Position> cluster = grid.findRandomFreeClusterPosition(clusterSize);
                 for (Position p : cluster) {
-                    int index = agents_range.remove(RNG.nextInt(agents_range.size()));
-                    for (TeamConfig team: matchTeams) {                      
+                    int index = agentsRange.remove(RNG.nextInt(agentsRange.size()));
+                    for (TeamConfig team: matchTeams) {
                         createEntity(p, team.getAgentNames().get(index), team.getName());
                     }
                     agentCounter++;
                     if (agentCounter == numberOfAgents) break;
-                }                
+                }
             }
         }
         teamSize = agentCounter;

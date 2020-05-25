@@ -5,7 +5,7 @@
     "randomSeed" : 17,
     "randomFail" : 1,
     "entities" : {"standard" : 50},
-    "clusterSize" : 10,
+    "clusterBounds" : [3,10],
 
     "clearSteps" : 3,
     "clearEnergyCost" : 30,
