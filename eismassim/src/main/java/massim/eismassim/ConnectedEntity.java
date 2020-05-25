@@ -17,11 +17,12 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An entity for the EIS to realize client-server communication following the MASSim protocol.
  */
-public abstract class EISEntity implements Runnable{
+public abstract class ConnectedEntity extends Entity {
 
     private static EnvironmentInterface EI;
 
@@ -34,7 +35,6 @@ public abstract class EISEntity implements Runnable{
     private static boolean onlyOnce = false; // clear percepts after retrieval
 
     // config for this entity
-    private String name;
     private String username;
     private String password;
     private String host;
@@ -62,8 +62,8 @@ public abstract class EISEntity implements Runnable{
     protected long currentActionId;
     private long lastUsedActionIdPercept;
 
-    public EISEntity(String name, String host, int port, String username, String password) {
-        this.name = name;
+    public ConnectedEntity(String name, String host, int port, String username, String password) {
+        super(name);
         this.host = host;
         this.port = port;
         this.username = username;
@@ -104,7 +104,7 @@ public abstract class EISEntity implements Runnable{
      * @param environmentInterface the EI
      */
     static void setEnvironmentInterface(EnvironmentInterface environmentInterface) {
-        EISEntity.EI = environmentInterface;
+        ConnectedEntity.EI = environmentInterface;
     }
 
     /**
@@ -112,7 +112,7 @@ public abstract class EISEntity implements Runnable{
      * @param timeout the timeout for all entities in ms for scheduling (if scheduling is enabled)
      */
     static void setTimeout(int timeout) {
-        EISEntity.timeout = timeout;
+        ConnectedEntity.timeout = timeout;
     }
 
     /**
@@ -162,13 +162,6 @@ public abstract class EISEntity implements Runnable{
      */
     void enableIILang() {
         useIILang = true;
-    }
-
-    /**
-     * @return the name of this entity
-     */
-    String getName(){
-        return name;
     }
 
     /**
@@ -264,13 +257,13 @@ public abstract class EISEntity implements Runnable{
      * @return all percepts for this entity
      * @throws PerceiveException if timeout configured and occurred
      */
-    LinkedList<Percept> getAllPercepts() throws PerceiveException{
+    public LinkedList<Percept> getAllPercepts() throws PerceiveException{
         if (scheduling && !queued) {
             // wait for new action id or timeout
             long startTime = System.currentTimeMillis();
             while (currentActionId <= lastUsedActionIdPercept || currentActionId == -1 ) {
                 try {
-                    Thread.sleep(100);
+                    TimeUnit.MILLISECONDS.wait(100);
                 } catch (InterruptedException ignored) {}
                 if (System.currentTimeMillis() - startTime >= timeout) {
                     throw new PerceiveException("timeout. no valid action-id available in time");
@@ -436,7 +429,7 @@ public abstract class EISEntity implements Runnable{
      * @param s the string to log
      */
     protected void log(String s) {
-        Log.log("Entity " + name + ": " + s);
+        Log.log("Entity " + getName() + ": " + s);
     }
 
     /**

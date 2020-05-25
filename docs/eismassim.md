@@ -99,6 +99,7 @@ Configuration example:
   "times": false,
   "notifications": false,
   "queued": false,
+  "only-once": true,
   "entities": [
     {
       "name": "connectionA28",
@@ -111,13 +112,17 @@ Configuration example:
   ],
   "multi-entities": [
     {
-      "name-prefix":  "connectionA",
-      "username-prefix":  "agentA",
-      "password":  "1",
+      "name-prefix": "connectionA",
+      "username-prefix": "agentA",
+      "password": "1",
       "print-iilang": false,
       "print-json": false,
       "count": 28,
       "start-index": 0
+    },
+
+    "status-entity": {
+      "name": "statusConnection"
     },
     ...
   ]
@@ -153,8 +158,25 @@ To simplify the creation of many similar entities, you can now specify a `multi-
 * __password:__ the password for all entities
 * __print-iilang:__ see above
 * __print-json:__ see above
-* __count:__ the number of entities to create from this data
+* __count:__ the number of entities to create from this data (if count is -1 or missing, EISMASSim will try to retrieve the number of entities from the MASSim server)
 * __start-index:__ the first index to append to the prefixes
+
+If you do not specify the count for the multi-entities block (or set it to -1), EISMASSim will query the running MASSim server for the maximum number of entities required for any simulation.
+
+You can also specify a `status-entity` to be created. This status-entity queries the current server status and gets the following percepts:
+
+* `teams(l)`
+  * l : List of Identifiers - names of the teams that are currently playing
+* `teamSizes(l)`
+  * l : List of Numerals - number of agents per simulation (e.g. [10,20,30] for three simulations with 10, 20 and 30 agents per team)
+* `currentSim(n)`
+  * n : Numeral - index of the simulation that is currently running. -1 if the match hasn't started yet
+* `currentTeamSize(n)`
+  * n : Numeral - number of agents required per team in the current simulation
+* `error`
+  * Indicates that no StatusResponse could be retrieved from the server.
+
+
 
 ## Example usage
 

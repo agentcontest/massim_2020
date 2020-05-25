@@ -7,6 +7,7 @@ import eis.iilang.EnvironmentState;
 import eis.iilang.IILElement;
 import eis.iilang.Percept;
 import massim.eismassim.entities.ScenarioEntity;
+import massim.eismassim.entities.StatusEntity;
 import massim.protocol.messages.scenario.Actions;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,6 +18,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Environment interface to the MASSim server following the Environment Interface Standard (EIS).
@@ -24,7 +26,7 @@ import java.util.concurrent.Executors;
 public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
     private Set<String> supportedActions = new HashSet<>();
-    private Map<String, EISEntity> entities = new HashMap<>();
+    private Map<String, Entity> entities = new HashMap<>();
 
     private String configFile = "eismassimconfig.json";
 
@@ -38,7 +40,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
     }
 
     /**
-     * Additional constructor for when the config file does not rest in the current working directory.
+     * Additional constructor for when the config file is not in the current working directory.
      * @param configFile the actual path to the config file (including the file name)
      */
     public EnvironmentInterface(String configFile){
@@ -51,7 +53,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
      * Setup method to be called at the end of each constructor.
      */
     private void setup(){
-        EISEntity.setEnvironmentInterface(this);
+        ConnectedEntity.setEnvironmentInterface(this);
         supportedActions.addAll(Actions.ALL_ACTIONS);
         try {
             parseConfig();
@@ -81,15 +83,16 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
     @Override
     protected LinkedList<Percept> getAllPerceptsFromEntity(String name) throws PerceiveException, NoEnvironmentException {
-        EISEntity e = entities.get(name);
+        var e = entities.get(name);
         if (e == null) throw new PerceiveException("unknown entity");
-        if (!e.isConnected()) throw new PerceiveException("no valid connection");
+        if (e instanceof ConnectedEntity && !((ConnectedEntity) e).isConnected())
+            throw new PerceiveException("no valid connection");
         return e.getAllPercepts();
     }
 
     @Override
     protected boolean isSupportedByEnvironment(Action action) {
-        return action != null && supportedActions.contains( action.getName());
+        return action != null && supportedActions.contains(action.getName());
     }
 
     @Override
@@ -104,9 +107,14 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
     @Override
     protected Percept performEntityAction(String name, Action action) throws ActException {
-        EISEntity entity = entities.get(name);
-        entity.performAction(action);
-        return new Percept("done");
+        var entity = entities.get(name);
+        if (entity instanceof ConnectedEntity) {
+            ((ConnectedEntity) entity).performAction(action);
+            return new Percept("done");
+        }
+        else {
+            return new Percept("impossible");
+        }
     }
 
     /**
@@ -130,35 +138,35 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
         // annotate percepts with timestamps
         if(config.optBoolean("times", true)){
-            EISEntity.enableTimeAnnotations();
+            ConnectedEntity.enableTimeAnnotations();
             Log.log("Timed annotations enabled.");
         }
 
         // enable scheduling
         if(config.optBoolean("scheduling", true)){
-            EISEntity.enableScheduling();
+            ConnectedEntity.enableScheduling();
             Log.log("Scheduling enabled.");
         }
 
         // enable notifications
         if(config.optBoolean("notifications", true)){
-            EISEntity.enableNotifications();
+            ConnectedEntity.enableNotifications();
             Log.log("Notifications enabled.");
         }
 
         // timeout
         int timeout = config.optInt("timeout", 3000);
-        EISEntity.setTimeout(timeout);
+        ConnectedEntity.setTimeout(timeout);
         Log.log("Timeout set to " + timeout);
 
         // queue
         if(config.optBoolean("queued", true)){
-            EISEntity.enablePerceptQueue();
+            ConnectedEntity.enablePerceptQueue();
             Log.log("Percept queue enabled.");
         }
 
         if(config.optBoolean("only-once", false)){
-            EISEntity.enableOnlyOnceRetrieval();
+            ConnectedEntity.enableOnlyOnceRetrieval();
             Log.log("Only once retrieval enabled.");
         }
 
@@ -175,7 +183,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
             String password = jsonEntity.optString("password");
             if (password == null) throw new ParseException("Entity must have a valid password", 0);
 
-            EISEntity entity = new ScenarioEntity(name, host, port, username, password);
+            ConnectedEntity entity = new ScenarioEntity(name, host, port, username, password);
 
             if(jsonEntity.optBoolean("print-json", true)){
                 entity.enableJSON();
@@ -197,23 +205,41 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
         if(multiEntities == null) multiEntities = new JSONArray();
         for (int i = 0; i < multiEntities.length(); i++) {
             var multiEntity = multiEntities.optJSONObject(i);
-            if(multiEntity == null) continue;
+            if (multiEntity == null) continue;
             var namePrefix = multiEntity.getString("name-prefix");
             var usernamePrefix = multiEntity.getString("username-prefix");
             var password = multiEntity.getString("password");
-            var count = multiEntity.getInt("count");
+            var count = multiEntity.optInt("count", -1);
             var startIndex = multiEntity.getInt("start-index");
             var printIILang = multiEntity.optBoolean("print-iilang", true);
             var printJSON = multiEntity.optBoolean("print-json", true);
 
-            for (int index = startIndex; index < startIndex + count; index++) {
-                EISEntity entity = new ScenarioEntity(namePrefix + index, host, port, usernamePrefix + index, password);
+            if (count == -1) {
+                Log.log("EISMASSim auto config found. Querying server for number of entities.");
+                var result = StatusEntity.queryServerStatus(host, port);
+                if (result == null) Log.log("Error while trying to contact MASSim server at " + host + ":" + port);
+                else {
+                    for (var size: result.teamSizes) if (size > count) count = size;
+                }
+            }
+            int endIndex = startIndex + count - 1;
+            Log.log("Creating " + count + " new EISMASSim entities " + namePrefix + startIndex + " to " + namePrefix + endIndex);
+            for (int index = startIndex; index <= endIndex; index++) {
+                ConnectedEntity entity = new ScenarioEntity(namePrefix + index, host, port, usernamePrefix + index, password);
                 if (printIILang) entity.enableIILang();
                 if (printJSON) entity.enableJSON();
                 if(entities.put(entity.getName(), entity) != null){
                     Log.log("Entity by name " + entity.getName() + " configured multiple times. Previous one replaced.");
                 }
             }
+        }
+
+        // create status entity if requested
+        var statusEntity = config.optJSONObject("status-entity");
+        if (statusEntity != null) {
+            var name = statusEntity.getString("name");
+            Log.log("Creating status entity: " + name);
+            entities.put(name, new StatusEntity(name, host, port));
         }
     }
 
@@ -222,14 +248,16 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
         while (this.getState() != EnvironmentState.KILLED) {
 
             // check connections and attempt to reconnect if necessary
-            for ( EISEntity e : entities.values() ) {
-                if (!e.isConnected()) {
+            for ( Entity e : entities.values()) {
+                if (e instanceof ConnectedEntity && !((ConnectedEntity) e).isConnected()) {
                     Log.log("entity \"" + e.getName() + "\" is not connected. trying to connect.");
-                    Executors.newSingleThreadExecutor().execute(e::establishConnection);
+                    Executors.newSingleThreadExecutor().execute(((ConnectedEntity)e)::establishConnection);
                 }
             }
 
-            try { Thread.sleep(1000); } catch (InterruptedException ignored) {} // be nice to the server and our CPU
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {} // be nice to the server and our CPU
         }
     }
 
@@ -255,7 +283,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
      * @return true if the entity exists and is connected to a MASSim server
      */
     public boolean isEntityConnected(String entityName){
-        EISEntity entity = entities.get(entityName);
-        return entity != null && entity.isConnected();
+        var entity = entities.get(entityName);
+        return entity != null && entity instanceof ConnectedEntity && ((ConnectedEntity) entity).isConnected();
     }
 }

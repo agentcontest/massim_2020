@@ -8,24 +8,31 @@
   "times": false,
   "notifications": false,
   "queued": false,
+
+  "entities" : {},
+  
   "multi-entities": [
     {
-      "name-prefix":  "connectionA",
-      "username-prefix":  "agentA",
-      "password":  "1",
+      "name-prefix": "connectionA",
+      "username-prefix": "agentA",
+      "password": "1",
       "print-iilang": false,
       "print-json": false,
-      "count": 50,
-      "start-index": 1
+      "start-index": 1,
+      "count": -1
     },
     {
-      "name-prefix":  "connectionB",
-      "username-prefix":  "agentB",
-      "password":  "1",
+      "name-prefix": "connectionB",
+      "username-prefix": "agentB",
+      "password": "1",
       "print-iilang": false,
       "print-json": false,
-      "count": 50,
-      "start-index": 1
+      "start-index": 1,
+      "count": -1
     }
-  ]
+  ],
+
+  "status-entity": {
+    "name": "statusConnection"
+  }
 }

@@ -5,10 +5,10 @@ import org.json.JSONObject;
 
 public class StatusResponseMessage extends Message {
 
-    private final long time;
-    private final String[] teams;
-    private final Integer[] teamSizes;
-    private final int currentSimulation;
+    public final long time;
+    public final String[] teams;
+    public final Integer[] teamSizes;
+    public final int currentSimulation;
 
     public StatusResponseMessage(JSONObject content) {
         this.time = content.optLong("time");
@@ -66,4 +66,6 @@ public class StatusResponseMessage extends Message {
     public long getTime() {
         return time;
     }
+
+
 }

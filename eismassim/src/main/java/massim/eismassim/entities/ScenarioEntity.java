@@ -1,7 +1,7 @@
 package massim.eismassim.entities;
 
 import eis.iilang.*;
-import massim.eismassim.EISEntity;
+import massim.eismassim.ConnectedEntity;
 import massim.protocol.messages.ActionMessage;
 import massim.protocol.messages.RequestActionMessage;
 import massim.protocol.messages.SimEndMessage;
@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * An EIS compatible entity.
  */
-public class ScenarioEntity extends EISEntity {
+public class ScenarioEntity extends ConnectedEntity {
 
     public ScenarioEntity(String name, String host, int port, String username, String password) {
         super(name, host, port, username, password);
