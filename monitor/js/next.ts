@@ -140,6 +140,8 @@ function render(canvas: HTMLCanvasElement, vm: CanvasVm) {
   const ymax = ymin + Math.ceil(canvas.height / transform.scale);
   const xmax = xmin + Math.ceil(canvas.width / transform.scale);
 
+  const period = 5;
+
   // draw grid
   ctx.beginPath();
   ctx.fillStyle = '#ddd';
@@ -151,13 +153,17 @@ function render(canvas: HTMLCanvasElement, vm: CanvasVm) {
   ctx.fill();
 
   // draw axis
-  ctx.beginPath();
-  ctx.lineWidth = 0.1;
-  ctx.moveTo(-1, 0);
-  ctx.lineTo(1, 0);
-  ctx.moveTo(0, -1);
-  ctx.lineTo(0, 1);
-  ctx.stroke();
+  for (let y = Math.floor(ymin / period) * period; y <= ymax + period; y += period) {
+    for (let x = Math.floor(xmin / period) * period; x <= xmax + period; x += period) {
+      ctx.beginPath();
+      ctx.lineWidth = 0.1;
+      ctx.moveTo(x - 1, y);
+      ctx.lineTo(x + 1, y);
+      ctx.moveTo(x, y - 1);
+      ctx.lineTo(x, y + 1);
+      ctx.stroke();
+    }
+  }
 
   /* ctx.scale(100, 100);
   ctx.rect(0, 0, 1, 1);
