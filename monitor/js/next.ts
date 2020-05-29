@@ -134,11 +134,17 @@ function render(canvas: HTMLCanvasElement, vm: CanvasVm) {
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
 
+  const ymin = Math.floor(-transform.y / transform.scale) + 1;
+  const xmin = Math.floor(-transform.x / transform.scale) + 1;
+
+  const ymax = ymin + Math.floor(canvas.height / transform.scale) - 1;
+  const xmax = xmin + Math.floor(canvas.width / transform.scale) - 1;
+
   // draw grid
   ctx.beginPath();
   ctx.fillStyle = '#ddd';
-  for (let y = 0; y < height; y++) {
-    for (let x = y % 2; x < width; x += 2) {
+  for (let y = ymin; y < ymax; y++) {
+    for (let x = xmin + y % 2; x < xmax; x += 2) {
       ctx.rect(x, y, 1, 1);
     }
   }
