@@ -144,7 +144,7 @@ function render(canvas: HTMLCanvasElement, vm: CanvasVm) {
   ctx.beginPath();
   ctx.fillStyle = '#ddd';
   for (let y = ymin; y <= ymax; y++) {
-    for (let x = xmin + y % 2; x <= xmax; x += 2) {
+    for (let x = xmin + (((xmin + y) % 2) + 2) % 2; x <= xmax; x += 2) {
       ctx.rect(x, y, 1, 1);
     }
   }
@@ -153,9 +153,9 @@ function render(canvas: HTMLCanvasElement, vm: CanvasVm) {
   // draw axis
   ctx.beginPath();
   ctx.lineWidth = 0.1;
-  ctx.moveTo(0, 0);
+  ctx.moveTo(-1, 0);
   ctx.lineTo(1, 0);
-  ctx.moveTo(0, 0);
+  ctx.moveTo(0, -1);
   ctx.lineTo(0, 1);
   ctx.stroke();
 
