@@ -104,7 +104,7 @@ export function monitorNextView(ctrl: MonitorNextCtrl): VNode {
         },
         wheel(ev) {
           ev.preventDefault();
-          const zoom = (ev.deltaY > 0 ? 1.5 : 1 / 1.5) * ctrl.vm.transform.scale;
+          const zoom = (ev.deltaY < 0 ? 1.5 : 1 / 1.5) * ctrl.vm.transform.scale;
           ctrl.vm.transform = new Transform(
             ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom / ctrl.vm.transform.scale,
             ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom / ctrl.vm.transform.scale,
