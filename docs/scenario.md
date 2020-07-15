@@ -34,6 +34,26 @@ Each agent controls one entity in the simulation (s.t. we can use both terms int
 
 `Config: match.maxEnergy`
 
+#### Vision range (distance for perceiving)
+
+Agents perceive everything in a specific radius r around them. In other words, a cell can be seen by an agent, if its distance (Manhattan distance, taxicab metric, ...) to the agent is at most r. The following illustrates a few different values for r. (X and * can be perceived, X is the agent's position).
+
+
+```
+  r=3       r=4         r=5
+   *         *           *
+  ***       ***         ***
+ *****     *****       *****
+***X***   *******     *******
+ *****   ****X****   ********* 
+  ***     *******   *****X*****
+   *       *****     *********
+            ***       *******
+             *         *****
+                        ***
+                         *
+```
+
 #### Disabled agents
 
 If an agent becomes disabled, it **loses all of its attachments** and remains inactive for a fixed configurable number of steps. For as long as the agent is disabled, all its actions will result in *failed_status*.
