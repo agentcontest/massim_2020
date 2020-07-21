@@ -80,7 +80,7 @@ export function mapView(ctrl: MapCtrl): VNode {
         document.addEventListener('mousemove', vnode.data.massim.mousemove);
       },
       update(_, vnode) {
-        requestAnimationFrame(() => render(vnode.elm as HTMLCanvasElement, ctrl.vm));
+        render(vnode.elm as HTMLCanvasElement, ctrl.vm);
       },
       destroy(vnode) {
         if (vnode.data) {
