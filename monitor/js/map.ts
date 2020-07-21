@@ -93,7 +93,7 @@ export function mapView(ctrl: MapCtrl): VNode {
       mousedown(ev) {
         ev.preventDefault();
         ctrl.vm.mousedown = [ev.offsetX, ev.offsetY];
-        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl.vm));
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl.vm, true));
       },
       wheel(ev) {
         ev.preventDefault();
@@ -103,13 +103,13 @@ export function mapView(ctrl: MapCtrl): VNode {
           y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom / ctrl.vm.transform.scale,
           scale: zoom,
         };
-        render(ev.target as HTMLCanvasElement, ctrl.vm);
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl.vm));
       },
     }
   });
 }
 
-function render(canvas: HTMLCanvasElement, vm: MapViewModel) {
+function render(canvas: HTMLCanvasElement, vm: MapViewModel, raf = false) {
   const ctx = canvas.getContext('2d')!;
   ctx.save();
 
@@ -164,7 +164,5 @@ function render(canvas: HTMLCanvasElement, vm: MapViewModel) {
   ctx.restore();
   console.log(canvas.width, canvas.height);
 
-  if (vm.mousedown) {
-    requestAnimationFrame(() => render(canvas, vm));
-  }
+  if (vm.mousedown && raf) requestAnimationFrame(() => render(canvas, vm, true));
 }
