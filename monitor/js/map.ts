@@ -42,38 +42,37 @@ export function mapView(ctrl: MapCtrl): VNode {
           }
         }).observe(elm);
 
-        if (!vnode.data) vnode.data = {};
+        const mouseup = (ev: Event) => {
+          ev.preventDefault();
+          ctrl.vm.drag = undefined;
+        };
 
-        vnode.data.massim = {
-          mouseup(ev: Event) {
-            ev.preventDefault();
-            ctrl.vm.drag = undefined;
-          },
-          mousemove(ev: Partial<MouseEvent & TouchEvent> & Event) {
-            ev.preventDefault();
-            const pos = eventPosition(ev);
-            if (ctrl.vm.drag && pos) {
-              ctrl.vm.transform.x += pos[0] - ctrl.vm.drag[0];
-              ctrl.vm.transform.y += pos[1] - ctrl.vm.drag[1];
-              ctrl.vm.drag = pos;
-            }
+        const mousemove = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
+          ev.preventDefault();
+          const pos = eventPosition(ev);
+          if (ctrl.vm.drag && pos) {
+            ctrl.vm.transform.x += pos[0] - ctrl.vm.drag[0];
+            ctrl.vm.transform.y += pos[1] - ctrl.vm.drag[1];
+            ctrl.vm.drag = pos;
           }
         };
-        document.addEventListener('mouseup', vnode.data.massim.mouseup);
-        document.addEventListener('touchend', vnode.data.massim.touchend);
-        document.addEventListener('mousemove', vnode.data.massim.mousemove, { passive: false });
-        document.addEventListener('touchmove', vnode.data.massim.mousemove, { passive: false });
+
+        if (!vnode.data) vnode.data = {};
+        vnode.data.massim = {
+          unbinds: [
+            unbindable(document, 'mouseup', mouseup),
+            unbindable(document, 'touchend', mouseup),
+            unbindable(document, 'mousemove', mousemove, { passive: false }),
+            unbindable(document, 'touchmove', mousemove, { passive: false }),
+          ],
+        };
       },
       update(_, vnode) {
         render(vnode.elm as HTMLCanvasElement, ctrl);
       },
       destroy(vnode) {
-        if (vnode.data) {
-          document.removeEventListener('mouseup', vnode.data.massim.mouseup);
-          document.removeEventListener('touchend', vnode.data.massim.mouseup);
-          document.removeEventListener('mousemove', vnode.data.massim.mousemove);
-          document.removeEventListener('touchmove', vnode.data.massim.mousemove);
-        }
+        const unbinds  = vnode.data?.massim?.unbinds;
+        if (unbinds) for (const unbind of unbinds) unbind();
       },
     },
     on: {
@@ -101,6 +100,11 @@ export function mapView(ctrl: MapCtrl): VNode {
       },
     }
   });
+}
+
+function unbindable(el: EventTarget, eventName: string, callback: EventListener, options?: AddEventListenerOptions) {
+  el.addEventListener(eventName, callback, options);
+  return () => el.removeEventListener(eventName, callback, options);
 }
 
 function eventPosition(e: Partial<MouseEvent & TouchEvent>): [number, number] | undefined {
