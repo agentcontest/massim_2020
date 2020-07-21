@@ -16,14 +16,6 @@ export interface MapViewModel {
   transform: MapTransform;
 }
 
-function chain(a: MapTransform, b: MapTransform) {
-  return {
-    x: a.x + a.scale * b.x,
-    y: a.y + a.scale * b.y,
-    scale: a.scale * b.scale,
-  };
-}
-
 export class MapCtrl {
   readonly vm: MapViewModel;
 
@@ -35,6 +27,16 @@ export class MapCtrl {
         scale: 20,
       },
     };
+  }
+
+  transform() {
+    if (this.vm.mousedown && this.vm.mousemove) {
+      return {
+        x: this.vm.transform.x + this.vm.mousemove[0] - this.vm.mousedown[0],
+        y: this.vm.transform.y + this.vm.mousemove[1] - this.vm.mousedown[1],
+        scale: this.vm.transform.scale,
+      }
+    } else return this.vm.transform;
   }
 }
 
@@ -48,7 +50,7 @@ export function mapView(ctrl: MapCtrl): VNode {
           for (const entry of entries) {
             elm.width = entry.contentRect.width;
             elm.height = entry.contentRect.height;
-            requestAnimationFrame(() => render(elm, ctrl.vm));
+            requestAnimationFrame(() => render(elm, ctrl));
           }
         }).observe(elm);
 
@@ -72,7 +74,7 @@ export function mapView(ctrl: MapCtrl): VNode {
         document.addEventListener('mousemove', vnode.data.massim.mousemove);
       },
       update(_, vnode) {
-        render(vnode.elm as HTMLCanvasElement, ctrl.vm);
+        render(vnode.elm as HTMLCanvasElement, ctrl);
       },
       destroy(vnode) {
         if (vnode.data) {
@@ -85,23 +87,26 @@ export function mapView(ctrl: MapCtrl): VNode {
       mousedown(ev) {
         ev.preventDefault();
         ctrl.vm.mousedown = ctrl.vm.mousemove = [ev.clientX, ev.clientY];
-        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl.vm, true));
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
       },
       wheel(ev) {
         ev.preventDefault();
-        const zoom = (ev.deltaY < 0 ? 1.5 : 1 / 1.5) * ctrl.vm.transform.scale;
+        let zoom = Math.pow(3 / 2, -ev.deltaY / 100);
+        if (ctrl.vm.transform.scale * zoom < 5) zoom = 5 / ctrl.vm.transform.scale;
+        if (ctrl.vm.transform.scale * zoom > 100) zoom = 100 / ctrl.vm.transform.scale;
         ctrl.vm.transform = {
-          x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom / ctrl.vm.transform.scale,
-          y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom / ctrl.vm.transform.scale,
-          scale: zoom,
+          x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom,
+          y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom,
+          scale: ctrl.vm.transform.scale * zoom,
         };
-        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl.vm));
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl));
       },
     }
   });
 }
 
-function render(canvas: HTMLCanvasElement, vm: MapViewModel, raf = false) {
+function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
+  const vm = ctrl.vm;
   const ctx = canvas.getContext('2d')!;
   ctx.save();
 
@@ -114,11 +119,7 @@ function render(canvas: HTMLCanvasElement, vm: MapViewModel, raf = false) {
   const width = canvas.width, height = canvas.height;
   console.log(width, height);
 
-  const transform = {...vm.transform};
-  if (vm.mousedown && vm.mousemove) {
-    transform.x += vm.mousemove[0] - vm.mousedown[0];
-    transform.y += vm.mousemove[1] - vm.mousedown[1];
-  }
+  const transform = ctrl.transform();
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
 
@@ -160,5 +161,5 @@ function render(canvas: HTMLCanvasElement, vm: MapViewModel, raf = false) {
   ctx.restore();
   console.log(canvas.width, canvas.height);
 
-  if (vm.mousedown && raf) requestAnimationFrame(() => render(canvas, vm, true));
+  if (vm.mousedown && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
 }
