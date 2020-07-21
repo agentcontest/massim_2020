@@ -91,6 +91,7 @@ export function mapView(ctrl: MapCtrl): VNode {
     },
     on: {
       mousedown(ev) {
+        ev.preventDefault();
         ctrl.vm.mousedown = [ev.offsetX, ev.offsetY];
         requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl.vm));
       },
