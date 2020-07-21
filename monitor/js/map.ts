@@ -3,15 +3,21 @@ import { VNode } from 'snabbdom/vnode';
 
 import { Ctrl } from './ctrl';
 
-export interface MapTransform {
+interface Transform {
   x: number;
   y: number;
   scale: number;
 }
 
+interface Dragging {
+  first: [number, number];
+  latest: [number, number];
+  started: boolean;
+}
+
 export interface MapViewModel {
-  drag?: [number, number];
-  transform: MapTransform;
+  dragging?: Dragging;
+  transform: Transform;
 }
 
 export class MapCtrl {
@@ -44,16 +50,19 @@ export function mapView(ctrl: MapCtrl): VNode {
 
         const mouseup = (ev: Event) => {
           ev.preventDefault();
-          ctrl.vm.drag = undefined;
+          ctrl.vm.dragging = undefined;
         };
 
         const mousemove = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
           ev.preventDefault();
           const pos = eventPosition(ev);
-          if (ctrl.vm.drag && pos) {
-            ctrl.vm.transform.x += pos[0] - ctrl.vm.drag[0];
-            ctrl.vm.transform.y += pos[1] - ctrl.vm.drag[1];
-            ctrl.vm.drag = pos;
+          if (ctrl.vm.dragging && pos) {
+            if (ctrl.vm.dragging.started || distanceSq(ctrl.vm.dragging.first, pos) > 20 * 20) {
+              ctrl.vm.dragging.started = true;
+              ctrl.vm.transform.x += pos[0] - ctrl.vm.dragging.latest[0];
+              ctrl.vm.transform.y += pos[1] - ctrl.vm.dragging.latest[1];
+              ctrl.vm.dragging.latest = pos;
+            }
           }
         };
 
@@ -78,12 +87,22 @@ export function mapView(ctrl: MapCtrl): VNode {
     on: {
       mousedown(ev) {
         ev.preventDefault();
-        ctrl.vm.drag = eventPosition(ev);
+        const pos = eventPosition(ev);
+        if (pos) ctrl.vm.dragging = {
+          first: pos,
+          latest: pos,
+          started: false,
+        };
         requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
       },
       touchstart(ev) {
         ev.preventDefault();
-        ctrl.vm.drag = eventPosition(ev);
+        const pos = eventPosition(ev);
+        if (pos) ctrl.vm.dragging = {
+          first: pos,
+          latest: pos,
+          started: false,
+        };
         requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
       },
       wheel(ev) {
@@ -111,6 +130,12 @@ function eventPosition(e: Partial<MouseEvent & TouchEvent>): [number, number] | 
   if (e.clientX || e.clientX === 0) return [e.clientX, e.clientY!];
   if (e.targetTouches?.[0]) return [e.targetTouches[0].clientX, e.targetTouches[0].clientY];
   return;
+}
+
+function distanceSq(a: [number, number], b: [number, number]): number {
+  const dx = a[0] - b[0];
+  const dy = a[1] - b[1];
+  return dx * dx + dy * dy;
 }
 
 function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
@@ -169,5 +194,5 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   ctx.restore();
   console.log(canvas.width, canvas.height);
 
-  if (vm.drag && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
+  if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
 }
