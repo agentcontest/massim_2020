@@ -141,18 +141,19 @@ function distanceSq(a: [number, number], b: [number, number]): number {
 
 function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   const vm = ctrl.vm;
+  const width = canvas.width, height = canvas.height;
+  console.log(width, height);
+
   const ctx = canvas.getContext('2d')!;
   ctx.save();
 
   // fill background
   ctx.beginPath();
   ctx.fillStyle = '#eee';
-  ctx.rect(0, 0, canvas.width, canvas.height);
+  ctx.rect(0, 0, width, height);
   ctx.fill();
 
-  const width = canvas.width, height = canvas.height;
-  console.log(width, height);
-
+  // draw grid
   const transform = ctrl.vm.transform;
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
@@ -163,9 +164,6 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   const ymax = ymin + Math.ceil(canvas.height / transform.scale);
   const xmax = xmin + Math.ceil(canvas.width / transform.scale);
 
-  const period = 5;
-
-  // draw grid
   ctx.beginPath();
   ctx.fillStyle = '#ddd';
   for (let y = ymin; y <= ymax; y++) {
@@ -176,24 +174,22 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   ctx.fill();
 
   // draw axis
-  for (let y = Math.floor(ymin / period) * period; y <= ymax + period; y += period) {
-    for (let x = Math.floor(xmin / period) * period; x <= xmax + period; x += period) {
-      ctx.beginPath();
-      ctx.lineWidth = 0.1;
-      ctx.moveTo(x - 1, y);
-      ctx.lineTo(x + 1, y);
-      ctx.moveTo(x, y - 1);
-      ctx.lineTo(x, y + 1);
-      ctx.stroke();
+  const grid = ctrl.root.vm.static?.grid;
+  if (grid) {
+    for (let y = Math.floor(ymin / grid.height) * grid.height; y <= ymax + grid.height; y += grid.height) {
+      for (let x = Math.floor(xmin / grid.width) * grid.width; x <= xmax + grid.width; x += grid.width) {
+        ctx.beginPath();
+        ctx.lineWidth = 0.1;
+        ctx.moveTo(x - 1, y);
+        ctx.lineTo(x + 1, y);
+        ctx.moveTo(x, y - 1);
+        ctx.lineTo(x, y + 1);
+        ctx.stroke();
+      }
     }
   }
 
-  /* ctx.scale(100, 100);
-  ctx.rect(0, 0, 1, 1);
-  ctx.fillStyle = Math.random() > 0.5 ? 'red' : 'blue';
-  ctx.fill(); */
   ctx.restore();
-  console.log(canvas.width, canvas.height);
 
   if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
 }
