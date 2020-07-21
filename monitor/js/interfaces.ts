@@ -20,10 +20,28 @@ export interface ReplayCtrl {
   playing(): boolean
 }
 
+export interface MapCtrl {
+  vm: MapViewModel
+}
+
+export interface MapViewModel {
+  mousedown?: [number, number];
+
+  pan: MapTransform;
+  transform: MapTransform;
+}
+
+export interface MapTransform {
+  readonly x: number;
+  readonly y: number;
+  readonly scale: number;
+}
+
 export interface Ctrl {
   vm: ViewModel
   redraw: Redraw
   replay?: ReplayCtrl
+  map: MapCtrl
   setHover(pos?: Pos): void
 }
 

@@ -9,9 +9,7 @@ import { styleModule } from 'snabbdom/modules/style';
 import { Ctrl } from './interfaces';
 import { makeCtrl } from './ctrl';
 import { render, invClientPos } from './canvas';
-import { overlay } from './overlay';
-
-import { MonitorNextCtrl, makeMonitorNextCtrl, monitorNextView } from './next';
+import { view } from './view';
 
 import { StatusCtrl } from './statusInterfaces';
 import { makeStatusCtrl } from './statusCtrl';
@@ -25,8 +23,8 @@ const patch = init([
   eventListenersModule
 ]);
 
-export function Monitor(overlayTarget: Element, canvas: HTMLCanvasElement) {
-  let vnode: VNode | Element = overlayTarget;
+export function Monitor(element: Element, canvas: HTMLCanvasElement) {
+  let vnode: VNode | Element = element;
   let ctrl: Ctrl;
 
   let redrawRequested = false;
@@ -36,7 +34,7 @@ export function Monitor(overlayTarget: Element, canvas: HTMLCanvasElement) {
     redrawRequested = true;
     requestAnimationFrame(() => {
       redrawRequested = false;
-      vnode = patch(vnode, overlay(ctrl));
+      vnode = patch(vnode, view(ctrl));
       render(canvas, ctrl);
     });
   };
@@ -66,25 +64,6 @@ export function Monitor(overlayTarget: Element, canvas: HTMLCanvasElement) {
   canvas.addEventListener('mouseleave', e => {
     ctrl.setHover(undefined);
   });
-}
-
-export function MonitorNext(target: Element) {
-  let vnode: VNode | Element = target;
-  let ctrl: MonitorNextCtrl;
-
-  let redrawRequested = false;
-  const redraw = () => {
-    if (redrawRequested) return;
-    redrawRequested = true;
-    requestAnimationFrame(() => {
-      redrawRequested = false;
-      vnode = patch(vnode, monitorNextView(ctrl));
-    });
-  };
-
-  ctrl = makeMonitorNextCtrl(redraw);
-
-  redraw();
 }
 
 export function Status(target: Element) {

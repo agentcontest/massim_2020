@@ -1,48 +1,18 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-import { Redraw } from './interfaces';
+import { MapCtrl, MapViewModel, Redraw } from './interfaces';
 
-export interface MonitorNextCtrl {
-  vm: CanvasVm;
-}
-
-export interface CanvasVm {
-  mousedown?: [number, number];
-
-  pan: Transform,
-  transform: Transform,
-}
-
-export function makeMonitorNextCtrl(redraw: Redraw): MonitorNextCtrl {
+export function makeMonitorNextCtrl(redraw: Redraw): MapCtrl {
   return {
     vm: {
-      pan: new Transform(0, 0, 1),
-      transform: new Transform(0, 0, 20),
+      pan: {x: 0, y: 0, scale: 1},
+      transform: {x: 0, y: 0, scale: 20},
     }
   };
 }
 
-class Transform {
-  constructor(readonly x: number, readonly y: number, readonly scale: number) { }
-
-  static identity() {
-    return new Transform(0, 0, 1);
-  }
-
-  apply(transform: Transform): Transform {
-    return new Transform(
-      this.x + this.scale * transform.x,
-      this.y + this.scale * transform.y,
-      this.scale * transform.scale);
-  }
-
-  inv(): Transform {
-    return new Transform(-this.x * this.scale, -this.y * this.scale, 1 / this.scale);
-  }
-}
-
-export function monitorNextView(ctrl: MonitorNextCtrl): VNode {
+export function monitorNextView(ctrl: MapCtrl): VNode {
   return h('div#monitor', [
     h('br'),
     h('canvas', {
@@ -61,9 +31,13 @@ export function monitorNextView(ctrl: MonitorNextCtrl): VNode {
             mouseup(ev: MouseEvent) {
               if (ctrl.vm.mousedown) {
                 const bounds = elm.getBoundingClientRect();
-                ctrl.vm.pan = new Transform(ev.clientX - bounds.left - ctrl.vm.mousedown[0], ev.clientY - bounds.top - ctrl.vm.mousedown[1], 1);
-                ctrl.vm.transform = ctrl.vm.pan.apply(ctrl.vm.transform);
-                ctrl.vm.pan = Transform.identity();
+                ctrl.vm.pan = {
+                  x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
+                  y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
+                  scale: 1,
+                };
+                //ctrl.vm.transform = ctrl.vm.pan.apply(ctrl.vm.transform);
+                ctrl.vm.pan = {x: 0, y: 0, scale: 1};
                 ctrl.vm.mousedown = undefined;
                 requestAnimationFrame(() => {
                   render(elm, ctrl.vm);
@@ -74,7 +48,11 @@ export function monitorNextView(ctrl: MonitorNextCtrl): VNode {
             mousemove(ev: MouseEvent) {
               if (ctrl.vm.mousedown) {
                 const bounds = elm.getBoundingClientRect();
-                ctrl.vm.pan = new Transform(ev.clientX - bounds.left - ctrl.vm.mousedown[0], ev.clientY - bounds.top - ctrl.vm.mousedown[1], 1);
+                ctrl.vm.pan = {
+                  x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
+                  y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
+                  scale: 1,
+                };
                 if (redrawing) return;
                 redrawing = true;
                 requestAnimationFrame(() => {
@@ -105,11 +83,11 @@ export function monitorNextView(ctrl: MonitorNextCtrl): VNode {
         wheel(ev) {
           ev.preventDefault();
           const zoom = (ev.deltaY < 0 ? 1.5 : 1 / 1.5) * ctrl.vm.transform.scale;
-          ctrl.vm.transform = new Transform(
-            ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom / ctrl.vm.transform.scale,
-            ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom / ctrl.vm.transform.scale,
-            zoom
-          );
+          ctrl.vm.transform = {
+            x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom / ctrl.vm.transform.scale,
+            y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom / ctrl.vm.transform.scale,
+            scale: zoom,
+          };
           render(ev.target as HTMLCanvasElement, ctrl.vm);
         },
       }
@@ -117,7 +95,7 @@ export function monitorNextView(ctrl: MonitorNextCtrl): VNode {
   ]);
 }
 
-function render(canvas: HTMLCanvasElement, vm: CanvasVm) {
+function render(canvas: HTMLCanvasElement, vm: MapViewModel) {
   const ctx = canvas.getContext('2d')!;
   ctx.save();
 
@@ -130,7 +108,7 @@ function render(canvas: HTMLCanvasElement, vm: CanvasVm) {
   const width = canvas.width, height = canvas.height;
   console.log(width, height);
 
-  const transform = vm.pan.apply(vm.transform);
+  const transform = vm.pan; //.apply(vm.transform);
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
 
