@@ -8,6 +8,6 @@ import { mapView } from './map';
 export function view(ctrl: Ctrl): VNode {
   return h('div#monitor', [
     overlay(ctrl),
-    mapView(ctrl.map),
+    //h('div.box', mapView(ctrl.map)),
   ]);
 }

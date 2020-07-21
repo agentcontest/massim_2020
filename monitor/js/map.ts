@@ -36,86 +36,83 @@ export class MapCtrl {
 }
 
 export function mapView(ctrl: MapCtrl): VNode {
-  return h('div#monitor', [
-    h('br'),
-    h('canvas', {
-      attrs: {
-        width: 800,
-        height: 300,
-      },
-      hook: {
-        insert(vnode) {
-          const elm = vnode.elm as HTMLCanvasElement;
-          render(elm, ctrl.vm);
-          if (!vnode.data) vnode.data = {};
-          let redrawing = false;
+  return h('canvas', {
+    attrs: {
+      width: 800,
+      height: 300,
+    },
+    hook: {
+      insert(vnode) {
+        const elm = vnode.elm as HTMLCanvasElement;
+        render(elm, ctrl.vm);
+        if (!vnode.data) vnode.data = {};
+        let redrawing = false;
 
-          vnode.data.massim = {
-            mouseup(ev: MouseEvent) {
-              if (ctrl.vm.mousedown) {
-                const bounds = elm.getBoundingClientRect();
-                ctrl.vm.pan = {
-                  x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
-                  y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
-                  scale: 1,
-                };
-                ctrl.vm.transform = chain(ctrl.vm.pan, ctrl.vm.transform);
-                ctrl.vm.pan = {x: 0, y: 0, scale: 1};
-                ctrl.vm.mousedown = undefined;
-                requestAnimationFrame(() => {
-                  render(elm, ctrl.vm);
-                  redrawing = false;
-                });
-              }
-            },
-            mousemove(ev: MouseEvent) {
-              if (ctrl.vm.mousedown) {
-                const bounds = elm.getBoundingClientRect();
-                ctrl.vm.pan = {
-                  x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
-                  y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
-                  scale: 1,
-                };
-                if (redrawing) return;
-                redrawing = true;
-                requestAnimationFrame(() => {
-                  render(elm, ctrl.vm);
-                  redrawing = false;
-                });
-              }
+        vnode.data.massim = {
+          mouseup(ev: MouseEvent) {
+            if (ctrl.vm.mousedown) {
+              const bounds = elm.getBoundingClientRect();
+              ctrl.vm.pan = {
+                x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
+                y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
+                scale: 1,
+              };
+              ctrl.vm.transform = chain(ctrl.vm.pan, ctrl.vm.transform);
+              ctrl.vm.pan = {x: 0, y: 0, scale: 1};
+              ctrl.vm.mousedown = undefined;
+              requestAnimationFrame(() => {
+                render(elm, ctrl.vm);
+                redrawing = false;
+              });
             }
-          };
-          document.addEventListener('mouseup', vnode.data.massim.mouseup);
-          document.addEventListener('mousemove', vnode.data.massim.mousemove);
-        },
-        update(_, vnode) {
-          console.log('update');
-          render(vnode.elm as HTMLCanvasElement, ctrl.vm);
-        },
-        destroy(vnode) {
-          if (vnode.data) {
-            document.removeEventListener('mouseup', vnode.data.massim.mouseup);
-            document.removeEventListener('mousemove', vnode.data.massim.mousemove);
+          },
+          mousemove(ev: MouseEvent) {
+            if (ctrl.vm.mousedown) {
+              const bounds = elm.getBoundingClientRect();
+              ctrl.vm.pan = {
+                x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
+                y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
+                scale: 1,
+              };
+              if (redrawing) return;
+              redrawing = true;
+              requestAnimationFrame(() => {
+                render(elm, ctrl.vm);
+                redrawing = false;
+              });
+            }
           }
-        },
+        };
+        document.addEventListener('mouseup', vnode.data.massim.mouseup);
+        document.addEventListener('mousemove', vnode.data.massim.mousemove);
       },
-      on: {
-        mousedown(ev) {
-          ctrl.vm.mousedown = [ev.offsetX, ev.offsetY];
-        },
-        wheel(ev) {
-          ev.preventDefault();
-          const zoom = (ev.deltaY < 0 ? 1.5 : 1 / 1.5) * ctrl.vm.transform.scale;
-          ctrl.vm.transform = {
-            x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom / ctrl.vm.transform.scale,
-            y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom / ctrl.vm.transform.scale,
-            scale: zoom,
-          };
-          render(ev.target as HTMLCanvasElement, ctrl.vm);
-        },
-      }
-    })
-  ]);
+      update(_, vnode) {
+        console.log('update');
+        render(vnode.elm as HTMLCanvasElement, ctrl.vm);
+      },
+      destroy(vnode) {
+        if (vnode.data) {
+          document.removeEventListener('mouseup', vnode.data.massim.mouseup);
+          document.removeEventListener('mousemove', vnode.data.massim.mousemove);
+        }
+      },
+    },
+    on: {
+      mousedown(ev) {
+        ctrl.vm.mousedown = [ev.offsetX, ev.offsetY];
+      },
+      wheel(ev) {
+        ev.preventDefault();
+        const zoom = (ev.deltaY < 0 ? 1.5 : 1 / 1.5) * ctrl.vm.transform.scale;
+        ctrl.vm.transform = {
+          x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom / ctrl.vm.transform.scale,
+          y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom / ctrl.vm.transform.scale,
+          scale: zoom,
+        };
+        render(ev.target as HTMLCanvasElement, ctrl.vm);
+      },
+    }
+  });
 }
 
 function render(canvas: HTMLCanvasElement, vm: MapViewModel) {
