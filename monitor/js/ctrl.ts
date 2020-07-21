@@ -60,8 +60,7 @@ export class ReplayCtrl {
   private suffix: string;
   private timer: NodeJS.Timeout | undefined;
 
-  private cache: any = {};
-  private cacheSize = 0;
+  private cache = new Map<number, any>();
 
   constructor(readonly root: Ctrl, readonly path: string) {
     if (path[path.length - 1] == '/') path = path.substr(0, path.length - 1);
@@ -104,8 +103,9 @@ export class ReplayCtrl {
 
   loadDynamic(step: number) {
     // got from cache
-    if (this.cache[step]) {
-      this.root.vm.dynamic = this.cache[step];
+    const entry = this.cache.get(step);
+    if (entry) {
+      this.root.vm.dynamic = entry;
       this.root.vm.state = (this.root.vm.dynamic && this.root.vm.dynamic.step == step) ? 'online' : 'connecting';
       this.root.redraw();
       return;
@@ -121,14 +121,8 @@ export class ReplayCtrl {
         this.root.vm.state = (this.root.vm.dynamic && this.root.vm.dynamic.step == step) ? 'online' : 'connecting';
 
         // write to cache
-        if (this.cacheSize > 100) {
-          this.cache = {};
-          this.cacheSize = 0;
-        }
-        for (const s in response) {
-          this.cache[s] = response[s];
-          this.cacheSize++;
-        }
+        if (this.cache.size > 100) this.cache.clear();
+        for (const s in response) this.cache.set(parseInt(s), response[s]);
       } else {
         this.root.vm.state = 'error';
         this.stop();
