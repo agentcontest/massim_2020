@@ -2,6 +2,7 @@ import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
 import { Ctrl } from './ctrl';
+import * as styles from './styles';
 
 interface Transform {
   x: number;
@@ -139,6 +140,10 @@ function distanceSq(a: [number, number], b: [number, number]): number {
   return dx * dx + dy * dy;
 }
 
+function mod(a: number, b: number): number {
+  return ((a % b) + b) % b;
+}
+
 function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   const vm = ctrl.vm;
   const width = canvas.width, height = canvas.height;
@@ -173,9 +178,29 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   }
   ctx.fill();
 
-  // draw axis
-  const grid = ctrl.root.vm.static?.grid;
-  if (grid) {
+  if (ctrl.root.vm.static && ctrl.root.vm.dynamic) {
+    const grid = ctrl.root.vm.static.grid;
+
+    // terrain
+    for (let y = ymin; y <= ymax; y++) {
+      for (let x = xmin; x <= xmax; x++) {
+        switch (ctrl.root.vm.dynamic?.cells[mod(y, grid.height)][mod(x, grid.width)]) {
+          case 1: // GOAL
+            ctx.fillStyle = styles.goalFill;
+            break;
+          case 2: // OBSTABLE
+            ctx.fillStyle = styles.obstacle;
+            break;
+          default: // EMPTY
+            continue;
+        }
+        ctx.beginPath();
+        ctx.rect(x, y, 1, 1);
+        ctx.fill();
+      }
+    }
+
+    // draw axis
     for (let y = Math.floor(ymin / grid.height) * grid.height; y <= ymax + grid.height; y += grid.height) {
       for (let x = Math.floor(xmin / grid.width) * grid.width; x <= xmax + grid.width; x += grid.width) {
         ctx.beginPath();
