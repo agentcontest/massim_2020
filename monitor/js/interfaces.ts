@@ -1,34 +1,6 @@
-import { Ctrl } from './ctrl';
-
 export type Redraw = () => void
 
 export type ConnectionState = 'offline' | 'online' | 'connecting' | 'error'
-
-export interface ViewModel {
-  state: ConnectionState
-  static?: StaticWorld
-  dynamic?: DynamicWorld
-  taskName?: string
-  hover?: Pos
-}
-
-export interface MapCtrl {
-  root: Ctrl
-  vm: MapViewModel
-}
-
-export interface MapViewModel {
-  mousedown?: [number, number];
-
-  pan: MapTransform;
-  transform: MapTransform;
-}
-
-export interface MapTransform {
-  readonly x: number;
-  readonly y: number;
-  readonly scale: number;
-}
 
 export type BlockType = string
 

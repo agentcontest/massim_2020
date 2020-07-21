@@ -1,8 +1,20 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-import { MapCtrl, MapViewModel, Redraw, MapTransform } from './interfaces';
 import { Ctrl } from './ctrl';
+
+export interface MapTransform {
+  readonly x: number;
+  readonly y: number;
+  readonly scale: number;
+}
+
+export interface MapViewModel {
+  mousedown?: [number, number];
+
+  pan: MapTransform;
+  transform: MapTransform;
+}
 
 function chain(a: MapTransform, b: MapTransform) {
   return {
@@ -12,14 +24,15 @@ function chain(a: MapTransform, b: MapTransform) {
   };
 }
 
-export function makeMapCtrl(root: Ctrl, redraw: Redraw): MapCtrl {
-  return {
-    root,
-    vm: {
+export class MapCtrl {
+  readonly vm: MapViewModel;
+
+  constructor(readonly root: Ctrl) {
+    this.vm = {
       pan: {x: 0, y: 0, scale: 1},
       transform: {x: 0, y: 0, scale: 20},
-    }
-  };
+    };
+  }
 }
 
 export function mapView(ctrl: MapCtrl): VNode {

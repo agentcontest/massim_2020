@@ -1,5 +1,13 @@
-import { Redraw, ViewModel, Pos, MapCtrl } from './interfaces';
-import { makeMapCtrl } from './map';
+import { Redraw, StaticWorld, DynamicWorld, ConnectionState, Pos } from './interfaces';
+import { MapCtrl } from './map';
+
+export interface ViewModel {
+  state: ConnectionState
+  static?: StaticWorld
+  dynamic?: DynamicWorld
+  taskName?: string
+  hover?: Pos
+}
 
 export class Ctrl {
   readonly vm: ViewModel;
@@ -14,7 +22,7 @@ export class Ctrl {
     if (replayPath) this.replay = new ReplayCtrl(this, replayPath);
     else this.connect();
 
-    this.map = makeMapCtrl(this, redraw);
+    this.map = new MapCtrl(this);
   }
 
   private connect(): void {
