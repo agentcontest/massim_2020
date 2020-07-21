@@ -45,12 +45,11 @@ export function mapView(ctrl: MapCtrl): VNode {
           for (const entry of entries) {
             elm.width = entry.contentRect.width;
             elm.height = entry.contentRect.height;
-            render(elm, ctrl.vm)
+            requestAnimationFrame(() => render(elm, ctrl.vm));
           }
         }).observe(elm);
 
         if (!vnode.data) vnode.data = {};
-        let redrawing = false;
 
         vnode.data.massim = {
           mouseup(ev: MouseEvent) {
@@ -64,10 +63,6 @@ export function mapView(ctrl: MapCtrl): VNode {
               ctrl.vm.transform = chain(ctrl.vm.pan, ctrl.vm.transform);
               ctrl.vm.pan = {x: 0, y: 0, scale: 1};
               ctrl.vm.mousedown = undefined;
-              requestAnimationFrame(() => {
-                render(elm, ctrl.vm);
-                redrawing = false;
-              });
             }
           },
           mousemove(ev: MouseEvent) {
@@ -78,12 +73,6 @@ export function mapView(ctrl: MapCtrl): VNode {
                 y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
                 scale: 1,
               };
-              if (redrawing) return;
-              redrawing = true;
-              requestAnimationFrame(() => {
-                render(elm, ctrl.vm);
-                redrawing = false;
-              });
             }
           }
         };
@@ -91,7 +80,7 @@ export function mapView(ctrl: MapCtrl): VNode {
         document.addEventListener('mousemove', vnode.data.massim.mousemove);
       },
       update(_, vnode) {
-        render(vnode.elm as HTMLCanvasElement, ctrl.vm);
+        requestAnimationFrame(() => render(vnode.elm as HTMLCanvasElement, ctrl.vm));
       },
       destroy(vnode) {
         if (vnode.data) {
@@ -103,6 +92,7 @@ export function mapView(ctrl: MapCtrl): VNode {
     on: {
       mousedown(ev) {
         ctrl.vm.mousedown = [ev.offsetX, ev.offsetY];
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl.vm));
       },
       wheel(ev) {
         ev.preventDefault();
@@ -172,4 +162,8 @@ function render(canvas: HTMLCanvasElement, vm: MapViewModel) {
   ctx.fill(); */
   ctx.restore();
   console.log(canvas.width, canvas.height);
+
+  if (vm.mousedown) {
+    requestAnimationFrame(() => render(canvas, vm));
+  }
 }
