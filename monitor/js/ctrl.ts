@@ -1,5 +1,5 @@
 import { Redraw, Ctrl, ReplayCtrl, ViewModel, Pos } from './interfaces';
-import { makeMonitorNextCtrl } from './map';
+import { makeMapCtrl } from './map';
 
 export function makeCtrl(redraw: Redraw, replayPath?: string): Ctrl {
   const vm: ViewModel = {
@@ -165,7 +165,7 @@ export function makeCtrl(redraw: Redraw, replayPath?: string): Ctrl {
   const replay = replayPath ? makeReplayCtrl(replayPath) : undefined;
   if (!replay) connect();
 
-  const map = makeMonitorNextCtrl(redraw);
+  const map = makeMapCtrl(redraw);
 
   return {
     replay,

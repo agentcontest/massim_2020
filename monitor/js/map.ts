@@ -1,9 +1,17 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-import { MapCtrl, MapViewModel, Redraw } from './interfaces';
+import { MapCtrl, MapViewModel, Redraw, MapTransform } from './interfaces';
 
-export function makeMonitorNextCtrl(redraw: Redraw): MapCtrl {
+function chain(a: MapTransform, b: MapTransform) {
+  return {
+    x: a.x + a.scale * b.x,
+    y: a.y + a.scale * b.y,
+    scale: a.scale * b.scale,
+  };
+}
+
+export function makeMapCtrl(redraw: Redraw): MapCtrl {
   return {
     vm: {
       pan: {x: 0, y: 0, scale: 1},
@@ -12,7 +20,7 @@ export function makeMonitorNextCtrl(redraw: Redraw): MapCtrl {
   };
 }
 
-export function monitorNextView(ctrl: MapCtrl): VNode {
+export function mapView(ctrl: MapCtrl): VNode {
   return h('div#monitor', [
     h('br'),
     h('canvas', {
@@ -36,7 +44,7 @@ export function monitorNextView(ctrl: MapCtrl): VNode {
                   y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
                   scale: 1,
                 };
-                //ctrl.vm.transform = ctrl.vm.pan.apply(ctrl.vm.transform);
+                ctrl.vm.transform = chain(ctrl.vm.pan, ctrl.vm.transform);
                 ctrl.vm.pan = {x: 0, y: 0, scale: 1};
                 ctrl.vm.mousedown = undefined;
                 requestAnimationFrame(() => {
@@ -108,7 +116,7 @@ function render(canvas: HTMLCanvasElement, vm: MapViewModel) {
   const width = canvas.width, height = canvas.height;
   console.log(width, height);
 
-  const transform = vm.pan; //.apply(vm.transform);
+  const transform = chain(vm.pan, vm.transform);
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
 
