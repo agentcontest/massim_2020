@@ -10,9 +10,7 @@ export interface MapTransform {
 }
 
 export interface MapViewModel {
-  mousedown?: [number, number];
-  mousemove?: [number, number];
-
+  drag?: [number, number];
   transform: MapTransform;
 }
 
@@ -27,16 +25,6 @@ export class MapCtrl {
         scale: 20,
       },
     };
-  }
-
-  transform() {
-    if (this.vm.mousedown && this.vm.mousemove) {
-      return {
-        x: this.vm.transform.x + this.vm.mousemove[0] - this.vm.mousedown[0],
-        y: this.vm.transform.y + this.vm.mousemove[1] - this.vm.mousedown[1],
-        scale: this.vm.transform.scale,
-      }
-    } else return this.vm.transform;
   }
 }
 
@@ -58,15 +46,13 @@ export function mapView(ctrl: MapCtrl): VNode {
 
         vnode.data.massim = {
           mouseup(ev: MouseEvent) {
-            if (ctrl.vm.mousedown && ctrl.vm.mousemove) {
-              ctrl.vm.transform.x += ctrl.vm.mousemove[0] - ctrl.vm.mousedown[0];
-              ctrl.vm.transform.y += ctrl.vm.mousemove[1] - ctrl.vm.mousedown[1];
-            }
-            ctrl.vm.mousedown = ctrl.vm.mousemove = undefined;
+            ctrl.vm.drag = undefined;
           },
           mousemove(ev: MouseEvent) {
-            if (ctrl.vm.mousedown) {
-              ctrl.vm.mousemove = [ev.clientX, ev.clientY];
+            if (ctrl.vm.drag) {
+              ctrl.vm.transform.x += ev.clientX - ctrl.vm.drag[0];
+              ctrl.vm.transform.y += ev.clientY - ctrl.vm.drag[1];
+              ctrl.vm.drag = [ev.clientX, ev.clientY];
             }
           }
         };
@@ -86,7 +72,7 @@ export function mapView(ctrl: MapCtrl): VNode {
     on: {
       mousedown(ev) {
         ev.preventDefault();
-        ctrl.vm.mousedown = ctrl.vm.mousemove = [ev.clientX, ev.clientY];
+        ctrl.vm.drag = [ev.clientX, ev.clientY];
         requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
       },
       wheel(ev) {
@@ -119,7 +105,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   const width = canvas.width, height = canvas.height;
   console.log(width, height);
 
-  const transform = ctrl.transform();
+  const transform = ctrl.vm.transform;
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
 
@@ -161,5 +147,5 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   ctx.restore();
   console.log(canvas.width, canvas.height);
 
-  if (vm.mousedown && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
+  if (vm.drag && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
 }
