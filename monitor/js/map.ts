@@ -86,6 +86,7 @@ export function mapView(ctrl: MapCtrl): VNode {
     },
     on: {
       mousedown(ev) {
+        if (ev.button !== undefined && ev.button !== 0) return; // only left click
         ev.preventDefault();
         const pos = eventPosition(ev);
         if (pos) ctrl.vm.dragging = {
