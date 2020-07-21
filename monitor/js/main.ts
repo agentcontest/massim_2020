@@ -1,10 +1,10 @@
 import { init } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
-import klass from 'snabbdom/modules/class';
-import props from 'snabbdom/modules/props';
-import attributes from 'snabbdom/modules/attributes';
-import listeners from 'snabbdom/modules/eventlisteners';
-import style from 'snabbdom/modules/style';
+import { classModule } from 'snabbdom/modules/class';
+import { propsModule } from 'snabbdom/modules/props';
+import { attributesModule } from 'snabbdom/modules/attributes';
+import { eventListenersModule } from 'snabbdom/modules/eventlisteners';
+import { styleModule } from 'snabbdom/modules/style';
 
 import { Ctrl } from './interfaces';
 import { makeCtrl } from './ctrl';
@@ -17,7 +17,13 @@ import { StatusCtrl } from './statusInterfaces';
 import { makeStatusCtrl } from './statusCtrl';
 import { statusView } from './statusView';
 
-const patch = init([klass, props, attributes, listeners, style]);
+const patch = init([
+  classModule,
+  propsModule,
+  attributesModule,
+  styleModule,
+  eventListenersModule
+]);
 
 export function Monitor(overlayTarget: Element, canvas: HTMLCanvasElement) {
   let vnode: VNode | Element = overlayTarget;
