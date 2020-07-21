@@ -4,15 +4,15 @@ import { VNode } from 'snabbdom/vnode';
 import { Ctrl } from './ctrl';
 
 export interface MapTransform {
-  readonly x: number;
-  readonly y: number;
-  readonly scale: number;
+  x: number;
+  y: number;
+  scale: number;
 }
 
 export interface MapViewModel {
   mousedown?: [number, number];
+  mousemove?: [number, number];
 
-  pan: MapTransform;
   transform: MapTransform;
 }
 
@@ -29,8 +29,11 @@ export class MapCtrl {
 
   constructor(readonly root: Ctrl) {
     this.vm = {
-      pan: {x: 0, y: 0, scale: 1},
-      transform: {x: 0, y: 0, scale: 20},
+      transform: {
+        x: 0,
+        y: 0,
+        scale: 20,
+      },
     };
   }
 }
@@ -53,26 +56,15 @@ export function mapView(ctrl: MapCtrl): VNode {
 
         vnode.data.massim = {
           mouseup(ev: MouseEvent) {
-            if (ctrl.vm.mousedown) {
-              const bounds = elm.getBoundingClientRect();
-              ctrl.vm.pan = {
-                x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
-                y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
-                scale: 1,
-              };
-              ctrl.vm.transform = chain(ctrl.vm.pan, ctrl.vm.transform);
-              ctrl.vm.pan = {x: 0, y: 0, scale: 1};
-              ctrl.vm.mousedown = undefined;
+            if (ctrl.vm.mousedown && ctrl.vm.mousemove) {
+              ctrl.vm.transform.x += ctrl.vm.mousemove[0] - ctrl.vm.mousedown[0];
+              ctrl.vm.transform.y += ctrl.vm.mousemove[1] - ctrl.vm.mousedown[1];
             }
+            ctrl.vm.mousedown = ctrl.vm.mousemove = undefined;
           },
           mousemove(ev: MouseEvent) {
             if (ctrl.vm.mousedown) {
-              const bounds = elm.getBoundingClientRect();
-              ctrl.vm.pan = {
-                x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
-                y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
-                scale: 1,
-              };
+              ctrl.vm.mousemove = [ev.clientX, ev.clientY];
             }
           }
         };
@@ -92,7 +84,7 @@ export function mapView(ctrl: MapCtrl): VNode {
     on: {
       mousedown(ev) {
         ev.preventDefault();
-        ctrl.vm.mousedown = [ev.offsetX, ev.offsetY];
+        ctrl.vm.mousedown = ctrl.vm.mousemove = [ev.clientX, ev.clientY];
         requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl.vm, true));
       },
       wheel(ev) {
@@ -122,7 +114,11 @@ function render(canvas: HTMLCanvasElement, vm: MapViewModel, raf = false) {
   const width = canvas.width, height = canvas.height;
   console.log(width, height);
 
-  const transform = chain(vm.pan, vm.transform);
+  const transform = {...vm.transform};
+  if (vm.mousedown && vm.mousemove) {
+    transform.x += vm.mousemove[0] - vm.mousedown[0];
+    transform.y += vm.mousemove[1] - vm.mousedown[1];
+  }
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
 
