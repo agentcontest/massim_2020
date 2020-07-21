@@ -9,6 +9,8 @@
     "noImplicitThis": true,
     "noUnusedParameters": false,
     "target": "ES2016",
-    "lib": ["DOM", "ES2016"]
-  }
+    "lib": ["DOM", "ES2016"],
+    "moduleResolution": "node"
+  },
+  "include": ["js/*.ts"]
 }
