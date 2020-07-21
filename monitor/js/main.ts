@@ -52,9 +52,7 @@ export function Monitor(element: Element) {
 
   redraw();
 
-  /* window.addEventListener('resize', redraw, { passive: true });
-
-  canvas.addEventListener('mousemove', e => {
+  /* canvas.addEventListener('mousemove', e => {
     if (!ctrl.vm.static) return;
     ctrl.setHover(invClientPos(canvas, ctrl.vm.static, e.clientX, e.clientY));
   });

@@ -40,7 +40,15 @@ export function mapView(ctrl: MapCtrl): VNode {
     hook: {
       insert(vnode) {
         const elm = vnode.elm as HTMLCanvasElement;
-        render(elm, ctrl.vm);
+
+        new (window as any)['ResizeObserver']((entries: any) => {
+          for (const entry of entries) {
+            elm.width = entry.contentRect.width;
+            elm.height = entry.contentRect.height;
+            render(elm, ctrl.vm)
+          }
+        }).observe(elm);
+
         if (!vnode.data) vnode.data = {};
         let redrawing = false;
 
@@ -83,7 +91,6 @@ export function mapView(ctrl: MapCtrl): VNode {
         document.addEventListener('mousemove', vnode.data.massim.mousemove);
       },
       update(_, vnode) {
-        console.log('update');
         render(vnode.elm as HTMLCanvasElement, ctrl.vm);
       },
       destroy(vnode) {
