@@ -12,16 +12,6 @@ export interface ViewModel {
   hover?: Pos
 }
 
-export interface ReplayCtrl {
-  name(): string
-  step(): number
-  setStep(s: number): void
-  toggle(): void
-  stop(): void
-  start(): void
-  playing(): boolean
-}
-
 export interface MapCtrl {
   root: Ctrl
   vm: MapViewModel

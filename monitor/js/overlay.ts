@@ -1,5 +1,5 @@
-import { ReplayCtrl, StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
-import { Ctrl } from './ctrl';
+import { StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
+import { Ctrl, ReplayCtrl } from './ctrl';
 import { renderBlocks } from './canvas';
 import  * as styles from './styles';
 
@@ -11,11 +11,11 @@ function replay(ctrl: ReplayCtrl) {
     h('div', [h('strong', 'Replay:'), ' ', ctrl.name()]),
     h('div', [
       h('button', { on: { click: () => ctrl.setStep(-1) } }, '|<<'),
-      h('button', { on: { click: () => ctrl.setStep(ctrl.step() - 10) } }, '<<'),
+      h('button', { on: { click: () => ctrl.setStep(ctrl.step - 10) } }, '<<'),
       h('button', {
         on: { click: () => ctrl.toggle() }
       }, ctrl.playing() ? '||' : '>'),
-      h('button', { on: { click: () => ctrl.setStep(ctrl.step() + 10) } }, '>>'),
+      h('button', { on: { click: () => ctrl.setStep(ctrl.step + 10) } }, '>>'),
       h('button', { on: { click: () => ctrl.setStep(99999999) } }, '>>|')
     ])
   ]);

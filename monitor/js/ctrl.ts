@@ -1,4 +1,4 @@
-import { Redraw, ReplayCtrl, ViewModel, Pos, MapCtrl } from './interfaces';
+import { Redraw, ViewModel, Pos, MapCtrl } from './interfaces';
 import { makeMapCtrl } from './map';
 
 export class Ctrl {
@@ -11,8 +11,8 @@ export class Ctrl {
       'state': 'connecting',
     };
 
-    this.replay = replayPath ? this.makeReplayCtrl(replayPath) : undefined;
-    if (!this.replay) this.connect();
+    if (replayPath) this.replay = new ReplayCtrl(this, replayPath);
+    else this.connect();
 
     this.map = makeMapCtrl(this, redraw);
   }
@@ -47,133 +47,131 @@ export class Ctrl {
     };
   }
 
-  private makeReplayCtrl(path: string): ReplayCtrl {
-    if (path[path.length - 1] == '/') path = path.substr(0, path.length - 1);
-    const suffix = location.pathname == '/' ? `?sri=${Math.random().toString(36).slice(-8)}` : '';
-
-    var step = -1;
-    var timer: NodeJS.Timeout | undefined = undefined;
-
-    var cache: any = {};
-    var cacheSize = 0;
-
-    const stop = () => {
-      if (timer) clearInterval(timer);
-      timer = undefined;
-      this.redraw();
-    }
-
-    const start = () => {
-      if (!timer) timer = setInterval(() => {
-        if (this.vm.state !== 'connecting') setStep(step + 1);
-      }, 1000);
-      this.redraw();
-    }
-
-    const loadStatic = () => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', `${path}/static.json${suffix}`);
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          this.vm.static = JSON.parse(xhr.responseText);
-          setStep(step);
-        } else {
-          this.vm.state = 'error';
-        }
-        this.redraw();
-      };
-      xhr.onerror = () => {
-        this.vm.state = 'error';
-        this.redraw();
-      };
-      xhr.send();
-    }
-
-    const loadDynamic = (step: number) => {
-      // got from cache
-      if (cache[step]) {
-        this.vm.dynamic = cache[step];
-        this.vm.state = (this.vm.dynamic && this.vm.dynamic.step == step) ? 'online' : 'connecting';
-        this.redraw();
-        return;
-      }
-
-      const group = step > 0 ? Math.floor(step / 5) * 5 : 0;
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', `${path}/${group}.json${suffix}`);
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          var response = JSON.parse(xhr.responseText);
-          this.vm.dynamic = response[step];
-          this.vm.state = (this.vm.dynamic && this.vm.dynamic.step == step) ? 'online' : 'connecting';
-
-          // write to cache
-          if (cacheSize > 100) {
-            cache = {};
-            cacheSize = 0;
-          }
-          for (var s in response) {
-            cache[s] = response[s];
-            cacheSize++;
-          }
-        } else {
-          this.vm.state = 'error';
-          stop();
-        }
-        this.redraw();
-      };
-      xhr.onerror = () => {
-        this.vm.state = 'error';
-        stop();
-        this.redraw();
-      };
-      xhr.send();
-    }
-
-    const setStep = (s: number) => {
-      // keep step in bounds
-      step = Math.max(-1, s);
-      if (this.vm.static && step >= this.vm.static.steps) {
-        stop();
-        step = this.vm.static.steps - 1;
-      }
-
-      // show connecting after a while
-      this.vm.state = 'connecting';
-      setTimeout(() => this.redraw(), 500);
-
-      // update url
-      if (history.replaceState) history.replaceState({}, document.title, '#' + step);
-
-      loadDynamic(step);
-    }
-
-    loadStatic();
-
-    return {
-      name: function() {
-        const parts = path.split('/');
-        return parts[parts.length - 1];
-      },
-      step: function() {
-        return step;
-      },
-      setStep,
-      toggle: function() {
-        if (timer) stop();
-        else start();
-      },
-      stop,
-      start,
-      playing: function() {
-        return !!timer;
-      }
-    };
-  }
-
   setHover(pos?: Pos) {
     const changed = (!pos && this.vm.hover) || (pos && !this.vm.hover) || (pos && this.vm.hover && (pos.x != this.vm.hover.x || pos.y != this.vm.hover.y));
     this.vm.hover = pos;
     if (changed) this.redraw();
+  }
+}
+
+export class ReplayCtrl {
+  public step = -1;
+
+  private suffix: string;
+  private timer: NodeJS.Timeout | undefined;
+
+  private cache: any = {};
+  private cacheSize = 0;
+
+  constructor(readonly root: Ctrl, readonly path: string) {
+    if (path[path.length - 1] == '/') path = path.substr(0, path.length - 1);
+    this.suffix = location.pathname == '/' ? `?sri=${Math.random().toString(36).slice(-8)}` : '';
+
+    this.loadStatic();
+  }
+
+  stop() {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = undefined;
+    this.root.redraw();
+  }
+
+  start() {
+    if (!this.timer) this.timer = setInterval(() => {
+      if (this.root.vm.state !== 'connecting') this.setStep(this.step + 1);
+    }, 1000);
+    this.root.redraw();
+  }
+
+  loadStatic() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `${this.path}/static.json${this.suffix}`);
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        this.root.vm.static = JSON.parse(xhr.responseText);
+        this.setStep(this.step);
+      } else {
+        this.root.vm.state = 'error';
+      }
+      this.root.redraw();
+    };
+    xhr.onerror = () => {
+      this.root.vm.state = 'error';
+      this.root.redraw();
+    };
+    xhr.send();
+  }
+
+  loadDynamic(step: number) {
+    // got from cache
+    if (this.cache[step]) {
+      this.root.vm.dynamic = this.cache[step];
+      this.root.vm.state = (this.root.vm.dynamic && this.root.vm.dynamic.step == step) ? 'online' : 'connecting';
+      this.root.redraw();
+      return;
+    }
+
+    const group = step > 0 ? Math.floor(step / 5) * 5 : 0;
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `${this.path}/${group}.json${this.suffix}`);
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        var response = JSON.parse(xhr.responseText);
+        this.root.vm.dynamic = response[step];
+        this.root.vm.state = (this.root.vm.dynamic && this.root.vm.dynamic.step == step) ? 'online' : 'connecting';
+
+        // write to cache
+        if (this.cacheSize > 100) {
+          this.cache = {};
+          this.cacheSize = 0;
+        }
+        for (const s in response) {
+          this.cache[s] = response[s];
+          this.cacheSize++;
+        }
+      } else {
+        this.root.vm.state = 'error';
+        this.stop();
+      }
+      this.root.redraw();
+    };
+    xhr.onerror = () => {
+      this.root.vm.state = 'error';
+      this.stop();
+      this.root.redraw();
+    };
+    xhr.send();
+  }
+
+  setStep(s: number) {
+    // keep step in bounds
+    this.step = Math.max(-1, s);
+    if (this.root.vm.static && this.step >= this.root.vm.static.steps) {
+      this.stop();
+      this.step = this.root.vm.static.steps - 1;
+    }
+
+    // show connecting after a while
+    this.root.vm.state = 'connecting';
+    setTimeout(() => this.root.redraw(), 500);
+
+    // update url
+    if (history.replaceState) history.replaceState({}, document.title, '#' + this.step);
+
+    this.loadDynamic(this.step);
+  }
+
+  name() {
+    const parts = this.path.split('/');
+    return parts[parts.length - 1];
+  }
+
+  toggle() {
+    if (this.timer) this.stop();
+    else this.start();
+  }
+
+  playing() {
+    return !!this.timer;
   }
 }
