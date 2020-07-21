@@ -50,7 +50,7 @@ function view(data: StatusData): VNode[] {
   ];
 }
 
-export default function(ctrl: StatusCtrl): VNode {
+export function statusView(ctrl: StatusCtrl): VNode {
   return h('div#status', [
     h('h1', ['Status: ', ctrl.vm.data ? ctrl.vm.data.sim : ctrl.vm.state]),
     ...(ctrl.vm.data ? view(ctrl.vm.data) : [])

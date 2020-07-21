@@ -1,19 +1,22 @@
 {
   "name": "mapc-webmonitor",
-  "version": "2020.1.0",
+  "version": "2020.2.0",
+  "private": true,
   "description": "Webmonitor for the Multi-Agent Programming Contest",
   "author": "Niklas Fiekas",
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-or-later",
   "dependencies": {
     "snabbdom": "^0.7.4"
   },
   "devDependencies": {
-    "browserify": "^16.5.1",
-    "gulp": "^4.0.2",
-    "tsify": "^4.0.1",
-    "typescript": "^3.8.3",
-    "vinyl-buffer": "^1.0.1",
-    "vinyl-source-stream": "^2.0.0",
-    "watchify": "^3.11.1"
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
+    "@rollup/plugin-typescript": "^5.0.2",
+    "rollup": "^2.22.1",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.7"
+  },
+  "scripts": {
+    "prepare": "rollup --config"
   }
 }

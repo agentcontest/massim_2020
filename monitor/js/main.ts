@@ -7,19 +7,19 @@ import listeners from 'snabbdom/modules/eventlisteners';
 import style from 'snabbdom/modules/style';
 
 import { Ctrl } from './interfaces';
-import makeCtrl from './ctrl';
+import { makeCtrl } from './ctrl';
 import { render, invClientPos } from './canvas';
-import overlay from './overlay';
+import { overlay } from './overlay';
 
 import { MonitorNextCtrl, makeMonitorNextCtrl, monitorNextView } from './next';
 
 import { StatusCtrl } from './statusInterfaces';
-import makeStatusCtrl from './statusCtrl';
-import statusView from './statusView';
+import { makeStatusCtrl } from './statusCtrl';
+import { statusView } from './statusView';
 
 const patch = init([klass, props, attributes, listeners, style]);
 
-export default function Monitor(overlayTarget: Element, canvas: HTMLCanvasElement) {
+export function Monitor(overlayTarget: Element, canvas: HTMLCanvasElement) {
   let vnode: VNode | Element = overlayTarget;
   let ctrl: Ctrl;
 
@@ -62,7 +62,7 @@ export default function Monitor(overlayTarget: Element, canvas: HTMLCanvasElemen
   });
 }
 
-export function Next(target: Element) {
+export function MonitorNext(target: Element) {
   let vnode: VNode | Element = target;
   let ctrl: MonitorNextCtrl;
 

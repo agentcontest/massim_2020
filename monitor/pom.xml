@@ -51,12 +51,11 @@
                         <goals>
                             <goal>install-node-and-npm</goal>
                             <goal>npm</goal>
-                            <goal>gulp</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <nodeVersion>v12.16.1</nodeVersion>
+                    <nodeVersion>v12.18.2</nodeVersion>
                 </configuration>
             </plugin>
         </plugins>

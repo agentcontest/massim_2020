@@ -151,7 +151,7 @@ function box(child: VNode | undefined): VNode | undefined {
   return child ? h('div.box', child) : undefined;
 }
 
-export default function(ctrl: Ctrl): VNode {
+export function overlay(ctrl: Ctrl): VNode {
   return h('div#overlay', [
     ctrl.vm.static && (ctrl.replay ? replay(ctrl.replay) : h('div.box', ctrl.vm.static.sim)),
     (ctrl.vm.state === 'error' || ctrl.vm.state === 'offline') ?

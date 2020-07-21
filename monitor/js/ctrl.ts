@@ -1,6 +1,6 @@
 import { Redraw, Ctrl, ReplayCtrl, ViewModel, Pos } from './interfaces';
 
-export default function(redraw: Redraw, replayPath?: string): Ctrl {
+export function makeCtrl(redraw: Redraw, replayPath?: string): Ctrl {
   const vm: ViewModel = {
     state: 'connecting'
   };
@@ -41,7 +41,7 @@ export default function(redraw: Redraw, replayPath?: string): Ctrl {
     const suffix = location.pathname == '/' ? `?sri=${Math.random().toString(36).slice(-8)}` : '';
 
     var step = -1;
-    var timer: number | undefined = undefined;
+    var timer: NodeJS.Timeout | undefined = undefined;
 
     var cache: any = {};
     var cacheSize = 0;
