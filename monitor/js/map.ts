@@ -45,19 +45,24 @@ export function mapView(ctrl: MapCtrl): VNode {
         if (!vnode.data) vnode.data = {};
 
         vnode.data.massim = {
-          mouseup(ev: MouseEvent) {
+          mouseup(ev: Event) {
+            ev.preventDefault();
             ctrl.vm.drag = undefined;
           },
-          mousemove(ev: MouseEvent) {
-            if (ctrl.vm.drag) {
-              ctrl.vm.transform.x += ev.clientX - ctrl.vm.drag[0];
-              ctrl.vm.transform.y += ev.clientY - ctrl.vm.drag[1];
-              ctrl.vm.drag = [ev.clientX, ev.clientY];
+          mousemove(ev: Partial<MouseEvent & TouchEvent> & Event) {
+            ev.preventDefault();
+            const pos = eventPosition(ev);
+            if (ctrl.vm.drag && pos) {
+              ctrl.vm.transform.x += pos[0] - ctrl.vm.drag[0];
+              ctrl.vm.transform.y += pos[1] - ctrl.vm.drag[1];
+              ctrl.vm.drag = pos;
             }
           }
         };
         document.addEventListener('mouseup', vnode.data.massim.mouseup);
-        document.addEventListener('mousemove', vnode.data.massim.mousemove);
+        document.addEventListener('touchend', vnode.data.massim.touchend);
+        document.addEventListener('mousemove', vnode.data.massim.mousemove, { passive: false });
+        document.addEventListener('touchmove', vnode.data.massim.mousemove, { passive: false });
       },
       update(_, vnode) {
         render(vnode.elm as HTMLCanvasElement, ctrl);
@@ -65,14 +70,21 @@ export function mapView(ctrl: MapCtrl): VNode {
       destroy(vnode) {
         if (vnode.data) {
           document.removeEventListener('mouseup', vnode.data.massim.mouseup);
+          document.removeEventListener('touchend', vnode.data.massim.mouseup);
           document.removeEventListener('mousemove', vnode.data.massim.mousemove);
+          document.removeEventListener('touchmove', vnode.data.massim.mousemove);
         }
       },
     },
     on: {
       mousedown(ev) {
         ev.preventDefault();
-        ctrl.vm.drag = [ev.clientX, ev.clientY];
+        ctrl.vm.drag = eventPosition(ev);
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
+      },
+      touchstart(ev) {
+        ev.preventDefault();
+        ctrl.vm.drag = eventPosition(ev);
         requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
       },
       wheel(ev) {
@@ -89,6 +101,12 @@ export function mapView(ctrl: MapCtrl): VNode {
       },
     }
   });
+}
+
+function eventPosition(e: Partial<MouseEvent & TouchEvent>): [number, number] | undefined {
+  if (e.offsetX || e.offsetX === 0) return [e.offsetX, e.offsetY!];
+  if (e.targetTouches?.[0]) return [e.targetTouches[0].clientX, e.targetTouches[0].clientY];
+  return;
 }
 
 function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
