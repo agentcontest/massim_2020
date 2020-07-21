@@ -1,4 +1,5 @@
-import { Ctrl, ReplayCtrl, StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
+import { ReplayCtrl, StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
+import { Ctrl } from './ctrl';
 import { renderBlocks } from './canvas';
 import  * as styles from './styles';
 

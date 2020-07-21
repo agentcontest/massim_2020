@@ -1,13 +1,23 @@
-import { Redraw, Ctrl, ReplayCtrl, ViewModel, Pos } from './interfaces';
+import { Redraw, ReplayCtrl, ViewModel, Pos, MapCtrl } from './interfaces';
 import { makeMapCtrl } from './map';
 
-export function makeCtrl(redraw: Redraw, replayPath?: string): Ctrl {
-  const vm: ViewModel = {
-    state: 'connecting'
-  };
+export class Ctrl {
+  readonly vm: ViewModel;
+  readonly replay: ReplayCtrl | undefined;
+  readonly map: MapCtrl;
 
+  constructor(readonly redraw: Redraw, replayPath?: string) {
+    this.vm = {
+      'state': 'connecting',
+    };
 
-  function connect() {
+    this.replay = replayPath ? this.makeReplayCtrl(replayPath) : undefined;
+    if (!this.replay) this.connect();
+
+    this.map = makeMapCtrl(this, redraw);
+  }
+
+  private connect(): void {
     const protocol = document.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const path = document.location.pathname.substr(0, document.location.pathname.lastIndexOf('/'));
     const ws = new WebSocket(protocol + '//' + document.location.host + path + '/live/monitor');
@@ -17,27 +27,27 @@ export function makeCtrl(redraw: Redraw, replayPath?: string): Ctrl {
       console.log(data);
       if (data.grid) {
         data.blockTypes.sort();
-        vm.static = data;
+        this.vm.static = data;
       }
-      else vm.dynamic = data;
-      redraw();
+      else this.vm.dynamic = data;
+      this.redraw();
     };
 
     ws.onopen = () => {
       console.log('Connected');
-      vm.state = 'online';
-      redraw();
+      this.vm.state = 'online';
+      this.redraw();
     };
 
     ws.onclose = () => {
       console.log('Disconnected');
-      setTimeout(connect, 5000);
-      vm.state = 'offline';
-      redraw();
+      setTimeout(this.connect, 5000);
+      this.vm.state = 'offline';
+      this.redraw();
     };
   }
 
-  const makeReplayCtrl = function(path: string): ReplayCtrl {
+  private makeReplayCtrl(path: string): ReplayCtrl {
     if (path[path.length - 1] == '/') path = path.substr(0, path.length - 1);
     const suffix = location.pathname == '/' ? `?sri=${Math.random().toString(36).slice(-8)}` : '';
 
@@ -47,56 +57,55 @@ export function makeCtrl(redraw: Redraw, replayPath?: string): Ctrl {
     var cache: any = {};
     var cacheSize = 0;
 
-
-    function stop() {
+    const stop = () => {
       if (timer) clearInterval(timer);
       timer = undefined;
-      redraw();
+      this.redraw();
     }
 
-    function start() {
-      if (!timer) timer = setInterval(function() {
-        if (vm.state !== 'connecting') setStep(step + 1);
+    const start = () => {
+      if (!timer) timer = setInterval(() => {
+        if (this.vm.state !== 'connecting') setStep(step + 1);
       }, 1000);
-      redraw();
+      this.redraw();
     }
 
-    function loadStatic() {
+    const loadStatic = () => {
       const xhr = new XMLHttpRequest();
       xhr.open('GET', `${path}/static.json${suffix}`);
-      xhr.onload = function() {
+      xhr.onload = () => {
         if (xhr.status === 200) {
-          vm.static = JSON.parse(xhr.responseText);
+          this.vm.static = JSON.parse(xhr.responseText);
           setStep(step);
         } else {
-          vm.state = 'error';
+          this.vm.state = 'error';
         }
-        redraw();
+        this.redraw();
       };
-      xhr.onerror = function() {
-        vm.state = 'error';
-        redraw();
+      xhr.onerror = () => {
+        this.vm.state = 'error';
+        this.redraw();
       };
       xhr.send();
     }
 
-    function loadDynamic(step: number) {
+    const loadDynamic = (step: number) => {
       // got from cache
       if (cache[step]) {
-        vm.dynamic = cache[step];
-        vm.state = (vm.dynamic && vm.dynamic.step == step) ? 'online' : 'connecting';
-        redraw();
+        this.vm.dynamic = cache[step];
+        this.vm.state = (this.vm.dynamic && this.vm.dynamic.step == step) ? 'online' : 'connecting';
+        this.redraw();
         return;
       }
 
       const group = step > 0 ? Math.floor(step / 5) * 5 : 0;
       const xhr = new XMLHttpRequest();
       xhr.open('GET', `${path}/${group}.json${suffix}`);
-      xhr.onload = function() {
+      xhr.onload = () => {
         if (xhr.status === 200) {
           var response = JSON.parse(xhr.responseText);
-          vm.dynamic = response[step];
-          vm.state = (vm.dynamic && vm.dynamic.step == step) ? 'online' : 'connecting';
+          this.vm.dynamic = response[step];
+          this.vm.state = (this.vm.dynamic && this.vm.dynamic.step == step) ? 'online' : 'connecting';
 
           // write to cache
           if (cacheSize > 100) {
@@ -108,30 +117,30 @@ export function makeCtrl(redraw: Redraw, replayPath?: string): Ctrl {
             cacheSize++;
           }
         } else {
-          vm.state = 'error';
+          this.vm.state = 'error';
           stop();
         }
-        redraw();
+        this.redraw();
       };
-      xhr.onerror = function() {
-        vm.state = 'error';
+      xhr.onerror = () => {
+        this.vm.state = 'error';
         stop();
-        redraw();
+        this.redraw();
       };
       xhr.send();
     }
 
-    function setStep(s: number) {
+    const setStep = (s: number) => {
       // keep step in bounds
       step = Math.max(-1, s);
-      if (vm.static && step >= vm.static.steps) {
+      if (this.vm.static && step >= this.vm.static.steps) {
         stop();
-        step = vm.static.steps - 1;
+        step = this.vm.static.steps - 1;
       }
 
       // show connecting after a while
-      vm.state = 'connecting';
-      setTimeout(() => redraw(), 500);
+      this.vm.state = 'connecting';
+      setTimeout(() => this.redraw(), 500);
 
       // update url
       if (history.replaceState) history.replaceState({}, document.title, '#' + step);
@@ -160,22 +169,11 @@ export function makeCtrl(redraw: Redraw, replayPath?: string): Ctrl {
         return !!timer;
       }
     };
-  };
+  }
 
-  const replay = replayPath ? makeReplayCtrl(replayPath) : undefined;
-  if (!replay) connect();
-
-  const map = makeMapCtrl(redraw);
-
-  return {
-    replay,
-    map,
-    vm,
-    redraw,
-    setHover(pos?: Pos) {
-      const changed = (!pos && vm.hover) || (pos && !vm.hover) || (pos && vm.hover && (pos.x != vm.hover.x || pos.y != vm.hover.y));
-      vm.hover = pos;
-      if (changed) redraw();
-    }
-  };
+  setHover(pos?: Pos) {
+    const changed = (!pos && this.vm.hover) || (pos && !this.vm.hover) || (pos && this.vm.hover && (pos.x != this.vm.hover.x || pos.y != this.vm.hover.y));
+    this.vm.hover = pos;
+    if (changed) this.redraw();
+  }
 }

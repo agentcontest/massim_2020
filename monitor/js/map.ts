@@ -2,6 +2,7 @@ import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
 import { MapCtrl, MapViewModel, Redraw, MapTransform } from './interfaces';
+import { Ctrl } from './ctrl';
 
 function chain(a: MapTransform, b: MapTransform) {
   return {
@@ -11,8 +12,9 @@ function chain(a: MapTransform, b: MapTransform) {
   };
 }
 
-export function makeMapCtrl(redraw: Redraw): MapCtrl {
+export function makeMapCtrl(root: Ctrl, redraw: Redraw): MapCtrl {
   return {
+    root,
     vm: {
       pan: {x: 0, y: 0, scale: 1},
       transform: {x: 0, y: 0, scale: 20},

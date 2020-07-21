@@ -1,3 +1,5 @@
+import { Ctrl } from './ctrl';
+
 export type Redraw = () => void
 
 export type ConnectionState = 'offline' | 'online' | 'connecting' | 'error'
@@ -21,6 +23,7 @@ export interface ReplayCtrl {
 }
 
 export interface MapCtrl {
+  root: Ctrl
   vm: MapViewModel
 }
 
@@ -35,14 +38,6 @@ export interface MapTransform {
   readonly x: number;
   readonly y: number;
   readonly scale: number;
-}
-
-export interface Ctrl {
-  vm: ViewModel
-  redraw: Redraw
-  replay?: ReplayCtrl
-  map: MapCtrl
-  setHover(pos?: Pos): void
 }
 
 export type BlockType = string

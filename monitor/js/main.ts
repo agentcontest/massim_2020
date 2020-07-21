@@ -6,8 +6,7 @@ import { attributesModule } from 'snabbdom/modules/attributes';
 import { eventListenersModule } from 'snabbdom/modules/eventlisteners';
 import { styleModule } from 'snabbdom/modules/style';
 
-import { Ctrl } from './interfaces';
-import { makeCtrl } from './ctrl';
+import { Ctrl } from './ctrl';
 import { render, invClientPos } from './canvas';
 import { view } from './view';
 
@@ -48,7 +47,7 @@ export function Monitor(element: Element, canvas: HTMLCanvasElement) {
   };
 
   const replayPath = window.location.search.length > 1 ? window.location.search.substr(1) : undefined;
-  ctrl = makeCtrl(redraw, replayPath);
+  ctrl = new Ctrl(redraw, replayPath);
 
   hashChange();
   window.onhashchange = hashChange;

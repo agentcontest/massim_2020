@@ -1,4 +1,5 @@
-import { Ctrl, DynamicWorld, StaticWorld, Block, Rect, Agent, Pos } from './interfaces';
+import { DynamicWorld, StaticWorld, Block, Rect, Agent, Pos } from './interfaces';
+import { Ctrl } from './ctrl';
 import * as styles from './styles';
 
 let GRID = 20; // todo: make const
