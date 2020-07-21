@@ -7,7 +7,6 @@ import { eventListenersModule } from 'snabbdom/modules/eventlisteners';
 import { styleModule } from 'snabbdom/modules/style';
 
 import { Ctrl } from './ctrl';
-import { render, invClientPos } from './canvas';
 import { view } from './view';
 
 import { StatusCtrl } from './statusInterfaces';
@@ -22,7 +21,7 @@ const patch = init([
   eventListenersModule
 ]);
 
-export function Monitor(element: Element, canvas: HTMLCanvasElement) {
+export function Monitor(element: Element) {
   let vnode: VNode | Element = element;
   let ctrl: Ctrl;
 
@@ -34,7 +33,6 @@ export function Monitor(element: Element, canvas: HTMLCanvasElement) {
     requestAnimationFrame(() => {
       redrawRequested = false;
       vnode = patch(vnode, view(ctrl));
-      render(canvas, ctrl);
     });
   };
 
@@ -54,7 +52,7 @@ export function Monitor(element: Element, canvas: HTMLCanvasElement) {
 
   redraw();
 
-  window.addEventListener('resize', redraw, { passive: true });
+  /* window.addEventListener('resize', redraw, { passive: true });
 
   canvas.addEventListener('mousemove', e => {
     if (!ctrl.vm.static) return;
@@ -62,7 +60,7 @@ export function Monitor(element: Element, canvas: HTMLCanvasElement) {
   });
   canvas.addEventListener('mouseleave', e => {
     ctrl.setHover(undefined);
-  });
+  }); */
 }
 
 export function Status(target: Element) {

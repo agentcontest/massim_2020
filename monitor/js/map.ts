@@ -37,10 +37,6 @@ export class MapCtrl {
 
 export function mapView(ctrl: MapCtrl): VNode {
   return h('canvas', {
-    attrs: {
-      width: 800,
-      height: 300,
-    },
     hook: {
       insert(vnode) {
         const elm = vnode.elm as HTMLCanvasElement;

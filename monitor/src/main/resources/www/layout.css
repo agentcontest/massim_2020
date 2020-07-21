@@ -4,6 +4,7 @@ body {
   background: #161512;
   color: #bababa;
   font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
 }
 a {
   color: #bababa;
@@ -19,15 +20,18 @@ p {
   bottom: 0;
   width: 350px;
   background: #555;
+  overflow-y: auto;
 }
 
-#canvas {
+#monitor > canvas {
   position: absolute;
   top: 0;
   right: 0;
   left: 350px;
   bottom: 0;
   background: #161512;
+  width: calc(100% - 350px);
+  height: 100%;
 }
 
 .box {
