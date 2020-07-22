@@ -206,6 +206,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
     for (let dy = Math.floor(ymin / grid.height) * grid.height; dy <= ymax + grid.height; dy += grid.height) {
       for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
         // draw axis
+        ctx.strokeStyle = 'black';
         ctx.beginPath();
         ctx.lineWidth = 0.1;
         ctx.moveTo(dx - 1, dy);
