@@ -184,7 +184,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
     // terrain
     for (let y = ymin; y <= ymax; y++) {
       for (let x = xmin; x <= xmax; x++) {
-        switch (ctrl.root.vm.dynamic?.cells[mod(y, grid.height)][mod(x, grid.width)]) {
+        switch (ctrl.root.vm.dynamic.cells[mod(y, grid.height)][mod(x, grid.width)]) {
           case 1: // GOAL
             ctx.fillStyle = styles.goalFill;
             break;
@@ -200,16 +200,21 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
       }
     }
 
-    // draw axis
-    for (let y = Math.floor(ymin / grid.height) * grid.height; y <= ymax + grid.height; y += grid.height) {
-      for (let x = Math.floor(xmin / grid.width) * grid.width; x <= xmax + grid.width; x += grid.width) {
+    for (let dy = Math.floor(ymin / grid.height) * grid.height; dy <= ymax + grid.height; dy += grid.height) {
+      for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
+        // draw axis
         ctx.beginPath();
         ctx.lineWidth = 0.1;
-        ctx.moveTo(x - 1, y);
-        ctx.lineTo(x + 1, y);
-        ctx.moveTo(x, y - 1);
-        ctx.lineTo(x, y + 1);
+        ctx.moveTo(dx - 1, dy);
+        ctx.lineTo(dx + 1, dy);
+        ctx.moveTo(dx, dy - 1);
+        ctx.lineTo(dx, dy + 1);
         ctx.stroke();
+
+        // task boards
+        for (const board of ctrl.root.vm.dynamic.taskboards) {
+          drawBlock(ctx, rect(1, dx + board.x, dy + board.y, 0.05), styles.board, 'white', 'black');
+        }
       }
     }
   }
@@ -217,4 +222,45 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   ctx.restore();
 
   if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
+}
+
+interface Rect {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  width: number;
+  height: number;
+}
+
+function rect(blockSize: number, x: number, y: number, margin: number): Rect {
+  return {
+    x1: x * blockSize + margin,
+    y1: y * blockSize + margin,
+    x2: x * blockSize + blockSize - margin,
+    y2: y * blockSize + blockSize - margin,
+    width: blockSize - 2 * margin,
+    height: blockSize - 2 * margin,
+  };
+}
+
+function drawBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light: string, dark: string) {
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.rect(r.x1, r.y1, r.width, r.height);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(r.x1, r.y2);
+  ctx.lineTo(r.x1, r.y1);
+  ctx.lineTo(r.x2, r.y1);
+  ctx.strokeStyle = light;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(r.x2, r.y1);
+  ctx.lineTo(r.x2, r.y2);
+  ctx.lineTo(r.x1, r.y2);
+  ctx.strokeStyle = dark;
+  ctx.stroke();
 }
