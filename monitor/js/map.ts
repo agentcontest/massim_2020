@@ -1,7 +1,7 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-import { Pos, Agent, Block, StaticWorld } from './interfaces';
+import { Pos, Agent, Block, StaticWorld, DynamicWorld } from './interfaces';
 import { Ctrl } from './ctrl';
 import * as styles from './styles';
 
@@ -306,6 +306,11 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
           ctx.strokeStyle = 'red';
           drawArea(ctx, dx + clear.x, dy + clear.y, clear.radius);
         }
+
+        // hover
+        if (ctrl.root.vm.hover) {
+          drawHover(ctx, ctrl.root.vm.static, ctrl.root.vm.dynamic, dx, dy, ctrl.root.vm.hover);
+        }
       }
     }
   }
@@ -313,6 +318,33 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   ctx.restore();
 
   if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
+}
+
+function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, dx: number, dy: number, hover: Pos) {
+  if (hover.x < 0 || hover.x >= st.grid.width || hover.y < 0 || hover.y >= st.grid.height) return;
+  ctx.beginPath();
+  ctx.fillStyle = 'rgba(180, 180, 255, 0.4)';
+  ctx.fillRect(dx + hover.x, dy + hover.y, 1, 1);
+
+  /* for (let attachable of (world.entities as Array<Agent | Block>).concat(world.blocks)) {
+    if (attachable.x == hover.x && attachable.y == hover.y && attachable.attached) {
+      for (let pos of attachable.attached) {
+        ctx.beginPath();
+        ctx.rect(pos.x * GRID, pos.y * GRID, GRID, GRID);
+        ctx.fill();
+      }
+    }
+  }
+
+  const teamNames = Object.keys(st.teams);
+  teamNames.sort();
+  for (let agent of world.entities) {
+    if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= agent.vision) {
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = styles.teams[teamNames.indexOf(agent.team)];
+      drawArea(ctx, agent.x, agent.y, 5);
+    }
+  } */
 }
 
 interface Rect {
