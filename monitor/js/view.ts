@@ -22,12 +22,14 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
     if (!ctrl.vm.dynamic) return;
     const agent = ctrl.vm.dynamic.entities.find(a => a.id === m.vm.selected);
     if (!agent) return;
-    return h('div.map', {
+    return h('div', {
       class: (agent.action && agent.actionResult) ? {
         'map': true,
         [agent.action]: true,
         [agent.actionResult]: true,
-      } : undefined,
+      } : {
+        map: true,
+      },
     }, [
       h('div.label', {
         style: m.vm.selected === ctrl.map.vm.selected ? {
