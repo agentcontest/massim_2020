@@ -1,27 +1,25 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
+import { Pos, Agent, Block, StaticWorld, DynamicWorld } from './interfaces';
 import { Ctrl } from './ctrl';
+import * as styles from './styles';
 
-export interface MapTransform {
-  readonly x: number;
-  readonly y: number;
-  readonly scale: number;
+interface Transform {
+  x: number;
+  y: number;
+  scale: number;
+}
+
+interface Dragging {
+  first: [number, number];
+  latest: [number, number];
+  started: boolean;
 }
 
 export interface MapViewModel {
-  mousedown?: [number, number];
-
-  pan: MapTransform;
-  transform: MapTransform;
-}
-
-function chain(a: MapTransform, b: MapTransform) {
-  return {
-    x: a.x + a.scale * b.x,
-    y: a.y + a.scale * b.y,
-    scale: a.scale * b.scale,
-  };
+  dragging?: Dragging;
+  transform: Transform;
 }
 
 export class MapCtrl {
@@ -29,106 +27,165 @@ export class MapCtrl {
 
   constructor(readonly root: Ctrl) {
     this.vm = {
-      pan: {x: 0, y: 0, scale: 1},
-      transform: {x: 0, y: 0, scale: 20},
+      transform: {
+        x: 0,
+        y: 0,
+        scale: 20,
+      },
     };
+  }
+
+  invPos(pos: [number, number], bounds: DOMRect): Pos | undefined {
+    // relative to bounds
+    const x = pos[0] - bounds.x;
+    const y = pos[1] - bounds.y;
+    if (x < 0 || x > bounds.width || y < 0 || y > bounds.height) return;
+
+    // relative to transform
+    const p = {
+      x: Math.floor((x - this.vm.transform.x) / this.vm.transform.scale),
+      y: Math.floor((y - this.vm.transform.y) / this.vm.transform.scale),
+    };
+
+    // relative to grid
+    if (this.root.vm.static) {
+      return {
+        x: mod(p.x, this.root.vm.static.grid.width),
+        y: mod(p.y, this.root.vm.static.grid.height),
+      };
+    } else return p;
   }
 }
 
 export function mapView(ctrl: MapCtrl): VNode {
   return h('canvas', {
-    attrs: {
-      width: 800,
-      height: 300,
-    },
     hook: {
       insert(vnode) {
         const elm = vnode.elm as HTMLCanvasElement;
-        render(elm, ctrl.vm);
-        if (!vnode.data) vnode.data = {};
-        let redrawing = false;
 
-        vnode.data.massim = {
-          mouseup(ev: MouseEvent) {
-            if (ctrl.vm.mousedown) {
-              const bounds = elm.getBoundingClientRect();
-              ctrl.vm.pan = {
-                x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
-                y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
-                scale: 1,
-              };
-              ctrl.vm.transform = chain(ctrl.vm.pan, ctrl.vm.transform);
-              ctrl.vm.pan = {x: 0, y: 0, scale: 1};
-              ctrl.vm.mousedown = undefined;
-              requestAnimationFrame(() => {
-                render(elm, ctrl.vm);
-                redrawing = false;
-              });
+        new (window as any)['ResizeObserver']((entries: any) => {
+          for (const entry of entries) {
+            elm.width = entry.contentRect.width;
+            elm.height = entry.contentRect.height;
+            requestAnimationFrame(() => render(elm, ctrl));
+          }
+        }).observe(elm);
+
+        const mouseup = (ev: Event) => {
+          ev.preventDefault();
+          ctrl.vm.dragging = undefined;
+        };
+
+        const mousemove = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
+          ev.preventDefault();
+          const pos = eventPosition(ev);
+          if (ctrl.vm.dragging && pos) {
+            if (ctrl.vm.dragging.started || distanceSq(ctrl.vm.dragging.first, pos) > 20 * 20) {
+              ctrl.vm.dragging.started = true;
+              ctrl.vm.transform.x += pos[0] - ctrl.vm.dragging.latest[0];
+              ctrl.vm.transform.y += pos[1] - ctrl.vm.dragging.latest[1];
+              ctrl.vm.dragging.latest = pos;
             }
-          },
-          mousemove(ev: MouseEvent) {
-            if (ctrl.vm.mousedown) {
-              const bounds = elm.getBoundingClientRect();
-              ctrl.vm.pan = {
-                x: ev.clientX - bounds.left - ctrl.vm.mousedown[0],
-                y: ev.clientY - bounds.top - ctrl.vm.mousedown[1],
-                scale: 1,
-              };
-              if (redrawing) return;
-              redrawing = true;
-              requestAnimationFrame(() => {
-                render(elm, ctrl.vm);
-                redrawing = false;
-              });
-            }
+          } else if (pos) {
+            ctrl.root.setHover(ctrl.invPos(pos, elm.getBoundingClientRect()));
           }
         };
-        document.addEventListener('mouseup', vnode.data.massim.mouseup);
-        document.addEventListener('mousemove', vnode.data.massim.mousemove);
+
+        if (!vnode.data) vnode.data = {};
+        vnode.data.massim = {
+          unbinds: [
+            unbindable(document, 'mouseup', mouseup),
+            unbindable(document, 'touchend', mouseup),
+            unbindable(document, 'mousemove', mousemove, { passive: false }),
+            unbindable(document, 'touchmove', mousemove, { passive: false }),
+          ],
+        };
       },
       update(_, vnode) {
-        console.log('update');
-        render(vnode.elm as HTMLCanvasElement, ctrl.vm);
+        render(vnode.elm as HTMLCanvasElement, ctrl);
       },
       destroy(vnode) {
-        if (vnode.data) {
-          document.removeEventListener('mouseup', vnode.data.massim.mouseup);
-          document.removeEventListener('mousemove', vnode.data.massim.mousemove);
-        }
+        const unbinds  = vnode.data?.massim?.unbinds;
+        if (unbinds) for (const unbind of unbinds) unbind();
       },
     },
     on: {
       mousedown(ev) {
-        ctrl.vm.mousedown = [ev.offsetX, ev.offsetY];
+        if (ev.button !== undefined && ev.button !== 0) return; // only left click
+        ev.preventDefault();
+        const pos = eventPosition(ev);
+        if (pos) ctrl.vm.dragging = {
+          first: pos,
+          latest: pos,
+          started: false,
+        };
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
+      },
+      touchstart(ev) {
+        ev.preventDefault();
+        const pos = eventPosition(ev);
+        if (pos) ctrl.vm.dragging = {
+          first: pos,
+          latest: pos,
+          started: false,
+        };
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
       },
       wheel(ev) {
         ev.preventDefault();
-        const zoom = (ev.deltaY < 0 ? 1.5 : 1 / 1.5) * ctrl.vm.transform.scale;
+        let zoom = Math.pow(3 / 2, -ev.deltaY / 100);
+        if (ctrl.vm.transform.scale * zoom < 10) zoom = 10 / ctrl.vm.transform.scale;
+        if (ctrl.vm.transform.scale * zoom > 100) zoom = 100 / ctrl.vm.transform.scale;
         ctrl.vm.transform = {
-          x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom / ctrl.vm.transform.scale,
-          y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom / ctrl.vm.transform.scale,
-          scale: zoom,
+          x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom,
+          y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom,
+          scale: ctrl.vm.transform.scale * zoom,
         };
-        render(ev.target as HTMLCanvasElement, ctrl.vm);
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl));
       },
     }
   });
 }
 
-function render(canvas: HTMLCanvasElement, vm: MapViewModel) {
+function unbindable(el: EventTarget, eventName: string, callback: EventListener, options?: AddEventListenerOptions) {
+  el.addEventListener(eventName, callback, options);
+  return () => el.removeEventListener(eventName, callback, options);
+}
+
+function eventPosition(e: Partial<MouseEvent & TouchEvent>): [number, number] | undefined {
+  if (e.clientX || e.clientX === 0) return [e.clientX, e.clientY!];
+  if (e.targetTouches?.[0]) return [e.targetTouches[0].clientX, e.targetTouches[0].clientY];
+  return;
+}
+
+function distanceSq(a: [number, number], b: [number, number]): number {
+  const dx = a[0] - b[0];
+  const dy = a[1] - b[1];
+  return dx * dx + dy * dy;
+}
+
+function mod(a: number, b: number): number {
+  return ((a % b) + b) % b;
+}
+
+function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
+  const vm = ctrl.vm;
+  const width = canvas.width, height = canvas.height;
+
   const ctx = canvas.getContext('2d')!;
   ctx.save();
 
+  // font
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.font = '0.3px Arial';
+
   // fill background
-  ctx.beginPath();
   ctx.fillStyle = '#eee';
-  ctx.rect(0, 0, canvas.width, canvas.height);
-  ctx.fill();
+  ctx.fillRect(0, 0, width, height);
 
-  const width = canvas.width, height = canvas.height;
-  console.log(width, height);
-
-  const transform = chain(vm.pan, vm.transform);
+  // draw grid
+  const transform = ctrl.vm.transform;
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
 
@@ -138,35 +195,245 @@ function render(canvas: HTMLCanvasElement, vm: MapViewModel) {
   const ymax = ymin + Math.ceil(canvas.height / transform.scale);
   const xmax = xmin + Math.ceil(canvas.width / transform.scale);
 
-  const period = 5;
-
-  // draw grid
-  ctx.beginPath();
   ctx.fillStyle = '#ddd';
   for (let y = ymin; y <= ymax; y++) {
     for (let x = xmin + (((xmin + y) % 2) + 2) % 2; x <= xmax; x += 2) {
-      ctx.rect(x, y, 1, 1);
+      ctx.fillRect(x, y, 1, 1);
     }
   }
+
+  if (ctrl.root.vm.static && ctrl.root.vm.dynamic) {
+    const grid = ctrl.root.vm.static.grid;
+
+    const teams = Object.keys(ctrl.root.vm.static.teams);
+    teams.sort();
+
+    // terrain
+    for (let y = ymin; y <= ymax; y++) {
+      for (let x = xmin; x <= xmax; x++) {
+        switch (ctrl.root.vm.dynamic.cells[mod(y, grid.height)][mod(x, grid.width)]) {
+          case 1: // GOAL
+            ctx.fillStyle = styles.goalFill;
+            break;
+          case 2: // OBSTABLE
+            ctx.fillStyle = styles.obstacle;
+            break;
+          default: // EMPTY
+            continue;
+        }
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+
+    for (let dy = Math.floor(ymin / grid.height) * grid.height; dy <= ymax + grid.height; dy += grid.height) {
+      for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
+        // draw axis
+        ctx.strokeStyle = 'black';
+        ctx.beginPath();
+        ctx.lineWidth = 0.1;
+        ctx.moveTo(dx - 1, dy);
+        ctx.lineTo(dx + 1, dy);
+        ctx.moveTo(dx, dy - 1);
+        ctx.lineTo(dx, dy + 1);
+        ctx.stroke();
+
+        // dispensers
+        for (const dispenser of ctrl.root.vm.dynamic.dispensers) {
+          ctx.lineWidth = 2 * 0.025;
+          const r1 = rect(1, dx + dispenser.x, dy + dispenser.y, 0.025);
+          const color = styles.blocks[ctrl.root.vm.static.blockTypes.indexOf(dispenser.type) % styles.blocks.length];
+          drawBlock(ctx, r1, color, 'white', 'black');
+          const r2 = rect(1, dx + dispenser.x, dy + dispenser.y, 4 * 0.025);
+          drawBlock(ctx, r2, color, 'white', 'black');
+          const r3 = rect(1, dx + dispenser.x, dy + dispenser.y, 8 * 0.025);
+          drawBlock(ctx, r3, color, 'white', 'black');
+          ctx.fillStyle = 'white';
+          ctx.fillText(`[${dispenser.type}]`, dx + dispenser.x + 0.5, dy + dispenser.y + 0.5);
+        }
+
+        // task boards
+        for (const board of ctrl.root.vm.dynamic.taskboards) {
+          ctx.lineWidth = 0.05;
+          drawBlock(ctx, rect(1, dx + board.x, dy + board.y, 0.05), styles.board, 'white', 'black');
+        }
+
+        // blocks
+        drawBlocks(ctx, dx, dy, ctrl.root.vm.static, ctrl.root.vm.dynamic.blocks);
+
+        // agents
+        for (const agent of ctrl.root.vm.dynamic.entities) {
+          ctx.lineWidth = 0.125;
+          ctx.strokeStyle = 'black';
+
+          ctx.beginPath();
+          ctx.moveTo(dx + agent.x + 0.5, dy + agent.y);
+          ctx.lineTo(dx + agent.x + 0.5, dy + agent.y + 1);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(dx + agent.x, dy + agent.y + 0.5);
+          ctx.lineTo(dx + agent.x + 1, dy + agent.y + 0.5);
+          ctx.stroke();
+
+          const color = styles.teams[teams.indexOf(agent.team)];
+          if (teams.indexOf(agent.team) == 0) {
+            ctx.lineWidth = 0.05;
+            const margin = (1 - 15 / 16 / Math.sqrt(2)) / 2;
+            const r = rect(1, dx + agent.x, dy + agent.y, margin);
+            drawBlock(ctx, r, color, 'white', 'black');
+          } else {
+            ctx.lineWidth = 0.04;
+            const r = rect(1, dx + agent.x, dy + agent.y, 0.0625);
+            drawRotatedBlock(ctx, r, color, 'white', 'black');
+          }
+
+          ctx.fillStyle = 'white';
+          ctx.fillText(shortName(agent), dx + agent.x + 0.5, dy + agent.y + 0.5);
+
+          // agent action
+          if (agent.action == 'clear' && agent.actionResult.indexOf('failed_') != 0) {
+            const x = dx + agent.x + parseInt(agent.actionParams[0], 10);
+            const y = dy + agent.y + parseInt(agent.actionParams[1], 10);
+            ctx.lineWidth = 0.05;
+            ctx.strokeStyle = 'red';
+            drawArea(ctx, x, y, 1);
+          }
+        }
+
+        // clear events
+        for (const clear of ctrl.root.vm.dynamic.clear) {
+          ctx.lineWidth = 0.1;
+          ctx.strokeStyle = 'red';
+          drawArea(ctx, dx + clear.x, dy + clear.y, clear.radius);
+        }
+
+        // hover
+        if (ctrl.root.vm.hover) {
+          drawHover(ctx, ctrl.root.vm.static, ctrl.root.vm.dynamic, dx, dy, ctrl.root.vm.hover);
+        }
+      }
+    }
+  }
+
+  ctx.restore();
+
+  if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
+}
+
+function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, dx: number, dy: number, hover: Pos) {
+  if (hover.x < 0 || hover.x >= st.grid.width || hover.y < 0 || hover.y >= st.grid.height) return;
+  ctx.beginPath();
+  ctx.fillStyle = 'rgba(180, 180, 255, 0.4)';
+  ctx.fillRect(dx + hover.x, dy + hover.y, 1, 1);
+
+  for (const attachable of (world.entities as Array<Agent | Block>).concat(world.blocks)) {
+    if (attachable.x == hover.x && attachable.y == hover.y && attachable.attached) {
+      for (let pos of attachable.attached) {
+        ctx.fillRect(dx + pos.x, dy + pos.y, 1, 1);
+      }
+    }
+  }
+
+  const teamNames = Object.keys(st.teams);
+  teamNames.sort();
+  for (const agent of world.entities) {
+    if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= agent.vision) {
+      ctx.lineWidth = 0.1;
+      ctx.strokeStyle = styles.teams[teamNames.indexOf(agent.team)];
+      drawArea(ctx, dx + agent.x, dy + agent.y, 5);
+    }
+  }
+}
+
+interface Rect {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  width: number;
+  height: number;
+}
+
+function rect(blockSize: number, x: number, y: number, margin: number): Rect {
+  return {
+    x1: x * blockSize + margin,
+    y1: y * blockSize + margin,
+    x2: x * blockSize + blockSize - margin,
+    y2: y * blockSize + blockSize - margin,
+    width: blockSize - 2 * margin,
+    height: blockSize - 2 * margin,
+  };
+}
+
+export function drawBlocks(ctx: CanvasRenderingContext2D, dx: number, dy: number, st: StaticWorld, blocks: Block[]) {
+  for (const block of blocks) {
+    ctx.lineWidth = 0.05;
+    const r = rect(1, dx + block.x, dy + block.y, 0.025);
+    drawBlock(ctx, r, styles.blocks[st.blockTypes.indexOf(block.type) % styles.blocks.length], 'white', 'black');
+
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'white';
+    ctx.font = '0.3px Arial';
+    ctx.fillText(block.type, dx + block.x + 0.5, dy + block.y + 0.5);
+  }
+}
+
+function drawBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light: string, dark: string) {
+  ctx.fillStyle = color;
+  ctx.fillRect(r.x1, r.y1, r.width, r.height);
+
+  ctx.beginPath();
+  ctx.moveTo(r.x1, r.y2);
+  ctx.lineTo(r.x1, r.y1);
+  ctx.lineTo(r.x2, r.y1);
+  ctx.strokeStyle = light;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(r.x2, r.y1);
+  ctx.lineTo(r.x2, r.y2);
+  ctx.lineTo(r.x1, r.y2);
+  ctx.strokeStyle = dark;
+  ctx.stroke();
+}
+
+function drawArea(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
+  ctx.beginPath();
+  ctx.moveTo(x - radius, y + 0.5);
+  ctx.lineTo(x + 0.5, y - radius);
+  ctx.lineTo(x + 1 + radius, y + 0.5);
+  ctx.lineTo(x + 0.5, y + radius + 1);
+  ctx.lineTo(x - radius, y + 0.5);
+  ctx.stroke();
+}
+
+function drawRotatedBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light: string, dark: string) {
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.moveTo(r.x1, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y1);
+  ctx.lineTo(r.x2, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y2);
+  ctx.closePath();
   ctx.fill();
 
-  // draw axis
-  for (let y = Math.floor(ymin / period) * period; y <= ymax + period; y += period) {
-    for (let x = Math.floor(xmin / period) * period; x <= xmax + period; x += period) {
-      ctx.beginPath();
-      ctx.lineWidth = 0.1;
-      ctx.moveTo(x - 1, y);
-      ctx.lineTo(x + 1, y);
-      ctx.moveTo(x, y - 1);
-      ctx.lineTo(x, y + 1);
-      ctx.stroke();
-    }
-  }
+  ctx.beginPath();
+  ctx.moveTo(r.x1, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y1);
+  ctx.lineTo(r.x2, (r.y1 + r.y2) / 2);
+  ctx.strokeStyle = light;
+  ctx.stroke();
 
-  /* ctx.scale(100, 100);
-  ctx.rect(0, 0, 1, 1);
-  ctx.fillStyle = Math.random() > 0.5 ? 'red' : 'blue';
-  ctx.fill(); */
-  ctx.restore();
-  console.log(canvas.width, canvas.height);
+  ctx.beginPath();
+  ctx.moveTo(r.x2, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y2);
+  ctx.lineTo(r.x1, (r.y1 + r.y2) / 2);
+  ctx.strokeStyle = dark;
+  ctx.stroke();
+}
+
+function shortName(agent: Agent): string {
+  const match = agent.name.match(/^agent-?([A-Za-z])[A-Za-z-_]*([0-9]+)$/);
+  return match ? match[1] + match[2] : agent.name;
 }
