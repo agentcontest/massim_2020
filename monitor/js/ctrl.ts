@@ -13,6 +13,7 @@ export class Ctrl {
   readonly vm: ViewModel;
   readonly replay: ReplayCtrl | undefined;
   readonly map: MapCtrl;
+  maps: MapCtrl[];
 
   constructor(readonly redraw: Redraw, replayPath?: string) {
     this.vm = {
@@ -23,6 +24,7 @@ export class Ctrl {
     else this.connect();
 
     this.map = new MapCtrl(this);
+    this.maps = [];
   }
 
   private connect(): void {
@@ -55,9 +57,22 @@ export class Ctrl {
     };
   }
 
+  setTeam(name?: string) {
+    if (this.vm.dynamic) {
+      this.maps = this.vm.dynamic.entities.filter(a => a.team === name).map(agent => {
+        const ctrl = new MapCtrl(this);
+        ctrl.vm.selected = agent.id;
+        return ctrl;
+      });
+      this.vm.hover = undefined;
+    } else this.maps = [];
+    this.redraw();
+  }
+
   setHover(pos?: Pos) {
     const changed = (!pos && this.vm.hover) || (pos && !this.vm.hover) || (pos && this.vm.hover && (pos.x != this.vm.hover.x || pos.y != this.vm.hover.y));
     this.vm.hover = pos;
+    if (!this.maps.length) this.setTeam('LFC'); // TODO
     if (changed) this.redraw();
   }
 }

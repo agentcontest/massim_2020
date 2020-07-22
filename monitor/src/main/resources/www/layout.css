@@ -33,7 +33,7 @@ p {
   word-wrap: anywhere;
 }
 
-#monitor > canvas {
+#monitor > canvas, #monitor > .maps {
   position: absolute;
   top: 0;
   right: 0;
