@@ -7,6 +7,7 @@ export interface ViewModel {
   dynamic?: DynamicWorld
   taskName?: string
   hover?: Pos
+  selected?: number; // agent.id
 }
 
 export class Ctrl {
@@ -59,6 +60,15 @@ export class Ctrl {
     const changed = (!pos && this.vm.hover) || (pos && !this.vm.hover) || (pos && this.vm.hover && (pos.x != this.vm.hover.x || pos.y != this.vm.hover.y));
     this.vm.hover = pos;
     if (changed) this.redraw();
+  }
+
+  select(pos?: Pos) {
+    if (pos && this.vm.dynamic) {
+      for (const agent of this.vm.dynamic.entities) {
+        if (agent.x == pos.x && agent.y == pos.y) this.vm.selected = agent.id;
+      }
+    } else this.vm.selected = undefined;
+    this.redraw();
   }
 }
 

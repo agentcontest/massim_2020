@@ -73,6 +73,10 @@ export function mapView(ctrl: MapCtrl): VNode {
 
         const mouseup = (ev: Event) => {
           ev.preventDefault();
+          if (ctrl.vm.dragging && !ctrl.vm.dragging.started) {
+            const pos = eventPosition(ev) || ctrl.vm.dragging.first;
+            ctrl.root.select(ctrl.invPos(pos, elm.getBoundingClientRect()));
+          }
           ctrl.vm.dragging = undefined;
         };
 
