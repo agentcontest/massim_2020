@@ -23,6 +23,12 @@ export interface MapViewModel {
   selected?: number; // agent.id
 }
 
+export interface MapViewOpts {
+  size?: number;
+  viewOnly?: boolean;
+  denseFog?: boolean;
+}
+
 export class MapCtrl {
   readonly vm: MapViewModel;
 
@@ -78,22 +84,27 @@ export class MapCtrl {
   }
 }
 
-export function mapView(ctrl: MapCtrl): VNode {
+export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
   return h('canvas', {
+    attrs: opts?.size ? {
+      width: opts.size,
+      height: opts.size,
+    } : undefined,
     hook: {
       insert(vnode) {
         const elm = vnode.elm as HTMLCanvasElement;
 
-        new (window as any)['ResizeObserver']((entries: any) => {
+        new (window as any).ResizeObserver((entries: any) => {
           for (const entry of entries) {
             elm.width = entry.contentRect.width;
             elm.height = entry.contentRect.height;
-            requestAnimationFrame(() => render(elm, ctrl));
+            requestAnimationFrame(() => render(elm, ctrl, opts));
           }
         }).observe(elm);
 
         const mouseup = (ev: Event) => {
           ev.preventDefault();
+          console.log('mouseup', ev);
           if (ctrl.vm.dragging && !ctrl.vm.dragging.started) {
             const pos = eventPosition(ev) || ctrl.vm.dragging.first;
             ctrl.select(ctrl.invPos(pos, elm.getBoundingClientRect()));
@@ -102,7 +113,6 @@ export function mapView(ctrl: MapCtrl): VNode {
         };
 
         const mousemove = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
-          ev.preventDefault();
           const pos = eventPosition(ev);
           if (ctrl.vm.dragging && pos) {
             if (ctrl.vm.dragging.started || distanceSq(ctrl.vm.dragging.first, pos) > 20 * 20) {
@@ -111,14 +121,17 @@ export function mapView(ctrl: MapCtrl): VNode {
               ctrl.vm.transform.y += pos[1] - ctrl.vm.dragging.latest[1];
               ctrl.vm.dragging.latest = pos;
             }
+            ev.preventDefault();
           } else if (pos) {
-            ctrl.root.setHover(ctrl.invPos(pos, elm.getBoundingClientRect()));
+            const inv = ctrl.invPos(pos, elm.getBoundingClientRect());
+            if (inv) ctrl.root.setHover(inv);
           }
         };
 
-        if (!vnode.data) vnode.data = {};
-        vnode.data.massim = {
-          unbinds: [
+        (elm as any).massim = {
+          unbinds: opts?.viewOnly ? [
+            unbindable(document, 'mousemove', mousemove, { passive: false }),
+          ] : [
             unbindable(document, 'mouseup', mouseup),
             unbindable(document, 'touchend', mouseup),
             unbindable(document, 'mousemove', mousemove, { passive: false }),
@@ -127,15 +140,16 @@ export function mapView(ctrl: MapCtrl): VNode {
         };
       },
       update(_, vnode) {
-        render(vnode.elm as HTMLCanvasElement, ctrl);
+        render(vnode.elm as HTMLCanvasElement, ctrl, opts);
       },
       destroy(vnode) {
-        const unbinds  = vnode.data?.massim?.unbinds;
+        const unbinds = (vnode.elm as any).massim?.unbinds;
         if (unbinds) for (const unbind of unbinds) unbind();
       },
     },
-    on: {
+    on: opts?.viewOnly ? undefined : {
       mousedown(ev) {
+        console.log(ev);
         if (ev.button !== undefined && ev.button !== 0) return; // only left click
         ev.preventDefault();
         const pos = eventPosition(ev);
@@ -144,7 +158,7 @@ export function mapView(ctrl: MapCtrl): VNode {
           latest: pos,
           started: false,
         };
-        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts, true));
       },
       touchstart(ev) {
         ev.preventDefault();
@@ -154,7 +168,7 @@ export function mapView(ctrl: MapCtrl): VNode {
           latest: pos,
           started: false,
         };
-        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, true));
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts, true));
       },
       wheel(ev) {
         ev.preventDefault();
@@ -166,9 +180,9 @@ export function mapView(ctrl: MapCtrl): VNode {
           y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom,
           scale: ctrl.vm.transform.scale * zoom,
         };
-        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl));
+        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts));
       },
-    }
+    },
   });
 }
 
@@ -193,7 +207,7 @@ function mod(a: number, b: number): number {
   return ((a % b) + b) % b;
 }
 
-function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
+function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | undefined, raf = false) {
   const vm = ctrl.vm;
   const width = canvas.width, height = canvas.height;
 
@@ -203,7 +217,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   // font
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
-  ctx.font = '0.3px Arial';
+  ctx.font = '0.4px Arial';
 
   // fill background
   ctx.fillStyle = '#eee';
@@ -211,6 +225,15 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
 
   // draw grid
   const transform = ctrl.vm.transform;
+  if (opts?.viewOnly && ctrl.vm.selected && ctrl.root.vm.dynamic) {
+    // auto center to selection
+    const agent =  ctrl.root.vm.dynamic.entities.find(a => a.id === ctrl.vm.selected);
+    if (agent) {
+      transform.scale = Math.min(canvas.width, canvas.height) / (agent.vision * 2 + 3);
+      transform.x = canvas.width / 2 - (agent.x + 0.5) * transform.scale;
+      transform.y = canvas.height / 2 - (agent.y + 0.5) * transform.scale;
+    }
+  }
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
 
@@ -350,6 +373,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
     }
 
     // fog of war
+    ctx.fillStyle = opts?.denseFog ? 'black' : 'rgba(0, 0, 0, 0.3)';
     for (let dy = Math.floor(ymin / grid.height) * grid.height; dy <= ymax + grid.height; dy += grid.height) {
       for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
         for (const agent of ctrl.root.vm.dynamic.entities) {
@@ -363,11 +387,10 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
 
   ctx.restore();
 
-  if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
+  if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, opts, true));
 }
 
 function drawFogOfWar(ctx: CanvasRenderingContext2D, st: StaticWorld, dx: number, dy: number, agent: Agent) {
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
   const top = dy - st.grid.height + agent.y + agent.vision + 1;
   ctx.fillRect(dx, top, st.grid.width, st.grid.height - 2 * agent.vision - 1); // above
   ctx.fillRect(dx - st.grid.width + agent.x + agent.vision + 1, dy + agent.y - agent.vision, st.grid.width - 2 * agent.vision - 1, 2 * agent.vision + 1);
@@ -434,7 +457,7 @@ export function drawBlocks(ctx: CanvasRenderingContext2D, dx: number, dy: number
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillStyle = 'white';
-    ctx.font = '0.3px Arial';
+    ctx.font = '0.5px Arial';
     ctx.fillText(block.type, dx + block.x + 0.5, dy + block.y + 0.5);
   }
 }

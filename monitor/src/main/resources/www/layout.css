@@ -33,7 +33,7 @@ p {
   word-wrap: anywhere;
 }
 
-#monitor > canvas {
+#monitor > canvas, #monitor > .maps {
   position: absolute;
   top: 0;
   right: 0;
@@ -42,6 +42,9 @@ p {
   background: #161512;
   width: calc(100% - 350px);
   height: 100%;
+}
+.maps {
+  overflow-y: auto;
 }
 
 .box {
@@ -54,4 +57,18 @@ p {
 ul {
   margin: 0;
   padding-left: 1em;
+}
+
+.map {
+  width: 250px;
+  float: left;
+  margin: 10px;
+}
+.map .label {
+  padding: 4px;
+  cursor: pointer;
+}
+.map .meta {
+  height: 5em;
+  font-size: 0.8em;
 }

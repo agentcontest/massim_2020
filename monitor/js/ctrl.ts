@@ -13,6 +13,7 @@ export class Ctrl {
   readonly vm: ViewModel;
   readonly replay: ReplayCtrl | undefined;
   readonly map: MapCtrl;
+  maps: MapCtrl[];
 
   constructor(readonly redraw: Redraw, replayPath?: string) {
     this.vm = {
@@ -23,6 +24,7 @@ export class Ctrl {
     else this.connect();
 
     this.map = new MapCtrl(this);
+    this.maps = [];
   }
 
   private connect(): void {
@@ -53,6 +55,25 @@ export class Ctrl {
       this.vm.state = 'offline';
       this.redraw();
     };
+  }
+
+  toggleMaps() {
+    if (this.vm.dynamic && !this.maps.length) {
+      const agents = [...this.vm.dynamic.entities];
+      agents.sort((a, b) => {
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        else return 0;
+      });
+      this.maps = agents.map(agent => {
+        const ctrl = new MapCtrl(this);
+        ctrl.vm.selected = agent.id;
+        return ctrl;
+      });
+    } else {
+      this.maps = [];
+    }
+    this.redraw();
   }
 
   setHover(pos?: Pos) {
