@@ -1,7 +1,7 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-import { Agent } from './interfaces';
+import { Agent, Block, StaticWorld } from './interfaces';
 import { Ctrl } from './ctrl';
 import * as styles from './styles';
 
@@ -241,13 +241,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
         }
 
         // blocks
-        for (const block of ctrl.root.vm.dynamic.blocks) {
-          ctx.lineWidth = 0.05;
-          const color = styles.blocks[ctrl.root.vm.static.blockTypes.indexOf(block.type) % styles.blocks.length];
-          drawBlock(ctx, rect(1, dx + block.x, dy + block.y, 0.025), color, 'white', 'black');
-          ctx.fillStyle = 'white';
-          ctx.fillText(block.type, dx + block.x + 0.5, dy + block.y + 0.5);
-        }
+        drawBlocks(ctx, dx, dy, ctrl.root.vm.static, ctrl.root.vm.dynamic.blocks);
 
         // agents
         for (const agent of ctrl.root.vm.dynamic.entities) {
@@ -322,6 +316,20 @@ function rect(blockSize: number, x: number, y: number, margin: number): Rect {
     width: blockSize - 2 * margin,
     height: blockSize - 2 * margin,
   };
+}
+
+export function drawBlocks(ctx: CanvasRenderingContext2D, dx: number, dy: number, st: StaticWorld, blocks: Block[]) {
+  for (const block of blocks) {
+    ctx.lineWidth = 0.05;
+    const r = rect(1, dx + block.x, dy + block.y, 0.025);
+    drawBlock(ctx, r, styles.blocks[st.blockTypes.indexOf(block.type) % styles.blocks.length], 'white', 'black');
+
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'white';
+    ctx.font = '0.3px Arial';
+    ctx.fillText(block.type, dx + block.x + 0.5, dy + block.y + 0.5);
+  }
 }
 
 function drawBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light: string, dark: string) {
