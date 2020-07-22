@@ -73,6 +73,10 @@ export function mapView(ctrl: MapCtrl): VNode {
 
         const mouseup = (ev: Event) => {
           ev.preventDefault();
+          if (ctrl.vm.dragging && !ctrl.vm.dragging.started) {
+            const pos = eventPosition(ev) || ctrl.vm.dragging.first;
+            ctrl.root.select(ctrl.invPos(pos, elm.getBoundingClientRect()));
+          }
           ctrl.vm.dragging = undefined;
         };
 
@@ -290,6 +294,14 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
           ctx.fillStyle = 'white';
           ctx.fillText(shortName(agent), dx + agent.x + 0.5, dy + agent.y + 0.5);
 
+          // attachables of selected agent
+          if (agent.id === ctrl.root.vm.selected && agent.attached) {
+            ctx.fillStyle = styles.hover;
+            for (const attached of agent.attached) {
+              if (attached.x != agent.x || attached.y != agent.y) ctx.fillRect(dx + attached.x, dy + attached.y, 1, 1);
+            }
+          }
+
           // agent action
           if (agent.action == 'clear' && agent.actionResult.indexOf('failed_') != 0) {
             const x = dx + agent.x + parseInt(agent.actionParams[0], 10);
@@ -313,6 +325,17 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
         }
       }
     }
+
+    // fog of war
+    for (let dy = Math.floor(ymin / grid.height) * grid.height; dy <= ymax + grid.height; dy += grid.height) {
+      for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
+        for (const agent of ctrl.root.vm.dynamic.entities) {
+          if (agent.id === ctrl.root.vm.selected) {
+            drawFogOfWar(ctx, ctrl.root.vm.static, dx, dy, agent);
+          }
+        }
+      }
+    }
   }
 
   ctx.restore();
@@ -320,10 +343,24 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
 }
 
+function drawFogOfWar(ctx: CanvasRenderingContext2D, st: StaticWorld, dx: number, dy: number, agent: Agent) {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  const top = dy - st.grid.height + agent.y + agent.vision + 1;
+  ctx.fillRect(dx, top, st.grid.width, st.grid.height - 2 * agent.vision - 1); // above
+  ctx.fillRect(dx - st.grid.width + agent.x + agent.vision + 1, dy + agent.y - agent.vision, st.grid.width - 2 * agent.vision - 1, 2 * agent.vision + 1);
+  for (let x = -agent.vision; x <= agent.vision; x++) {
+    for (let y = -agent.vision; y <= agent.vision; y++) {
+      if (Math.abs(x) + Math.abs(y) > agent.vision) {
+        ctx.fillRect(dx + agent.x + x, dy + agent.y + y, 1, 1);
+      }
+    }
+  }
+}
+
 function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, dx: number, dy: number, hover: Pos) {
   if (hover.x < 0 || hover.x >= st.grid.width || hover.y < 0 || hover.y >= st.grid.height) return;
   ctx.beginPath();
-  ctx.fillStyle = 'rgba(180, 180, 255, 0.4)';
+  ctx.fillStyle = styles.hover;
   ctx.fillRect(dx + hover.x, dy + hover.y, 1, 1);
 
   for (const attachable of (world.entities as Array<Agent | Block>).concat(world.blocks)) {

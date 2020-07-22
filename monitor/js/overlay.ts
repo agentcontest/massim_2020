@@ -1,4 +1,4 @@
-import { StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
+import { Agent, StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
 import { Ctrl, ReplayCtrl } from './ctrl';
 import { drawBlocks } from './map';
 import  * as styles from './styles';
@@ -97,14 +97,28 @@ function hover(world: DynamicWorld, pos: Pos): VNode | undefined {
   // agents
   for (let agent of world.entities) {
     if (agent.x == pos.x && agent.y == pos.y) {
-      let description = `agent: name = ${agent.name}, team = ${agent.team}, energy = ${agent.energy}, ${agent.action}(…) = ${agent.actionResult}`;
-      if (agent.disabled) description += ', disabled';
-      r.push(h('li', description));
+      r.push(h('li', agentDescription(agent)));
     }
   }
 
   return h('ul', r);
 }
+
+function selected(world: DynamicWorld, selected: number): VNode | undefined {
+  for (const agent of world.entities) {
+    if (agent.id === selected) {
+      return h('div', 'Selected ' + agentDescription(agent));
+    }
+  }
+  return;
+}
+
+function agentDescription(agent: Agent): string {
+  let description = `agent: name = ${agent.name}, team = ${agent.team}, energy = ${agent.energy}, ${agent.action}(…) = ${agent.actionResult}`;
+  if (agent.disabled) description += ', disabled';
+  return description;
+}
+
 
 function taskDetails(st: StaticWorld, task: Task): VNode[] {
   const xs = task.requirements.map(b => Math.abs(b.x));
@@ -168,7 +182,8 @@ export function overlay(ctrl: Ctrl): VNode {
     ...((ctrl.vm.state === 'online' && ctrl.vm.static && ctrl.vm.dynamic) ? [
       h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
       h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
-      ctrl.vm.hover ? box(hover(ctrl.vm.dynamic, ctrl.vm.hover)) : undefined
+      ctrl.vm.selected ? box(selected(ctrl.vm.dynamic, ctrl.vm.selected)) : undefined,
+      ctrl.vm.hover ? box(hover(ctrl.vm.dynamic, ctrl.vm.hover)) : undefined,
     ] : [])
   ]);
 }
