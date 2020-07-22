@@ -36,13 +36,24 @@ export class MapCtrl {
   }
 
   invPos(pos: [number, number], bounds: DOMRect): Pos | undefined {
+    // relative to bounds
     const x = pos[0] - bounds.x;
     const y = pos[1] - bounds.y;
     if (x < 0 || x > bounds.width || y < 0 || y > bounds.height) return;
-    return {
+
+    // relative to transform
+    const p = {
       x: Math.floor((x - this.vm.transform.x) / this.vm.transform.scale),
       y: Math.floor((y - this.vm.transform.y) / this.vm.transform.scale),
     };
+
+    // relative to grid
+    if (this.root.vm.static) {
+      return {
+        x: mod(p.x, this.root.vm.static.grid.width),
+        y: mod(p.y, this.root.vm.static.grid.height),
+      };
+    } else return p;
   }
 }
 
