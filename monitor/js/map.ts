@@ -1,7 +1,7 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-import { Agent, Block, StaticWorld } from './interfaces';
+import { Pos, Agent, Block, StaticWorld } from './interfaces';
 import { Ctrl } from './ctrl';
 import * as styles from './styles';
 
@@ -32,6 +32,16 @@ export class MapCtrl {
         y: 0,
         scale: 20,
       },
+    };
+  }
+
+  invPos(pos: [number, number], bounds: DOMRect): Pos | undefined {
+    const x = pos[0] - bounds.x;
+    const y = pos[1] - bounds.y;
+    if (x < 0 || x > bounds.width || y < 0 || y > bounds.height) return;
+    return {
+      x: Math.floor((x - this.vm.transform.x) / this.vm.transform.scale),
+      y: Math.floor((y - this.vm.transform.y) / this.vm.transform.scale),
     };
   }
 }
@@ -65,6 +75,8 @@ export function mapView(ctrl: MapCtrl): VNode {
               ctrl.vm.transform.y += pos[1] - ctrl.vm.dragging.latest[1];
               ctrl.vm.dragging.latest = pos;
             }
+          } else if (pos) {
+            ctrl.root.setHover(ctrl.invPos(pos, elm.getBoundingClientRect()));
           }
         };
 
@@ -148,7 +160,6 @@ function mod(a: number, b: number): number {
 function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   const vm = ctrl.vm;
   const width = canvas.width, height = canvas.height;
-  console.log(width, height);
 
   const ctx = canvas.getContext('2d')!;
   ctx.save();
