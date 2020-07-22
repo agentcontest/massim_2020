@@ -326,25 +326,23 @@ function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: Dynami
   ctx.fillStyle = 'rgba(180, 180, 255, 0.4)';
   ctx.fillRect(dx + hover.x, dy + hover.y, 1, 1);
 
-  /* for (let attachable of (world.entities as Array<Agent | Block>).concat(world.blocks)) {
+  for (const attachable of (world.entities as Array<Agent | Block>).concat(world.blocks)) {
     if (attachable.x == hover.x && attachable.y == hover.y && attachable.attached) {
       for (let pos of attachable.attached) {
-        ctx.beginPath();
-        ctx.rect(pos.x * GRID, pos.y * GRID, GRID, GRID);
-        ctx.fill();
+        ctx.fillRect(dx + pos.x, dy + pos.y, 1, 1);
       }
     }
   }
 
   const teamNames = Object.keys(st.teams);
   teamNames.sort();
-  for (let agent of world.entities) {
+  for (const agent of world.entities) {
     if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= agent.vision) {
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 0.1;
       ctx.strokeStyle = styles.teams[teamNames.indexOf(agent.team)];
-      drawArea(ctx, agent.x, agent.y, 5);
+      drawArea(ctx, dx + agent.x, dy + agent.y, 5);
     }
-  } */
+  }
 }
 
 interface Rect {
