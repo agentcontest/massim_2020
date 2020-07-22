@@ -111,7 +111,7 @@ export function mapView(ctrl: MapCtrl): VNode {
       wheel(ev) {
         ev.preventDefault();
         let zoom = Math.pow(3 / 2, -ev.deltaY / 100);
-        if (ctrl.vm.transform.scale * zoom < 5) zoom = 5 / ctrl.vm.transform.scale;
+        if (ctrl.vm.transform.scale * zoom < 10) zoom = 10 / ctrl.vm.transform.scale;
         if (ctrl.vm.transform.scale * zoom > 100) zoom = 100 / ctrl.vm.transform.scale;
         ctrl.vm.transform = {
           x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom,
