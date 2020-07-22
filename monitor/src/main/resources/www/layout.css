@@ -66,6 +66,9 @@ ul {
   width: 250px;
   float: left;
 }
+.map.no_action, .map.unknown {
+  background: #901717;
+}
 .map .label {
   padding: 4px;
   cursor: pointer;
