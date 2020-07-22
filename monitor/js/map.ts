@@ -336,14 +336,17 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
 }
 
 function drawFogOfWar(ctx: CanvasRenderingContext2D, st: StaticWorld, dx: number, dy: number, agent: Agent) {
-  ctx.fillStyle = 'rgba(1, 1, 1, 0.5)';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
   const top = dy - st.grid.height + agent.y + agent.vision + 1;
   ctx.fillRect(dx, top, st.grid.width, st.grid.height - 2 * agent.vision - 1); // above
   ctx.fillRect(dx - st.grid.width + agent.x + agent.vision + 1, dy + agent.y - agent.vision, st.grid.width - 2 * agent.vision - 1, 2 * agent.vision + 1);
-  //ctx.fillRect(dx, dy, Math.max(0, agent.x - agent.vision), st.grid.height); // left
-  //ctx.fillRect(dx + agent.x + agent.vision + 1, dy, Math.max(0, st.grid.width - agent.x - agent.vision - 1), st.grid.height); // right
-  //ctx.fillRect(dx + agent.x - agent.vision, dy, agent.vision * 2 + 1, Math.max(0, agent.y - agent.vision)); // above
-  //ctx.fillRect(dx + agent.x - agent.vision, dy + agent.y + agent.vision + 1, agent.vision * 2 + 1, Math.max(0, st.grid.height - agent.y - agent.vision - 1)); // below
+  for (let x = -agent.vision; x <= agent.vision; x++) {
+    for (let y = -agent.vision; y <= agent.vision; y++) {
+      if (Math.abs(x) + Math.abs(y) > agent.vision) {
+        ctx.fillRect(dx + agent.x + x, dy + agent.y + y, 1, 1);
+      }
+    }
+  }
 }
 
 function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, dx: number, dy: number, hover: Pos) {
