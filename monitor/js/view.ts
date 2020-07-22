@@ -24,7 +24,10 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
     if (!agent) return;
     return h('div.map', [
       h('div.label', {
-        style: {
+        style: m.vm.selected === ctrl.map.vm.selected ? {
+          background: 'white',
+          color: 'black',
+        } : {
           background: styles.teams[teamNames.indexOf(agent.team)],
         },
         on: {
