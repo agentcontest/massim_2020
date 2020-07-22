@@ -40,7 +40,6 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
       mapView(m, {
         size: 250,
         viewOnly: true,
-        denseFog: true
       }),
       h('div.meta', [
         h('div', `energy = ${agent.energy}`),

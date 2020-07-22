@@ -26,7 +26,6 @@ export interface MapViewModel {
 export interface MapViewOpts {
   size?: number;
   viewOnly?: boolean;
-  denseFog?: boolean;
 }
 
 export class MapCtrl {
@@ -373,7 +372,6 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
     }
 
     // fog of war
-    ctx.fillStyle = opts?.denseFog ? 'black' : 'rgba(0, 0, 0, 0.3)';
     for (let dy = Math.floor(ymin / grid.height) * grid.height; dy <= ymax + grid.height; dy += grid.height) {
       for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
         for (const agent of ctrl.root.vm.dynamic.entities) {
@@ -391,6 +389,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
 }
 
 function drawFogOfWar(ctx: CanvasRenderingContext2D, st: StaticWorld, dx: number, dy: number, agent: Agent) {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
   const top = dy - st.grid.height + agent.y + agent.vision + 1;
   ctx.fillRect(dx, top, st.grid.width, st.grid.height - 2 * agent.vision - 1); // above
   ctx.fillRect(dx - st.grid.width + agent.x + agent.vision + 1, dy + agent.y - agent.vision, st.grid.width - 2 * agent.vision - 1, 2 * agent.vision + 1);
