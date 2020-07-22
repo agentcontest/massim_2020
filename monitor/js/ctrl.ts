@@ -64,11 +64,13 @@ export class Ctrl {
 
   select(pos?: Pos) {
     if (pos && this.vm.dynamic) {
-      const agents = [...this.vm.dynamic.entities];
+      const agents = this.vm.dynamic.entities.filter(a => a.x == pos.x && a.y == pos.y);
       agents.sort((a, b) => a.id - b.id);
 
-      for (const agent of this.vm.dynamic.entities) {
-        if (agent.x == pos.x && agent.y == pos.y && (this.vm.selected === undefined || agent.id > this.vm.selected)) {
+      if (agents.every(a => a.id !== this.vm.selected)) this.vm.selected = undefined;
+
+      for (const agent of agents) {
+        if (this.vm.selected === undefined || agent.id > this.vm.selected) {
           this.vm.selected = agent.id;
           this.redraw();
           return;
