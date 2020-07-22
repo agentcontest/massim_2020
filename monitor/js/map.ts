@@ -317,11 +317,33 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
         }
       }
     }
+
+    // fog of war
+    for (let dy = Math.floor(ymin / grid.height) * grid.height; dy <= ymax + grid.height; dy += grid.height) {
+      for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
+        for (const agent of ctrl.root.vm.dynamic.entities) {
+          if (agent.id === ctrl.root.vm.selected) {
+            drawFogOfWar(ctx, ctrl.root.vm.static, dx, dy, agent);
+          }
+        }
+      }
+    }
   }
 
   ctx.restore();
 
   if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, true));
+}
+
+function drawFogOfWar(ctx: CanvasRenderingContext2D, st: StaticWorld, dx: number, dy: number, agent: Agent) {
+  ctx.fillStyle = 'rgba(1, 1, 1, 0.5)';
+  const top = dy - st.grid.height + agent.y + agent.vision + 1;
+  ctx.fillRect(dx, top, st.grid.width, st.grid.height - 2 * agent.vision - 1); // above
+  ctx.fillRect(dx - st.grid.width + agent.x + agent.vision + 1, dy + agent.y - agent.vision, st.grid.width - 2 * agent.vision - 1, 2 * agent.vision + 1);
+  //ctx.fillRect(dx, dy, Math.max(0, agent.x - agent.vision), st.grid.height); // left
+  //ctx.fillRect(dx + agent.x + agent.vision + 1, dy, Math.max(0, st.grid.width - agent.x - agent.vision - 1), st.grid.height); // right
+  //ctx.fillRect(dx + agent.x - agent.vision, dy, agent.vision * 2 + 1, Math.max(0, agent.y - agent.vision)); // above
+  //ctx.fillRect(dx + agent.x - agent.vision, dy + agent.y + agent.vision + 1, agent.vision * 2 + 1, Math.max(0, st.grid.height - agent.y - agent.vision - 1)); // below
 }
 
 function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, dx: number, dy: number, hover: Pos) {
