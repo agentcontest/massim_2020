@@ -74,28 +74,30 @@ function hover(world: DynamicWorld, pos: Pos): VNode | undefined {
   else if (terrain === 2) r.push(h('li', 'terrain: obstacle'));
 
   // dispensers
-  for (let dispenser of world.dispensers) {
+  for (const dispenser of world.dispensers) {
     if (dispenser.x == pos.x && dispenser.y == pos.y) {
       r.push(h('li', `dispenser: type = ${dispenser.type}`));
     }
   }
 
   // task boards
-  for (let board of world.taskboards) {
-    if (board.x == pos.x && board.y == pos.y) {
-      r.push(h('li', 'task board'));
+  if (world.taskboards) {
+    for (const board of world.taskboards) {
+      if (board.x == pos.x && board.y == pos.y) {
+        r.push(h('li', 'task board'));
+      }
     }
   }
 
   // blocks
-  for (let block of world.blocks) {
+  for (const block of world.blocks) {
     if (block.x == pos.x && block.y == pos.y) {
       r.push(h('li', `block: type = ${block.type}`));
     }
   }
 
   // agents
-  for (let agent of world.entities) {
+  for (const agent of world.entities) {
     if (agent.x == pos.x && agent.y == pos.y) {
       r.push(h('li', agentDescription(agent)));
     }

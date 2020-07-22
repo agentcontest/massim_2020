@@ -256,9 +256,11 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
         }
 
         // task boards
-        for (const board of ctrl.root.vm.dynamic.taskboards) {
-          ctx.lineWidth = 0.05;
-          drawBlock(ctx, rect(1, dx + board.x, dy + board.y, 0.05), styles.board, 'white', 'black');
+        if (ctrl.root.vm.dynamic.taskboards) {
+          for (const board of ctrl.root.vm.dynamic.taskboards) {
+            ctx.lineWidth = 0.05;
+            drawBlock(ctx, rect(1, dx + board.x, dy + board.y, 0.05), styles.board, 'white', 'black');
+          }
         }
 
         // blocks

@@ -28,7 +28,7 @@ export interface DynamicWorld {
   entities: Agent[]
   blocks: Block[]
   dispensers: Dispenser[]
-  taskboards: TaskBoard[]
+  taskboards?: TaskBoard[]
   tasks: Task[]
   clear: ClearEvent[]
   cells: Terrain[][]
