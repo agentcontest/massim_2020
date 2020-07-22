@@ -262,14 +262,13 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
         switch (ctrl.root.vm.dynamic.cells[mod(y, grid.height)][mod(x, grid.width)]) {
           case 1: // GOAL
             ctx.fillStyle = styles.goalFill;
+            ctx.fillRect(x, y, 1, 1);
             break;
           case 2: // OBSTABLE
             ctx.fillStyle = styles.obstacle;
+            ctx.fillRect(x - 0.04, y - 0.04, 1.08, 1.08);
             break;
-          default: // EMPTY
-            continue;
         }
-        ctx.fillRect(x, y, 1, 1);
       }
     }
 
