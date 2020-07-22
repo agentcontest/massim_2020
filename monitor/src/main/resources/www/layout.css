@@ -21,6 +21,16 @@ p {
   width: 350px;
   background: #555;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.replay button {
+  padding: 0;
+  line-height: 1.5em;
+  width: 19%;
+}
+.replay {
+  word-wrap: anywhere;
 }
 
 #monitor > canvas {
