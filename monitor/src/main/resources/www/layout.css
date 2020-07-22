@@ -33,6 +33,10 @@ p {
   word-wrap: anywhere;
 }
 
+.team {
+  padding: 4px;
+}
+
 #monitor > canvas, #monitor > .maps {
   position: absolute;
   top: 0;
@@ -69,8 +73,7 @@ ul {
 .map.no_action, .map.unknown {
   background: #901717;
 }
-.map .label {
-  padding: 4px;
+.map .team {
   cursor: pointer;
 }
 .map .meta {

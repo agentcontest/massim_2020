@@ -31,7 +31,7 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
         map: true,
       },
     }, [
-      h('div.label', {
+      h('div.team', {
         style: m.vm.selected === ctrl.map.vm.selected ? {
           background: 'white',
           color: 'black',
