@@ -152,6 +152,12 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   const ctx = canvas.getContext('2d')!;
   ctx.save();
 
+  // font
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'white';
+  ctx.font = '0.3px Arial';
+
   // fill background
   ctx.beginPath();
   ctx.fillStyle = '#eee';
@@ -221,11 +227,6 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
           drawBlock(ctx, r2, color, 'white', 'black');
           const r3 = rect(1, dx + dispenser.x, dy + dispenser.y, 8 * 0.025);
           drawBlock(ctx, r3, color, 'white', 'black');
-
-          ctx.textBaseline = 'middle';
-          ctx.textAlign = 'center';
-          ctx.fillStyle = 'white';
-          ctx.font = '0.3px Arial';
           ctx.fillText(`[${dispenser.type}]`, dx + dispenser.x + 0.5, dy + dispenser.y + 0.5);
         }
 
@@ -233,6 +234,14 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
         for (const board of ctrl.root.vm.dynamic.taskboards) {
           ctx.lineWidth = 0.05;
           drawBlock(ctx, rect(1, dx + board.x, dy + board.y, 0.05), styles.board, 'white', 'black');
+        }
+
+        // blocks
+        for (const block of ctrl.root.vm.dynamic.blocks) {
+          ctx.lineWidth = 0.05;
+          const color = styles.blocks[ctrl.root.vm.static.blockTypes.indexOf(block.type) % styles.blocks.length];
+          drawBlock(ctx, rect(1, dx + block.x, dy + block.y, 0.025), color, 'white', 'black');
+          ctx.fillText(block.type, dx + block.x + 0.5, dy + block.y + 0.5);
         }
 
         // clear events
