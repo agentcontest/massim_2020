@@ -159,10 +159,8 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   ctx.font = '0.3px Arial';
 
   // fill background
-  ctx.beginPath();
   ctx.fillStyle = '#eee';
-  ctx.rect(0, 0, width, height);
-  ctx.fill();
+  ctx.fillRect(0, 0, width, height);
 
   // draw grid
   const transform = ctrl.vm.transform;
@@ -175,14 +173,12 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   const ymax = ymin + Math.ceil(canvas.height / transform.scale);
   const xmax = xmin + Math.ceil(canvas.width / transform.scale);
 
-  ctx.beginPath();
   ctx.fillStyle = '#ddd';
   for (let y = ymin; y <= ymax; y++) {
     for (let x = xmin + (((xmin + y) % 2) + 2) % 2; x <= xmax; x += 2) {
-      ctx.rect(x, y, 1, 1);
+      ctx.fillRect(x, y, 1, 1);
     }
   }
-  ctx.fill();
 
   if (ctrl.root.vm.static && ctrl.root.vm.dynamic) {
     const grid = ctrl.root.vm.static.grid;
@@ -203,9 +199,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
           default: // EMPTY
             continue;
         }
-        ctx.beginPath();
-        ctx.rect(x, y, 1, 1);
-        ctx.fill();
+        ctx.fillRect(x, y, 1, 1);
       }
     }
 
@@ -333,10 +327,8 @@ export function drawBlocks(ctx: CanvasRenderingContext2D, dx: number, dy: number
 }
 
 function drawBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light: string, dark: string) {
-  ctx.beginPath();
   ctx.fillStyle = color;
-  ctx.rect(r.x1, r.y1, r.width, r.height);
-  ctx.fill();
+  ctx.fillRect(r.x1, r.y1, r.width, r.height);
 
   ctx.beginPath();
   ctx.moveTo(r.x1, r.y2);
