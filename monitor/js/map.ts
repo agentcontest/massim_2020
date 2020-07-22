@@ -93,7 +93,8 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
       insert(vnode) {
         const elm = vnode.elm as HTMLCanvasElement;
 
-        new (window as any).ResizeObserver((entries: any) => {
+        if (opts?.size) render(elm, ctrl, opts);
+        else new (window as any).ResizeObserver((entries: any) => {
           for (const entry of entries) {
             elm.width = entry.contentRect.width;
             elm.height = entry.contentRect.height;
