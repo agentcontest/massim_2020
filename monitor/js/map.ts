@@ -211,6 +211,24 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
         ctx.lineTo(dx, dy + 1);
         ctx.stroke();
 
+        // dispensers
+        for (const dispenser of ctrl.root.vm.dynamic.dispensers) {
+          ctx.lineWidth = 2 * 0.025;
+          const r1 = rect(1, dx + dispenser.x, dy + dispenser.y, 0.025);
+          const color = styles.blocks[ctrl.root.vm.static.blockTypes.indexOf(dispenser.type) % styles.blocks.length];
+          drawBlock(ctx, r1, color, 'white', 'black');
+          const r2 = rect(1, dx + dispenser.x, dy + dispenser.y, 4 * 0.025);
+          drawBlock(ctx, r2, color, 'white', 'black');
+          const r3 = rect(1, dx + dispenser.x, dy + dispenser.y, 8 * 0.025);
+          drawBlock(ctx, r3, color, 'white', 'black');
+
+          ctx.textBaseline = 'middle';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = 'white';
+          ctx.font = '0.3px Arial';
+          ctx.fillText(`[${dispenser.type}]`, dx + dispenser.x + 0.5, dy + dispenser.y + 0.5);
+        }
+
         // task boards
         for (const board of ctrl.root.vm.dynamic.taskboards) {
           ctx.lineWidth = 0.05;
