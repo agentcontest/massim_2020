@@ -155,7 +155,6 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   // font
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
-  ctx.fillStyle = 'white';
   ctx.font = '0.3px Arial';
 
   // fill background
@@ -227,6 +226,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
           drawBlock(ctx, r2, color, 'white', 'black');
           const r3 = rect(1, dx + dispenser.x, dy + dispenser.y, 8 * 0.025);
           drawBlock(ctx, r3, color, 'white', 'black');
+          ctx.fillStyle = 'white';
           ctx.fillText(`[${dispenser.type}]`, dx + dispenser.x + 0.5, dy + dispenser.y + 0.5);
         }
 
@@ -241,6 +241,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
           ctx.lineWidth = 0.05;
           const color = styles.blocks[ctrl.root.vm.static.blockTypes.indexOf(block.type) % styles.blocks.length];
           drawBlock(ctx, rect(1, dx + block.x, dy + block.y, 0.025), color, 'white', 'black');
+          ctx.fillStyle = 'white';
           ctx.fillText(block.type, dx + block.x + 0.5, dy + block.y + 0.5);
         }
 
