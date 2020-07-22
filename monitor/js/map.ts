@@ -213,7 +213,15 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
 
         // task boards
         for (const board of ctrl.root.vm.dynamic.taskboards) {
+          ctx.lineWidth = 0.05;
           drawBlock(ctx, rect(1, dx + board.x, dy + board.y, 0.05), styles.board, 'white', 'black');
+        }
+
+        // clear events
+        for (const clear of ctrl.root.vm.dynamic.clear) {
+          ctx.lineWidth = 0.1;
+          ctx.strokeStyle = 'red';
+          drawArea(ctx, dx + clear.x, dy + clear.y, clear.radius);
         }
       }
     }
@@ -262,5 +270,15 @@ function drawBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light:
   ctx.lineTo(r.x2, r.y2);
   ctx.lineTo(r.x1, r.y2);
   ctx.strokeStyle = dark;
+  ctx.stroke();
+}
+
+function drawArea(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
+  ctx.beginPath();
+  ctx.moveTo(x - radius, y + 0.5);
+  ctx.lineTo(x + 0.5, y - radius);
+  ctx.lineTo(x + 1 + radius, y + 0.5);
+  ctx.lineTo(x + 0.5, y + radius + 1);
+  ctx.lineTo(x - radius, y + 0.5);
   ctx.stroke();
 }
