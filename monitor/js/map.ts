@@ -277,11 +277,11 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
         // draw axis
         ctx.strokeStyle = 'black';
         ctx.beginPath();
-        ctx.lineWidth = 0.1;
-        ctx.moveTo(dx - 1, dy);
-        ctx.lineTo(dx + 1, dy);
-        ctx.moveTo(dx, dy - 1);
-        ctx.lineTo(dx, dy + 1);
+        ctx.lineWidth = 0.2;
+        ctx.moveTo(dx - 1.5, dy);
+        ctx.lineTo(dx + 1.5, dy);
+        ctx.moveTo(dx, dy - 1.5);
+        ctx.lineTo(dx, dy + 1.5);
         ctx.stroke();
 
         // dispensers
