@@ -1,6 +1,7 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
+import { Agent } from './interfaces';
 import { Ctrl } from './ctrl';
 import * as styles from './styles';
 
@@ -186,6 +187,9 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
   if (ctrl.root.vm.static && ctrl.root.vm.dynamic) {
     const grid = ctrl.root.vm.static.grid;
 
+    const teams = Object.keys(ctrl.root.vm.static.teams);
+    teams.sort();
+
     // terrain
     for (let y = ymin; y <= ymax; y++) {
       for (let x = xmin; x <= xmax; x++) {
@@ -243,6 +247,37 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
           drawBlock(ctx, rect(1, dx + block.x, dy + block.y, 0.025), color, 'white', 'black');
           ctx.fillStyle = 'white';
           ctx.fillText(block.type, dx + block.x + 0.5, dy + block.y + 0.5);
+        }
+
+        // agents
+        for (const agent of ctrl.root.vm.dynamic.entities) {
+          ctx.lineWidth = 0.125;
+          ctx.strokeStyle = 'black';
+
+          ctx.beginPath();
+          ctx.moveTo(dx + agent.x + 0.5, dy + agent.y);
+          ctx.lineTo(dx + agent.x + 0.5, dy + agent.y + 1);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(dx + agent.x, dy + agent.y + 0.5);
+          ctx.lineTo(dx + agent.x + 1, dy + agent.y + 0.5);
+          ctx.stroke();
+
+          const color = styles.teams[teams.indexOf(agent.team)];
+          if (teams.indexOf(agent.team) == 0) {
+            ctx.lineWidth = 0.05;
+            const margin = (1 - 15 / 16 / Math.sqrt(2)) / 2;
+            const r = rect(1, dx + agent.x, dy + agent.y, margin);
+            drawBlock(ctx, r, color, 'white', 'black');
+          } else {
+            ctx.lineWidth = 0.04;
+            const r = rect(1, dx + agent.x, dy + agent.y, 0.0625);
+            drawRotatedBlock(ctx, r, color, 'white', 'black');
+          }
+
+          ctx.fillStyle = 'white';
+          ctx.fillText(shortName(agent), dx + agent.x + 0.5, dy + agent.y + 0.5);
         }
 
         // clear events
@@ -309,4 +344,34 @@ function drawArea(ctx: CanvasRenderingContext2D, x: number, y: number, radius: n
   ctx.lineTo(x + 0.5, y + radius + 1);
   ctx.lineTo(x - radius, y + 0.5);
   ctx.stroke();
+}
+
+function drawRotatedBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string, light: string, dark: string) {
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.moveTo(r.x1, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y1);
+  ctx.lineTo(r.x2, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y2);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(r.x1, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y1);
+  ctx.lineTo(r.x2, (r.y1 + r.y2) / 2);
+  ctx.strokeStyle = light;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(r.x2, (r.y1 + r.y2) / 2);
+  ctx.lineTo((r.x1 + r.x2) / 2, r.y2);
+  ctx.lineTo(r.x1, (r.y1 + r.y2) / 2);
+  ctx.strokeStyle = dark;
+  ctx.stroke();
+}
+
+function shortName(agent: Agent): string {
+  const match = agent.name.match(/^agent-?([A-Za-z])[A-Za-z-_]*([0-9]+)$/);
+  return match ? match[1] + match[2] : agent.name;
 }
