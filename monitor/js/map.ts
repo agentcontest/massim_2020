@@ -294,6 +294,14 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
           ctx.fillStyle = 'white';
           ctx.fillText(shortName(agent), dx + agent.x + 0.5, dy + agent.y + 0.5);
 
+          // attachables of selected agent
+          if (agent.id === ctrl.root.vm.selected && agent.attached) {
+            ctx.fillStyle = styles.hover;
+            for (const attached of agent.attached) {
+              if (attached.x != agent.x || attached.y != agent.y) ctx.fillRect(dx + attached.x, dy + attached.y, 1, 1);
+            }
+          }
+
           // agent action
           if (agent.action == 'clear' && agent.actionResult.indexOf('failed_') != 0) {
             const x = dx + agent.x + parseInt(agent.actionParams[0], 10);
@@ -352,7 +360,7 @@ function drawFogOfWar(ctx: CanvasRenderingContext2D, st: StaticWorld, dx: number
 function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, dx: number, dy: number, hover: Pos) {
   if (hover.x < 0 || hover.x >= st.grid.width || hover.y < 0 || hover.y >= st.grid.height) return;
   ctx.beginPath();
-  ctx.fillStyle = 'rgba(180, 180, 255, 0.4)';
+  ctx.fillStyle = styles.hover;
   ctx.fillRect(dx + hover.x, dy + hover.y, 1, 1);
 
   for (const attachable of (world.entities as Array<Agent | Block>).concat(world.blocks)) {
