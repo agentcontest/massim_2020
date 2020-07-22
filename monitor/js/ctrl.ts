@@ -57,22 +57,29 @@ export class Ctrl {
     };
   }
 
-  setTeam(name?: string) {
-    if (this.vm.dynamic) {
-      this.maps = this.vm.dynamic.entities.filter(a => a.team === name).map(agent => {
+  toggleMaps() {
+    if (this.vm.dynamic && !this.maps.length) {
+      const agents = [...this.vm.dynamic.entities];
+      agents.sort((a, b) => {
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        else return 0;
+      });
+      this.maps = agents.map(agent => {
         const ctrl = new MapCtrl(this);
         ctrl.vm.selected = agent.id;
         return ctrl;
       });
       this.vm.hover = undefined;
-    } else this.maps = [];
+    } else {
+      this.maps = [];
+    }
     this.redraw();
   }
 
   setHover(pos?: Pos) {
     const changed = (!pos && this.vm.hover) || (pos && !this.vm.hover) || (pos && this.vm.hover && (pos.x != this.vm.hover.x || pos.y != this.vm.hover.y));
     this.vm.hover = pos;
-    if (!this.maps.length) this.setTeam('LFC'); // TODO
     if (changed) this.redraw();
   }
 }

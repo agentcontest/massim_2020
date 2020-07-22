@@ -184,6 +184,13 @@ export function overlay(ctrl: Ctrl): VNode {
     ...((ctrl.vm.state === 'online' && ctrl.vm.static && ctrl.vm.dynamic) ? [
       h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
       h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
+      h('div.box', [
+        h('button', {
+          on: {
+            click: () => ctrl.toggleMaps(),
+          }
+        }, ctrl.maps.length ? 'Global view' : 'Agent view'),
+      ]),
       ctrl.map.vm.selected ? box(selected(ctrl.vm.dynamic, ctrl.map.vm.selected)) : undefined,
       ctrl.vm.hover ? box(hover(ctrl.vm.dynamic, ctrl.vm.hover)) : undefined,
     ] : [])

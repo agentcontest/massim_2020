@@ -148,6 +148,7 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
     },
     on: opts?.viewOnly ? undefined : {
       mousedown(ev) {
+        console.log(ev);
         if (ev.button !== undefined && ev.button !== 0) return; // only left click
         ev.preventDefault();
         const pos = eventPosition(ev);
@@ -215,7 +216,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
   // font
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'center';
-  ctx.font = '0.3px Arial';
+  ctx.font = '0.4px Arial';
 
   // fill background
   ctx.fillStyle = '#eee';
@@ -458,7 +459,7 @@ export function drawBlocks(ctx: CanvasRenderingContext2D, dx: number, dy: number
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillStyle = 'white';
-    ctx.font = '0.3px Arial';
+    ctx.font = '0.5px Arial';
     ctx.fillText(block.type, dx + block.x + 0.5, dy + block.y + 0.5);
   }
 }
