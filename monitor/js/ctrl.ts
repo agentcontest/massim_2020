@@ -130,7 +130,7 @@ export class ReplayCtrl {
 
         // write to cache
         if (this.cache.size > 100) this.cache.clear();
-        for (const s in response) this.cache.set(parseInt(s), response[s]);
+        for (const s in response) this.cache.set(parseInt(s, 10), response[s]);
       } else {
         this.root.vm.state = 'error';
         this.stop();
