@@ -20,6 +20,7 @@ interface Dragging {
 export interface MapViewModel {
   dragging?: Dragging;
   transform: Transform;
+  selected?: number; // agent.id
 }
 
 export class MapCtrl {
@@ -33,6 +34,26 @@ export class MapCtrl {
         scale: 20,
       },
     };
+  }
+
+  select(pos?: Pos) {
+    if (pos && this.root.vm.dynamic) {
+      const agents = this.root.vm.dynamic.entities.filter(a => a.x == pos.x && a.y == pos.y);
+      agents.sort((a, b) => b.id - a.id);
+
+      if (agents.every(a => a.id !== this.vm.selected)) this.vm.selected = undefined;
+
+      for (const agent of agents) {
+        if (this.vm.selected === undefined || agent.id < this.vm.selected) {
+          this.vm.selected = agent.id;
+          this.root.redraw();
+          return;
+        }
+      }
+    }
+
+    this.vm.selected = undefined;
+    this.root.redraw();
   }
 
   invPos(pos: [number, number], bounds: DOMRect): Pos | undefined {
@@ -75,7 +96,7 @@ export function mapView(ctrl: MapCtrl): VNode {
           ev.preventDefault();
           if (ctrl.vm.dragging && !ctrl.vm.dragging.started) {
             const pos = eventPosition(ev) || ctrl.vm.dragging.first;
-            ctrl.root.select(ctrl.invPos(pos, elm.getBoundingClientRect()));
+            ctrl.select(ctrl.invPos(pos, elm.getBoundingClientRect()));
           }
           ctrl.vm.dragging = undefined;
         };
@@ -297,7 +318,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
           ctx.fillText(shortName(agent), dx + agent.x + 0.5, dy + agent.y + 0.5);
 
           // attachables of selected agent
-          if (agent.id === ctrl.root.vm.selected && agent.attached) {
+          if (agent.id === ctrl.vm.selected && agent.attached) {
             ctx.fillStyle = styles.hover;
             for (const attached of agent.attached) {
               if (attached.x != agent.x || attached.y != agent.y) ctx.fillRect(dx + attached.x, dy + attached.y, 1, 1);
@@ -332,7 +353,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, raf = false) {
     for (let dy = Math.floor(ymin / grid.height) * grid.height; dy <= ymax + grid.height; dy += grid.height) {
       for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
         for (const agent of ctrl.root.vm.dynamic.entities) {
-          if (agent.id === ctrl.root.vm.selected) {
+          if (agent.id === ctrl.vm.selected) {
             drawFogOfWar(ctx, ctrl.root.vm.static, dx, dy, agent);
           }
         }
