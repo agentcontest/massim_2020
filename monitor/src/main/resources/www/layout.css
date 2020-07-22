@@ -66,6 +66,7 @@ ul {
 }
 .map .label {
   padding: 4px;
+  cursor: pointer;
 }
 .map .meta {
   height: 5em;

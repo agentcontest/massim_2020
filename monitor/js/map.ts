@@ -94,7 +94,7 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
       insert(vnode) {
         const elm = vnode.elm as HTMLCanvasElement;
 
-        new (window as any)['ResizeObserver']((entries: any) => {
+        new (window as any).ResizeObserver((entries: any) => {
           for (const entry of entries) {
             elm.width = entry.contentRect.width;
             elm.height = entry.contentRect.height;
@@ -102,10 +102,9 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
           }
         }).observe(elm);
 
-        if (opts?.viewOnly) return;
-
         const mouseup = (ev: Event) => {
           ev.preventDefault();
+          console.log('mouseup', ev);
           if (ctrl.vm.dragging && !ctrl.vm.dragging.started) {
             const pos = eventPosition(ev) || ctrl.vm.dragging.first;
             ctrl.select(ctrl.invPos(pos, elm.getBoundingClientRect()));
@@ -114,7 +113,6 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
         };
 
         const mousemove = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
-          ev.preventDefault();
           const pos = eventPosition(ev);
           if (ctrl.vm.dragging && pos) {
             if (ctrl.vm.dragging.started || distanceSq(ctrl.vm.dragging.first, pos) > 20 * 20) {
@@ -123,14 +121,17 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
               ctrl.vm.transform.y += pos[1] - ctrl.vm.dragging.latest[1];
               ctrl.vm.dragging.latest = pos;
             }
+            ev.preventDefault();
           } else if (pos) {
-            ctrl.root.setHover(ctrl.invPos(pos, elm.getBoundingClientRect()));
+            const inv = ctrl.invPos(pos, elm.getBoundingClientRect());
+            if (inv) ctrl.root.setHover(inv);
           }
         };
 
-        if (!vnode.data) vnode.data = {};
-        vnode.data.massim = {
-          unbinds: [
+        (elm as any).massim = {
+          unbinds: opts?.viewOnly ? [
+            unbindable(document, 'mousemove', mousemove, { passive: false }),
+          ] : [
             unbindable(document, 'mouseup', mouseup),
             unbindable(document, 'touchend', mouseup),
             unbindable(document, 'mousemove', mousemove, { passive: false }),
@@ -142,7 +143,7 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
         render(vnode.elm as HTMLCanvasElement, ctrl, opts);
       },
       destroy(vnode) {
-        const unbinds  = vnode.data?.massim?.unbinds;
+        const unbinds = (vnode.elm as any).massim?.unbinds;
         if (unbinds) for (const unbind of unbinds) unbind();
       },
     },
@@ -223,17 +224,14 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
   ctx.fillRect(0, 0, width, height);
 
   // draw grid
-  let transform = ctrl.vm.transform;
+  const transform = ctrl.vm.transform;
   if (opts?.viewOnly && ctrl.vm.selected && ctrl.root.vm.dynamic) {
     // auto center to selection
     const agent =  ctrl.root.vm.dynamic.entities.find(a => a.id === ctrl.vm.selected);
     if (agent) {
-      const scale = Math.min(canvas.width, canvas.height) / (agent.vision * 2 + 3);
-      transform = {
-        x: canvas.width / 2 - (agent.x + 0.5) * scale,
-        y: canvas.height / 2 - (agent.y + 0.5) * scale,
-        scale,
-      };
+      transform.scale = Math.min(canvas.width, canvas.height) / (agent.vision * 2 + 3);
+      transform.x = canvas.width / 2 - (agent.x + 0.5) * transform.scale;
+      transform.y = canvas.height / 2 - (agent.y + 0.5) * transform.scale;
     }
   }
   ctx.translate(transform.x, transform.y);

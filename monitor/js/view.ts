@@ -26,8 +26,14 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
       h('div.label', {
         style: {
           background: styles.teams[teamNames.indexOf(agent.team)],
-        }
-      }, agent.name),
+        },
+        on: {
+          click() {
+            ctrl.map.vm.selected = agent.id;
+            ctrl.toggleMaps();
+          },
+        },
+      }, `${agent.name} (${agent.x}|${agent.y})`),
       mapView(m, {
         size: 250,
         viewOnly: true,

@@ -70,7 +70,6 @@ export class Ctrl {
         ctrl.vm.selected = agent.id;
         return ctrl;
       });
-      this.vm.hover = undefined;
     } else {
       this.maps = [];
     }
