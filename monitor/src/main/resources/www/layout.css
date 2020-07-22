@@ -17,11 +17,11 @@ p {
   position: absolute;
   top: 0;
   left: 0;
-  bottom: 0;
-  width: 350px;
-  background: #555;
+  width: 250px;
+  background: #161512cc;
   overflow-y: auto;
   overflow-x: hidden;
+  z-index: 1;
 }
 
 .replay button {
@@ -33,17 +33,25 @@ p {
   word-wrap: anywhere;
 }
 
-#monitor > canvas, #monitor > .maps {
+#monitor > canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#monitor > .maps {
   position: absolute;
   top: 0;
   right: 0;
-  left: 350px;
+  left: 250px;
   bottom: 0;
   background: #161512;
-  width: calc(100% - 350px);
+  width: calc(100% - 250px);
   height: 100%;
-}
-.maps {
   overflow-y: auto;
 }
 

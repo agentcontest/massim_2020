@@ -127,7 +127,7 @@ function taskDetails(st: StaticWorld, task: Task): VNode[] {
   const ys = task.requirements.map(b => Math.abs(b.y));
   const width = 2 * Math.max(...xs) + 1;
   const height = 2 * Math.max(...ys) + 1;
-  const elementWidth = 318;
+  const elementWidth = 218;
   const gridSize = Math.min(Math.floor(elementWidth / width), 50);
   const elementHeight = gridSize * height;
   const render = function (vnode: VNode) {
