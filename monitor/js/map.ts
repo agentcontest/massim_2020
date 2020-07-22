@@ -276,12 +276,17 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
       for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
         // draw axis
         ctx.strokeStyle = 'black';
+        ctx.lineWidth = 0.3;
         ctx.beginPath();
-        ctx.lineWidth = 0.2;
-        ctx.moveTo(dx - 1.5, dy);
-        ctx.lineTo(dx + 1.5, dy);
-        ctx.moveTo(dx, dy - 1.5);
-        ctx.lineTo(dx, dy + 1.5);
+        if (ctrl.root.vm.dynamic.taskboards) {
+          ctx.moveTo(dx - 1.5, dy);
+          ctx.lineTo(dx + 1.5, dy);
+          ctx.moveTo(dx, dy - 1.5);
+          ctx.lineTo(dx, dy + 1.5);
+        } else {
+          // 2019
+          ctx.rect(dx, dy, grid.width, grid.height);
+        }
         ctx.stroke();
 
         // dispensers
