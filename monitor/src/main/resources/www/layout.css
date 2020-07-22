@@ -15,8 +15,8 @@ p {
 
 #overlay {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 10px;
+  left: 10px;
   width: 250px;
   background: #161512cc;
   overflow-y: auto;
@@ -45,9 +45,10 @@ p {
 
 #monitor > .maps {
   position: absolute;
-  top: 0;
+  top: 0px;
+  padding-top: 10px;
   right: 0;
-  left: 250px;
+  left: 260px;
   bottom: 0;
   background: #161512;
   width: calc(100% - 250px);
@@ -55,7 +56,7 @@ p {
   overflow-y: auto;
 }
 
-.box {
+.box, .map {
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.2), 0 1px 5px 0 rgba(0,0,0,0.12);
   background-color: #252422;
   margin: 0.5em;
@@ -70,7 +71,6 @@ ul {
 .map {
   width: 250px;
   float: left;
-  margin: 10px;
 }
 .map .label {
   padding: 4px;

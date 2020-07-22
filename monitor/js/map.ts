@@ -34,8 +34,8 @@ export class MapCtrl {
   constructor(readonly root: Ctrl) {
     this.vm = {
       transform: {
-        x: 10,
-        y: 10,
+        x: 0,
+        y: 0,
         scale: 20,
       },
     };
