@@ -18,8 +18,14 @@ interface Dragging {
   started: boolean;
 }
 
+interface Zooming {
+  center: [number, number];
+  distance: number;
+}
+
 export interface MapViewModel {
   dragging?: Dragging;
+  zooming?: Zooming;
   transform: Transform;
   selected?: number; // agent.id
 }
@@ -126,11 +132,16 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
             ctrl.select(ctrl.invPos(pos, elm.getBoundingClientRect()));
           }
           ctrl.vm.dragging = undefined;
+          ctrl.vm.zooming = undefined;
         };
 
         const mousemove = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
           const pos = eventPosition(ev);
-          if (ctrl.vm.dragging && pos) {
+          const zooming = eventZooming(ev);
+          if (ctrl.vm.zooming && zooming) {
+            ctrl.zoom(ctrl.vm.zooming.center, Math.max(ctrl.vm.zooming.distance, 20) / Math.max(zooming.distance, 20));
+            ev.preventDefault();
+          } else if (ctrl.vm.dragging && pos) {
             if (ctrl.vm.dragging.started || distanceSq(ctrl.vm.dragging.first, pos) > 20 * 20) {
               ctrl.vm.dragging.started = true;
               ctrl.vm.transform.x += pos[0] - ctrl.vm.dragging.latest[0];
@@ -146,15 +157,21 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
 
         const mousedown = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
           if (ev.button !== undefined && ev.button !== 0) return; // only left click
-          if (ev.targetTouches !== undefined && ev.targetTouches.length !== 1) return; // only one finger
-          ev.preventDefault();
           const pos = eventPosition(ev);
-          if (pos) ctrl.vm.dragging = {
-            first: pos,
-            latest: pos,
-            started: false,
+          const zooming = eventZooming(ev);
+          if (zooming) {
+            ctrl.vm.zooming = zooming;
+          } else if (pos) {
+            ctrl.vm.dragging = {
+              first: pos,
+              latest: pos,
+              started: false,
+            }
           };
-          requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts, true));
+          if (zooming || pos) {
+            ev.preventDefault();
+            requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts, true));
+          }
         };
 
         const wheel = (ev: WheelEvent) => {
@@ -191,6 +208,20 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
 function unbindable(el: EventTarget, eventName: string, callback: EventListener, options?: AddEventListenerOptions) {
   el.addEventListener(eventName, callback, options);
   return () => el.removeEventListener(eventName, callback, options);
+}
+
+function eventZooming(e: Partial<TouchEvent>): Zooming | undefined {
+  if (e.targetTouches?.length !== 2) return;
+  return {
+    center: [
+      (e.targetTouches[0].clientX + e.targetTouches[1].clientX) / 2,
+      (e.targetTouches[0].clientY + e.targetTouches[1].clientY) / 2
+    ],
+    distance: Math.hypot(
+      e.targetTouches[0].clientX - e.targetTouches[1].clientX,
+      e.targetTouches[0].clientY - e.targetTouches[1].clientY
+    )
+  };
 }
 
 function eventPosition(e: Partial<MouseEvent & TouchEvent>): [number, number] | undefined {
