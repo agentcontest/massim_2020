@@ -82,7 +82,12 @@ function hover(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld, pos: Pos): VNod
   if (world.taskboards) {
     for (const board of world.taskboards) {
       if (board.x == pos.x && board.y == pos.y) {
-        r.push(h('li', 'task board'));
+        r.push(h('li', h('span', {
+          style: {
+            background: styles.board,
+            color: 'black',
+          }
+        }, 'task board')));
       }
     }
   }

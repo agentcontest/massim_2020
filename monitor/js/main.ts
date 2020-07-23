@@ -1,6 +1,3 @@
-// TODO: Block colors in hover
-// TODO: Dispenser colors in hover
-// TODO: Task board color in hover
 // TODO: Agent list in task description
 // TODO: Agent count in task selector
 
