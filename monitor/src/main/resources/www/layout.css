@@ -20,6 +20,7 @@ p {
   top: 10px;
   left: 10px;
   width: 340px;
+  max-height: calc(100% - 20px);
   background: #161512cc;
   overflow-y: auto;
   overflow-x: hidden;
