@@ -33,7 +33,7 @@ function teams(teamNames: string[], world: DynamicWorld): VNode[] {
 }
 
 function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
-  const selectedTask = world.tasks.filter(t => t.name === ctrl.vm.taskName)[0];
+  const selectedTask = world.tasks.find(t => t.name === ctrl.vm.taskName);
   return [
     h('select', {
       props: {
