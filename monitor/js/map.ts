@@ -40,6 +40,9 @@ export interface MapViewOpts {
   viewOnly?: boolean;
 }
 
+export const minScale = 10;
+export const maxScale = 100;
+
 export class MapCtrl {
   readonly vm: MapViewModel;
 
@@ -101,8 +104,8 @@ export class MapCtrl {
   }
 
   zoom(center: [number, number], factor: number): void {
-    if (this.vm.transform.scale * factor < 10) factor = 10 / this.vm.transform.scale;
-    if (this.vm.transform.scale * factor > 100) factor = 100 / this.vm.transform.scale;
+    if (this.vm.transform.scale * factor < minScale) factor = minScale / this.vm.transform.scale;
+    if (this.vm.transform.scale * factor > maxScale) factor = maxScale / this.vm.transform.scale;
     this.vm.transform = {
       x: center[0] + (this.vm.transform.x - center[0]) * factor,
       y: center[1] + (this.vm.transform.y - center[1]) * factor,

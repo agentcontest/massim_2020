@@ -1,5 +1,5 @@
 import { Redraw, StaticWorld, DynamicWorld, ConnectionState, Pos } from './interfaces';
-import { MapCtrl } from './map';
+import { MapCtrl, minScale, maxScale } from './map';
 import { compareAgent } from './util';
 
 export interface ViewModel {
@@ -64,6 +64,19 @@ export class Ctrl {
       this.vm.teamNames.sort();
     }
     this.vm.static = st;
+    this.resetTransform();
+  }
+
+  resetTransform() {
+    const margin = 2;
+    const grid = this.vm.static?.grid;
+    if (!grid) return;
+    const scale = Math.max(minScale, Math.min(maxScale, Math.min(window.innerWidth, window.innerHeight) / (2 * margin + Math.max(grid.width, grid.height))));
+    this.map.vm.transform = {
+      x: (window.innerWidth - scale * (grid.width + 2 * margin)) / 2 + scale * margin,
+      y: (window.innerHeight - scale * (grid.height + 2 * margin)) / 2 + scale * margin,
+      scale,
+    };
   }
 
   setDynamic(dynamic?: DynamicWorld) {

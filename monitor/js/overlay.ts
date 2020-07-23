@@ -246,6 +246,14 @@ export function overlay(ctrl: Ctrl): VNode {
             click: () => ctrl.toggleMaps(),
           }
         }, ctrl.maps.length ? 'Global view' : 'Agent view'),
+        ctrl.maps.length ? undefined : h('button', {
+          on: {
+            click() {
+              ctrl.resetTransform();
+              ctrl.redraw();
+            }
+          }
+        }, 'Reset zoom'),
       ]),
       selectedAgent ? box(h('div', ['Selected agent: ', ...agentDescription(ctrl, selectedAgent)])) : undefined,
       ctrl.vm.hover ? box(hover(ctrl, ctrl.vm.static, ctrl.vm.dynamic, ctrl.vm.hover)) : undefined,
