@@ -141,7 +141,6 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
         };
 
         const mousemove = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
-          const pos = eventPosition(ev);
           const zoom = eventZoom(ev);
           if (ctrl.vm.zooming && zoom) {
             ctrl.vm.transform = {...ctrl.vm.zooming.initialTransform};
@@ -150,7 +149,16 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
               (ctrl.vm.zooming.zoom.center[1] + zoom.center[1]) / 2,
             ], zoom.distance / ctrl.vm.zooming.zoom.distance);
             ev.preventDefault();
-          } else if (ctrl.vm.dragging && pos) {
+            return;
+          }
+
+          const pos = eventPosition(ev);
+          if (pos) {
+            const inv = ctrl.invPos(pos, elm.getBoundingClientRect());
+            if (inv) ctrl.root.setHover(inv);
+          }
+
+          if (ctrl.vm.dragging && pos) {
             if (ctrl.vm.dragging.started || distanceSq(ctrl.vm.dragging.first, pos) > 20 * 20) {
               ctrl.vm.dragging.started = true;
               ctrl.vm.transform.x += pos[0] - ctrl.vm.dragging.latest[0];
@@ -158,9 +166,6 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
               ctrl.vm.dragging.latest = pos;
             }
             ev.preventDefault();
-          } else if (pos) {
-            const inv = ctrl.invPos(pos, elm.getBoundingClientRect());
-            if (inv) ctrl.root.setHover(inv);
           }
         };
 
