@@ -36,6 +36,9 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
   const selectedTask = world.tasks.filter(t => t.name === ctrl.vm.taskName)[0];
   return [
     h('select', {
+      props: {
+        value: ctrl.vm.taskName || '',
+      },
       on: {
         change: function(e) {
           ctrl.vm.taskName = (e.target as HTMLOptionElement).value;
@@ -44,12 +47,12 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
       }
     }, [
       h('option', {
-        props: {
+        attrs: {
           value: ''
         },
       }, simplePlural(world.tasks.length, 'task')),
       ...world.tasks.map(t => h('option', {
-        props: {
+        attrs: {
           value: t.name
         },
       }, `${t.reward}$ for ${t.name} until step ${t.deadline}`))
