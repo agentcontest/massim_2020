@@ -134,10 +134,38 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
           }
         };
 
+        const mousedown = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
+          if (ev.button !== undefined && ev.button !== 0) return; // only left click
+          ev.preventDefault();
+          const pos = eventPosition(ev);
+          if (pos) ctrl.vm.dragging = {
+            first: pos,
+            latest: pos,
+            started: false,
+          };
+          requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts, true));
+        };
+
+        const wheel = (ev: WheelEvent) => {
+          ev.preventDefault();
+          let zoom = Math.pow(3 / 2, -ev.deltaY / (ev.deltaMode ? 6.25 : 100));
+          if (ctrl.vm.transform.scale * zoom < 10) zoom = 10 / ctrl.vm.transform.scale;
+          if (ctrl.vm.transform.scale * zoom > 100) zoom = 100 / ctrl.vm.transform.scale;
+          ctrl.vm.transform = {
+            x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom,
+            y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom,
+            scale: ctrl.vm.transform.scale * zoom,
+          };
+          requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts));
+        };
+
         (elm as any).massim = {
           unbinds: opts?.viewOnly ? [
             unbindable(document, 'mousemove', mousemove, { passive: false }),
           ] : [
+            unbindable(elm, 'mousedown', mousedown, { passive: false }),
+            unbindable(elm, 'touchstart', mousedown, { passive: false }),
+            unbindable(elm, 'wheel', wheel, { passive: false }),
             unbindable(document, 'mouseup', mouseup),
             unbindable(document, 'touchend', mouseup),
             unbindable(document, 'mousemove', mousemove, { passive: false }),
@@ -151,41 +179,6 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
       destroy(vnode) {
         const unbinds = (vnode.elm as any).massim?.unbinds;
         if (unbinds) for (const unbind of unbinds) unbind();
-      },
-    },
-    on: opts?.viewOnly ? undefined : {
-      mousedown(ev) {
-        if (ev.button !== undefined && ev.button !== 0) return; // only left click
-        ev.preventDefault();
-        const pos = eventPosition(ev);
-        if (pos) ctrl.vm.dragging = {
-          first: pos,
-          latest: pos,
-          started: false,
-        };
-        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts, true));
-      },
-      touchstart(ev) {
-        ev.preventDefault();
-        const pos = eventPosition(ev);
-        if (pos) ctrl.vm.dragging = {
-          first: pos,
-          latest: pos,
-          started: false,
-        };
-        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts, true));
-      },
-      wheel(ev) {
-        ev.preventDefault();
-        let zoom = Math.pow(3 / 2, -ev.deltaY / (ev.deltaMode ? 6.25 : 100));
-        if (ctrl.vm.transform.scale * zoom < 10) zoom = 10 / ctrl.vm.transform.scale;
-        if (ctrl.vm.transform.scale * zoom > 100) zoom = 100 / ctrl.vm.transform.scale;
-        ctrl.vm.transform = {
-          x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom,
-          y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom,
-          scale: ctrl.vm.transform.scale * zoom,
-        };
-        requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts));
       },
     },
   });
