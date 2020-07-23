@@ -8,6 +8,8 @@ body {
 }
 a {
   color: #bababa;
+  cursor: pointer;
+  text-decoration: underline;
 }
 p {
   margin: 0;
@@ -31,6 +33,10 @@ p {
 }
 .replay {
   word-wrap: anywhere;
+}
+
+span.no_action, span.unknown {
+  color: red;
 }
 
 .team {
@@ -70,13 +76,11 @@ ul {
   width: 250px;
   float: left;
 }
-.map.no_action, .map.unknown {
+.map.no_action, .map.unknown{
   background: #901717;
 }
 .map a {
   display: block;
-  cursor: pointer;
-  text-decoration: underline;
 }
 .map a.team {
   text-decoration: none;

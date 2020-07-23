@@ -1,10 +1,10 @@
-// TODO: Team colors in hover
 // TODO: Block colors in hover
 // TODO: Dispenser colors in hover
 // TODO: Task board color in hover
-// TODO: Clickable task in agent description
 // TODO: Agent list in task description
 // TODO: Agent count in task selector
+
+// TODO: Remove test task hack
 
 import { init } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';

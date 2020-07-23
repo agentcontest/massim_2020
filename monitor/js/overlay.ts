@@ -58,7 +58,7 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
   ]
 }
 
-function hover(world: DynamicWorld, pos: Pos): VNode | undefined {
+function hover(ctrl: Ctrl, world: DynamicWorld, pos: Pos): VNode | undefined {
   if (!world.cells[pos.y]) return;
   const terrain = world.cells[pos.y][pos.x];
   if (typeof terrain == 'undefined') return;
@@ -97,19 +97,38 @@ function hover(world: DynamicWorld, pos: Pos): VNode | undefined {
   // agents
   for (const agent of world.entities) {
     if (agent.x == pos.x && agent.y == pos.y) {
-      r.push(h('li', agentDescription(agent)));
+      r.push(h('li', ['agent: ', ...agentDescription(ctrl, agent)]));
     }
   }
 
   return h('ul', r);
 }
 
-function agentDescription(agent: Agent): string {
-  let description = `agent: name = ${agent.name}, team = ${agent.team}, energy = ${agent.energy}`;
-  if (agent.action) description += `, ${agent.action}(…) = ${agent.actionResult}`;
-  if (agent.acceptedTask) description += `, ${agent.acceptedTask}`;
-  if (agent.disabled) description += ', disabled';
-  return description;
+function agentDescription(ctrl: Ctrl, agent: Agent): Array<VNode | string> {
+  const r = [
+    'name = ', h('span', {
+      style: {
+        background: styles.teams[ctrl.vm.teamNames.indexOf(agent.team)],
+      }
+    }, agent.name),
+    `, energy = ${agent.energy}`
+  ];
+  if (agent.action && agent.actionResult) r.push(', ', h('span', {
+    class: {
+      [agent.action]: true,
+      [agent.actionResult]: true,
+    }
+  }, `${agent.action}(…) = ${agent.actionResult}`));
+  if (agent.acceptedTask) r.push(', ', h('a', {
+    on: {
+      click() {
+        ctrl.vm.taskName = agent.acceptedTask;
+        ctrl.redraw();
+      }
+    }
+  }, agent.acceptedTask));
+  if (agent.disabled) r.push(', disabled');
+  return r;
 }
 
 function taskDetails(st: StaticWorld, task: Task): VNode[] {
@@ -182,8 +201,8 @@ export function overlay(ctrl: Ctrl): VNode {
           }
         }, ctrl.maps.length ? 'Global view' : 'Agent view'),
       ]),
-      selectedAgent ? box(h('div', 'Selected ' + agentDescription(selectedAgent))) : undefined,
-      ctrl.vm.hover ? box(hover(ctrl.vm.dynamic, ctrl.vm.hover)) : undefined,
+      selectedAgent ? box(h('div', ['Selected agent: ', ...agentDescription(ctrl, selectedAgent)])) : undefined,
+      ctrl.vm.hover ? box(hover(ctrl, ctrl.vm.dynamic, ctrl.vm.hover)) : undefined,
     ] : [])
   ]);
 }
