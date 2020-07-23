@@ -26,9 +26,7 @@ function simplePlural(n: number, singular: string): string {
   else return n + ' ' + singular + 's';
 }
 
-function teams(st: StaticWorld, world: DynamicWorld): VNode[] {
-  const teamNames = Object.keys(st.teams);
-  teamNames.sort();
+function teams(teamNames: string[], world: DynamicWorld): VNode[] {
   return teamNames.map((name, i) => h('div.team', {
     style: { background: styles.teams[i] }
   }, `${name}: $${world.scores[name]}`));
@@ -175,7 +173,7 @@ export function overlay(ctrl: Ctrl): VNode {
       ]) : undefined,
     (ctrl.vm.state === 'connecting' || !ctrl.vm.static || !ctrl.vm.dynamic) ? h('div.box', [h('div.loader', 'Waiting ...')]) : undefined,
     ...((ctrl.vm.state === 'online' && ctrl.vm.static && ctrl.vm.dynamic) ? [
-      h('div.box', teams(ctrl.vm.static, ctrl.vm.dynamic)),
+      h('div.box', teams(ctrl.vm.teamNames, ctrl.vm.dynamic)),
       h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
       h('div.box', [
         h('button', {

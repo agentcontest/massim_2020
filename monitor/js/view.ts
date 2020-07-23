@@ -15,8 +15,6 @@ export function view(ctrl: Ctrl): VNode {
 
 function allMaps(ctrl: Ctrl): VNode | undefined {
   if (!ctrl.vm.static) return;
-  const teamNames = Object.keys(ctrl.vm.static.teams);
-  teamNames.sort();
 
   return h('div.maps', ctrl.maps.map(m => {
     const agent = m.selectedAgent();
@@ -36,7 +34,7 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
           background: 'white',
           color: 'black',
         } : {
-          background: styles.teams[teamNames.indexOf(agent.team)],
+          background: styles.teams[ctrl.vm.teamNames.indexOf(agent.team)],
         },
         on: {
           click() {

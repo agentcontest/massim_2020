@@ -258,9 +258,6 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
   if (ctrl.root.vm.static && ctrl.root.vm.dynamic) {
     const grid = ctrl.root.vm.static.grid;
 
-    const teams = Object.keys(ctrl.root.vm.static.teams);
-    teams.sort();
-
     // terrain
     for (let y = ymin; y <= ymax; y++) {
       for (let x = xmin; x <= xmax; x++) {
@@ -334,8 +331,9 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
           ctx.lineTo(dx + agent.x + 1, dy + agent.y + 0.5);
           ctx.stroke();
 
-          const color = styles.teams[teams.indexOf(agent.team)];
-          if (teams.indexOf(agent.team) == 0) {
+          const teamIndex = ctrl.root.vm.teamNames.indexOf(agent.team);
+          const color = styles.teams[teamIndex];
+          if (teamIndex === 0) {
             ctx.lineWidth = 0.05;
             const margin = (1 - 15 / 16 / Math.sqrt(2)) / 2;
             const r = rect(1, dx + agent.x, dy + agent.y, margin);
@@ -378,7 +376,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
 
         // hover
         if (ctrl.root.vm.hover) {
-          drawHover(ctx, ctrl.root.vm.static, ctrl.root.vm.dynamic, dx, dy, ctrl.root.vm.hover);
+          drawHover(ctx, ctrl.root.vm.static, ctrl.root.vm.dynamic, ctrl.root.vm.teamNames, dx, dy, ctrl.root.vm.hover);
         }
       }
     }
@@ -414,7 +412,7 @@ function drawFogOfWar(ctx: CanvasRenderingContext2D, st: StaticWorld, dx: number
   }
 }
 
-function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, dx: number, dy: number, hover: Pos) {
+function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: DynamicWorld, teamNames: string[], dx: number, dy: number, hover: Pos) {
   if (hover.x < 0 || hover.x >= st.grid.width || hover.y < 0 || hover.y >= st.grid.height) return;
   ctx.beginPath();
   ctx.fillStyle = styles.hover;
@@ -435,8 +433,6 @@ function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: Dynami
       drawArea(ctx, dx + taskboard.x, dy + taskboard.y, 2);
     }
   }
-  const teamNames = Object.keys(st.teams);
-  teamNames.sort();
   for (const agent of world.entities) {
     if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= agent.vision) {
       ctx.strokeStyle = styles.teams[teamNames.indexOf(agent.team)];

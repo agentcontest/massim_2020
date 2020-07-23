@@ -8,6 +8,7 @@ export interface ViewModel {
   dynamic?: DynamicWorld
   taskName?: string
   hover?: Pos
+  teamNames: string[]
 }
 
 export class Ctrl {
@@ -18,7 +19,8 @@ export class Ctrl {
 
   constructor(readonly redraw: Redraw, replayPath?: string) {
     this.vm = {
-      'state': 'connecting',
+      state: 'connecting',
+      teamNames: [],
     };
 
     if (replayPath) this.replay = new ReplayCtrl(this, replayPath);
@@ -57,6 +59,8 @@ export class Ctrl {
 
   setStatic(st: StaticWorld) {
     st.blockTypes.sort();
+    this.vm.teamNames = Object.keys(st.teams);
+    this.vm.teamNames.sort();
     this.vm.static = st;
   }
 
