@@ -1,7 +1,7 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-import { Pos, Positionable, Agent, Block, Grid, StaticWorld, DynamicWorld } from './interfaces';
+import { Pos, Positionable, Agent, Block, StaticWorld, DynamicWorld } from './interfaces';
 import { Ctrl } from './ctrl';
 import { compareAgent } from './util';
 import * as styles from './styles';
@@ -18,9 +18,14 @@ interface Dragging {
   started: boolean;
 }
 
-interface Zooming {
+interface Zoom {
   center: [number, number];
   distance: number;
+}
+
+interface Zooming {
+  initialTransform: Transform;
+  zoom: Zoom;
 }
 
 export interface MapViewModel {
@@ -126,7 +131,7 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
         }).observe(elm);
 
         const mouseup = (ev: Event) => {
-          if (ctrl.vm.dragging) ev.preventDefault();
+          if (ctrl.vm.dragging || ctrl.vm.zooming) ev.preventDefault();
           if (ctrl.vm.dragging && !ctrl.vm.dragging.started) {
             const pos = eventPosition(ev) || ctrl.vm.dragging.first;
             ctrl.select(ctrl.invPos(pos, elm.getBoundingClientRect()));
@@ -137,9 +142,13 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
 
         const mousemove = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
           const pos = eventPosition(ev);
-          const zooming = eventZooming(ev);
-          if (ctrl.vm.zooming && zooming) {
-            ctrl.zoom(ctrl.vm.zooming.center, Math.max(ctrl.vm.zooming.distance, 20) / Math.max(zooming.distance, 20));
+          const zoom = eventZoom(ev);
+          if (ctrl.vm.zooming && zoom) {
+            ctrl.vm.transform = {...ctrl.vm.zooming.initialTransform};
+            ctrl.zoom([
+              (ctrl.vm.zooming.zoom.center[0] + zoom.center[0]) / 2,
+              (ctrl.vm.zooming.zoom.center[1] + zoom.center[1]) / 2,
+            ], zoom.distance / ctrl.vm.zooming.zoom.distance);
             ev.preventDefault();
           } else if (ctrl.vm.dragging && pos) {
             if (ctrl.vm.dragging.started || distanceSq(ctrl.vm.dragging.first, pos) > 20 * 20) {
@@ -158,9 +167,12 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
         const mousedown = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
           if (ev.button !== undefined && ev.button !== 0) return; // only left click
           const pos = eventPosition(ev);
-          const zooming = eventZooming(ev);
-          if (zooming) {
-            ctrl.vm.zooming = zooming;
+          const zoom = eventZoom(ev);
+          if (zoom) {
+            ctrl.vm.zooming = {
+              initialTransform: {...ctrl.vm.transform},
+              zoom,
+            };
           } else if (pos) {
             ctrl.vm.dragging = {
               first: pos,
@@ -168,7 +180,7 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
               started: false,
             }
           };
-          if (zooming || pos) {
+          if (zoom || pos) {
             ev.preventDefault();
             requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts, true));
           }
@@ -210,17 +222,17 @@ function unbindable(el: EventTarget, eventName: string, callback: EventListener,
   return () => el.removeEventListener(eventName, callback, options);
 }
 
-function eventZooming(e: Partial<TouchEvent>): Zooming | undefined {
+function eventZoom(e: Partial<TouchEvent>): Zoom | undefined {
   if (e.targetTouches?.length !== 2) return;
   return {
     center: [
       (e.targetTouches[0].clientX + e.targetTouches[1].clientX) / 2,
       (e.targetTouches[0].clientY + e.targetTouches[1].clientY) / 2
     ],
-    distance: Math.hypot(
+    distance: Math.max(20, Math.hypot(
       e.targetTouches[0].clientX - e.targetTouches[1].clientX,
       e.targetTouches[0].clientY - e.targetTouches[1].clientY
-    )
+    ))
   };
 }
 
