@@ -35,11 +35,8 @@ export class Ctrl {
     ws.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
       console.log(data);
-      if (data.grid) {
-        data.blockTypes.sort();
-        this.vm.static = data;
-      }
-      else this.vm.dynamic = data;
+      if (data.grid) this.setStatic(data);
+      else this.setDynamic(data);
       this.redraw();
     };
 
@@ -55,6 +52,15 @@ export class Ctrl {
       this.vm.state = 'offline';
       this.redraw();
     };
+  }
+
+  setStatic(st: StaticWorld) {
+    st.blockTypes.sort();
+    this.vm.static = st;
+  }
+
+  setDynamic(dynamic: DynamicWorld) {
+    this.vm.dynamic = dynamic;
   }
 
   toggleMaps() {
@@ -116,7 +122,7 @@ export class ReplayCtrl {
     xhr.open('GET', `${this.path}/static.json${this.suffix}`);
     xhr.onload = () => {
       if (xhr.status === 200) {
-        this.root.vm.static = JSON.parse(xhr.responseText);
+        this.root.setStatic(JSON.parse(xhr.responseText));
         this.setStep(this.step);
       } else {
         this.root.vm.state = 'error';
@@ -134,7 +140,7 @@ export class ReplayCtrl {
     // got from cache
     const entry = this.cache.get(step);
     if (entry) {
-      this.root.vm.dynamic = entry;
+      this.root.setDynamic(entry);
       this.root.vm.state = (this.root.vm.dynamic && this.root.vm.dynamic.step == step) ? 'online' : 'connecting';
       this.root.redraw();
       return;
@@ -146,7 +152,7 @@ export class ReplayCtrl {
     xhr.onload = () => {
       if (xhr.status === 200) {
         var response = JSON.parse(xhr.responseText);
-        this.root.vm.dynamic = response[step];
+        this.root.setDynamic(response[step]);
         this.root.vm.state = (this.root.vm.dynamic && this.root.vm.dynamic.step == step) ? 'online' : 'connecting';
 
         // write to cache
