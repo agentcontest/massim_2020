@@ -69,8 +69,8 @@ span.no_action, span.unknown {
 }
 
 ul {
-  margin: 0;
-  padding-left: 1em;
+  margin: 0.4em 0;
+  padding-left: 1.5em;
 }
 
 .map {

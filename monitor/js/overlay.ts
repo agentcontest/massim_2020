@@ -57,7 +57,7 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
         },
       }, `${t.reward}$ for ${t.name} until step ${t.deadline}`))
     ]),
-    ...(selectedTask ? taskDetails(st, selectedTask) : [])
+    ...(selectedTask ? taskDetails(ctrl, st, world, selectedTask) : [])
   ]
 }
 
@@ -149,7 +149,7 @@ function agentDescription(ctrl: Ctrl, agent: Agent): Array<VNode | string> {
   return r;
 }
 
-function taskDetails(st: StaticWorld, task: Task): VNode[] {
+function taskDetails(ctrl: Ctrl, st: StaticWorld, dynamic: DynamicWorld, task: Task): VNode[] {
   const xs = task.requirements.map(b => Math.abs(b.x));
   const ys = task.requirements.map(b => Math.abs(b.y));
   const width = 2 * Math.max(...xs) + 1;
@@ -171,16 +171,34 @@ function taskDetails(st: StaticWorld, task: Task): VNode[] {
     drawBlocks(ctx, 0, 0, st, task.requirements);
     ctx.restore();
   };
-  return [h('canvas', {
-    props: {
-      width: elementWidth,
-      height: elementHeight
-    },
-    hook: {
-      insert: render,
-      update: (_, vnode) => render(vnode)
-    }
-  }), h('p', simplePlural(task.requirements.length, 'block'))];
+  const acceptedBy = dynamic.entities.filter(a => a.acceptedTask === task.name);
+  return [
+    h('canvas', {
+      props: {
+        width: elementWidth,
+        height: elementHeight
+      },
+      hook: {
+        insert: render,
+        update: (_, vnode) => render(vnode)
+      }
+    }),
+    ...(acceptedBy.length ? [
+      h('p', `Accepted by ${simplePlural(acceptedBy.length, 'agent')}`),
+      h('ul', acceptedBy.map(by => h('li', h('a', {
+        style: {
+          background: styles.teams[ctrl.vm.teamNames.indexOf(by.team)],
+        },
+        on: {
+          click() {
+            ctrl.map.vm.selected = by.id;
+            ctrl.redraw();
+          }
+        },
+      }, by.name)))),
+    ] : []),
+    h('p', simplePlural(task.requirements.length, 'block')),
+  ];
 }
 
 function disconnected(): VNode {

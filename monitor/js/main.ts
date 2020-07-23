@@ -1,4 +1,3 @@
-// TODO: Agent list in task description
 // TODO: Agent count in task selector
 
 // TODO: Remove test task hack
