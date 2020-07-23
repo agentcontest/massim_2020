@@ -3,6 +3,7 @@ import { VNode } from 'snabbdom/vnode';
 
 import { Pos, Agent, Block, StaticWorld, DynamicWorld } from './interfaces';
 import { Ctrl } from './ctrl';
+import { compareAgent } from './util';
 import * as styles from './styles';
 
 interface Transform {
@@ -41,15 +42,21 @@ export class MapCtrl {
     };
   }
 
+  selectedAgent(): Agent | undefined {
+    if (!this.root.vm.dynamic) return;
+    return this.root.vm.dynamic.entities.find(a => a.id === this.vm.selected);
+  }
+
   select(pos?: Pos) {
     if (pos && this.root.vm.dynamic) {
       const agents = this.root.vm.dynamic.entities.filter(a => a.x == pos.x && a.y == pos.y);
-      agents.sort((a, b) => b.id - a.id);
+      agents.reverse(); // opposite of rendering order
 
       if (agents.every(a => a.id !== this.vm.selected)) this.vm.selected = undefined;
+      const selected = this.selectedAgent();
 
       for (const agent of agents) {
-        if (this.vm.selected === undefined || agent.id < this.vm.selected) {
+        if (!selected || compareAgent(selected, agent) > 0) {
           this.vm.selected = agent.id;
           this.root.redraw();
           return;
