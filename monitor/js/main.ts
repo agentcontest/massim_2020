@@ -1,5 +1,3 @@
-// TODO: Agent count in task selector
-
 // TODO: Remove test task hack
 
 import { init } from 'snabbdom';

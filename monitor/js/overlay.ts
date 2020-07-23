@@ -1,4 +1,4 @@
-import { Agent, StaticWorld, DynamicWorld, Task, Block, Pos } from './interfaces';
+import { Agent, StaticWorld, DynamicWorld, Task, Pos } from './interfaces';
 import { Ctrl, ReplayCtrl } from './ctrl';
 import { drawBlocks } from './map';
 import  * as styles from './styles';
@@ -51,11 +51,17 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
           value: ''
         },
       }, simplePlural(world.tasks.length, 'task')),
-      ...world.tasks.map(t => h('option', {
-        attrs: {
-          value: t.name
-        },
-      }, `${t.reward}$ for ${t.name} until step ${t.deadline}`))
+      ...world.tasks.map(t => {
+        const acceptedBy = world.entities.filter(a => a.acceptedTask === t.name).length;
+        return h('option', {
+          attrs: {
+            value: t.name
+          },
+        }, [
+          `${t.reward}$ for ${t.name} until step ${t.deadline}`,
+          acceptedBy ? ` (${acceptedBy} accepted)` : undefined,
+        ]);
+      }),
     ]),
     ...(selectedTask ? taskDetails(ctrl, st, world, selectedTask) : [])
   ]
@@ -184,7 +190,7 @@ function taskDetails(ctrl: Ctrl, st: StaticWorld, dynamic: DynamicWorld, task: T
       }
     }),
     ...(acceptedBy.length ? [
-      h('p', `Accepted by ${simplePlural(acceptedBy.length, 'agent')}`),
+      h('p', `Accepted by ${simplePlural(acceptedBy.length, 'agent')}:`),
       h('ul', acceptedBy.map(by => h('li', h('a', {
         style: {
           background: styles.teams[ctrl.vm.teamNames.indexOf(by.team)],
