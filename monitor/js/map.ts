@@ -111,7 +111,6 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
 
         const mouseup = (ev: Event) => {
           ev.preventDefault();
-          console.log('mouseup', ev);
           if (ctrl.vm.dragging && !ctrl.vm.dragging.started) {
             const pos = eventPosition(ev) || ctrl.vm.dragging.first;
             ctrl.select(ctrl.invPos(pos, elm.getBoundingClientRect()));
@@ -156,7 +155,6 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
     },
     on: opts?.viewOnly ? undefined : {
       mousedown(ev) {
-        console.log(ev);
         if (ev.button !== undefined && ev.button !== 0) return; // only left click
         ev.preventDefault();
         const pos = eventPosition(ev);
