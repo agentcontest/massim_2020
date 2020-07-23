@@ -73,8 +73,13 @@ ul {
 .map.no_action, .map.unknown {
   background: #901717;
 }
-.map .team {
+.map a {
+  display: block;
   cursor: pointer;
+  text-decoration: underline;
+}
+.map a.team {
+  text-decoration: none;
 }
 .map .meta {
   height: 5em;

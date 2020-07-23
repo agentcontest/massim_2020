@@ -22,6 +22,7 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
     if (!ctrl.vm.dynamic) return;
     const agent = ctrl.vm.dynamic.entities.find(a => a.id === m.vm.selected);
     if (!agent) return;
+    const acceptedTask = agent.acceptedTask;
     return h('div', {
       class: (agent.action && agent.actionResult) ? {
         'map': true,
@@ -31,7 +32,7 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
         map: true,
       },
     }, [
-      h('div.team', {
+      h('a.team', {
         style: m.vm.selected === ctrl.map.vm.selected ? {
           background: 'white',
           color: 'black',
@@ -52,6 +53,14 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
       h('div.meta', [
         h('div', `energy = ${agent.energy}`),
         h('div', `${agent.action}(…) = ${agent.actionResult}`),
+        acceptedTask ? h('a', {
+          on: {
+            click() {
+              ctrl.vm.taskName = acceptedTask;
+              ctrl.redraw();
+            }
+          }
+        }, agent.acceptedTask) : undefined,
         agent.disabled ? h('div', 'disabled') : undefined,
       ]),
     ]);
