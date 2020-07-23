@@ -1,5 +1,6 @@
 import { Redraw, StaticWorld, DynamicWorld, ConnectionState, Pos } from './interfaces';
 import { MapCtrl } from './map';
+import { compareAgent } from './util';
 
 export interface ViewModel {
   state: ConnectionState
@@ -60,18 +61,13 @@ export class Ctrl {
   }
 
   setDynamic(dynamic: DynamicWorld) {
+    dynamic.entities.sort(compareAgent);
     this.vm.dynamic = dynamic;
   }
 
   toggleMaps() {
     if (this.vm.dynamic && !this.maps.length) {
-      const agents = [...this.vm.dynamic.entities];
-      agents.sort((a, b) => {
-        if (a.name < b.name) return -1;
-        if (a.name > b.name) return 1;
-        else return 0;
-      });
-      this.maps = agents.map(agent => {
+      this.maps = this.vm.dynamic.entities.map(agent => {
         const ctrl = new MapCtrl(this);
         ctrl.vm.selected = agent.id;
         return ctrl;
