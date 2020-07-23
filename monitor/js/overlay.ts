@@ -239,7 +239,6 @@ export function overlay(ctrl: Ctrl): VNode {
     (ctrl.vm.state === 'online' && (!ctrl.vm.static || !ctrl.vm.dynamic)) ? h('div.box', ['Waiting ...', h('div.loader')]) : undefined,
     ...((ctrl.vm.state === 'online' && ctrl.vm.static && ctrl.vm.dynamic) ? [
       h('div.box', teams(ctrl.vm.teamNames, ctrl.vm.dynamic)),
-      h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
       h('div.box', [
         h('button', {
           on: {
@@ -255,6 +254,7 @@ export function overlay(ctrl: Ctrl): VNode {
           }
         }, 'Reset zoom'),
       ]),
+      h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
       selectedAgent ? box(h('div', ['Selected agent: ', ...agentDescription(ctrl, selectedAgent)])) : undefined,
       ctrl.vm.hover ? box(hover(ctrl, ctrl.vm.static, ctrl.vm.dynamic, ctrl.vm.hover)) : undefined,
     ] : [])
