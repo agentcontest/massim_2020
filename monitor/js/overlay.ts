@@ -133,6 +133,7 @@ function agentDescription(ctrl: Ctrl, agent: Agent): Array<VNode | string> {
       [agent.actionResult]: true,
     }
   }, `${agent.action}(…) = ${agent.actionResult}`));
+  if (agent.attached?.length) r.push(`, ${agent.attached.length} attached`);
   if (agent.acceptedTask) r.push(', ', h('a', {
     on: {
       click() {
