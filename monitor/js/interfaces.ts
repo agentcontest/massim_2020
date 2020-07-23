@@ -51,6 +51,7 @@ export interface Agent extends Positionable {
   action: string
   actionParams: string[]
   actionResult: string
+  acceptedTask?: string // can also be empty string
 }
 
 export interface Block extends Positionable {

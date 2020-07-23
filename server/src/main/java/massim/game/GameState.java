@@ -773,6 +773,7 @@ class GameState {
                 obj.put("action", ((Entity) o).getLastAction());
                 obj.put("actionParams", ((Entity) o).getLastActionParams());
                 obj.put("actionResult", ((Entity) o).getLastActionResult());
+                obj.put("acceptedTask", ((Entity) o).getTask());
                 if (((Entity) o).isDisabled()) obj.put("disabled", true);
                 entities.put(obj);
             } else if (o instanceof Block) {
