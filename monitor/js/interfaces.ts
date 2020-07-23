@@ -40,18 +40,21 @@ export interface Positionable {
   y: number
 }
 
-export interface Agent extends Positionable {
-  id: number
+export interface AgentStatus {
   name: string
   team: string
+  action: string // can be empty string before first step
+  actionResult: string
+}
+
+export interface Agent extends Positionable, AgentStatus {
+  id: number
   energy: number
   vision: number
   attached?: Pos[]
   disabled?: boolean
-  action: string // can be empty string before first step
   actionParams: string[]
-  actionResult: string
-  acceptedTask?: string // can also be empty string
+  acceptedTask?: string // can be empty string before first accept
 }
 
 export interface Block extends Positionable {

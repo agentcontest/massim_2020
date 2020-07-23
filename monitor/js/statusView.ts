@@ -1,25 +1,12 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-import { StatusCtrl, StatusData, EntityStatus } from './statusInterfaces';
+import { StatusCtrl, StatusData } from './statusInterfaces';
+import { compareAgent } from './util';
 import * as styles from './styles';
 
-function compare(a: EntityStatus, b: EntityStatus) {
-  if (a.team < b.team) return -1;
-  else if (a.team > b.team) return 1;
-
-  const suffixA = parseInt(a.name.replace(/^[^\d]*/, ''), 10);
-  const suffixB = parseInt(b.name.replace(/^[^\d]*/, ''), 10);
-  if (suffixA < suffixB) return -1;
-  else if (suffixA > suffixB) return 1;
-
-  if (a.name < b.name) return -1;
-  else if (a.name > b.name) return 1;
-  else return 0;
-}
-
 function view(data: StatusData): VNode[] {
-  data.entities.sort(compare);
+  data.entities.sort(compareAgent);
 
   const teams: string[] = [];
   for (const entity of data.entities) {
