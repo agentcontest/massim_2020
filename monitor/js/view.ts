@@ -8,12 +8,12 @@ import * as styles from './styles';
 
 export function view(ctrl: Ctrl): VNode {
   return h('div#monitor', [
+    ctrl.maps.length ? agentView(ctrl) : mapView(ctrl.map),
     overlay(ctrl),
-    ctrl.maps.length > 0 ? allMaps(ctrl) : mapView(ctrl.map),
   ]);
 }
 
-function allMaps(ctrl: Ctrl): VNode | undefined {
+function agentView(ctrl: Ctrl): VNode | undefined {
   if (!ctrl.vm.static) return;
 
   return h('div.maps', ctrl.maps.map(m => {
