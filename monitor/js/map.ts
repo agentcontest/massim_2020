@@ -88,6 +88,16 @@ export class MapCtrl {
       };
     } else return p;
   }
+
+  zoom(center: [number, number], factor: number): void {
+    if (this.vm.transform.scale * factor < 10) factor = 10 / this.vm.transform.scale;
+    if (this.vm.transform.scale * factor > 100) factor = 100 / this.vm.transform.scale;
+    this.vm.transform = {
+      x: center[0] + (this.vm.transform.x - center[0]) * factor,
+      y: center[1] + (this.vm.transform.y - center[1]) * factor,
+      scale: this.vm.transform.scale * factor,
+    };
+  }
 }
 
 export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
@@ -136,6 +146,7 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
 
         const mousedown = (ev: Partial<MouseEvent & TouchEvent> & Event) => {
           if (ev.button !== undefined && ev.button !== 0) return; // only left click
+          if (ev.targetTouches !== undefined && ev.targetTouches.length !== 1) return; // only one finger
           ev.preventDefault();
           const pos = eventPosition(ev);
           if (pos) ctrl.vm.dragging = {
@@ -148,14 +159,7 @@ export function mapView(ctrl: MapCtrl, opts?: MapViewOpts): VNode {
 
         const wheel = (ev: WheelEvent) => {
           ev.preventDefault();
-          let zoom = Math.pow(3 / 2, -ev.deltaY / (ev.deltaMode ? 6.25 : 100));
-          if (ctrl.vm.transform.scale * zoom < 10) zoom = 10 / ctrl.vm.transform.scale;
-          if (ctrl.vm.transform.scale * zoom > 100) zoom = 100 / ctrl.vm.transform.scale;
-          ctrl.vm.transform = {
-            x: ev.offsetX + (ctrl.vm.transform.x - ev.offsetX) * zoom,
-            y: ev.offsetY + (ctrl.vm.transform.y - ev.offsetY) * zoom,
-            scale: ctrl.vm.transform.scale * zoom,
-          };
+          ctrl.zoom([ev.offsetX, ev.offsetY], Math.pow(3 / 2, -ev.deltaY / (ev.deltaMode ? 6.25 : 100)));
           requestAnimationFrame(() => render(ev.target as HTMLCanvasElement, ctrl, opts));
         };
 
