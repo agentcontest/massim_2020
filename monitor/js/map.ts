@@ -1,7 +1,7 @@
 import { h } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 
-import { Pos, Agent, Block, StaticWorld, DynamicWorld } from './interfaces';
+import { Pos, Positionable, Agent, Block, Grid, StaticWorld, DynamicWorld } from './interfaces';
 import { Ctrl } from './ctrl';
 import { compareAgent } from './util';
 import * as styles from './styles';
@@ -242,7 +242,6 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
 
   const ymin = Math.floor(-transform.y / transform.scale);
   const xmin = Math.floor(-transform.x / transform.scale);
-
   const ymax = ymin + Math.ceil(canvas.height / transform.scale);
   const xmax = xmin + Math.ceil(canvas.width / transform.scale);
 
@@ -291,59 +290,65 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
 
         // dispensers
         for (const dispenser of ctrl.root.vm.dynamic.dispensers) {
-          ctx.lineWidth = 2 * 0.025;
-          const r1 = rect(1, dx + dispenser.x, dy + dispenser.y, 0.025);
-          const color = styles.blocks[ctrl.root.vm.static.blockTypes.indexOf(dispenser.type) % styles.blocks.length];
-          drawBlock(ctx, r1, color, 'white', 'black');
-          const r2 = rect(1, dx + dispenser.x, dy + dispenser.y, 4 * 0.025);
-          drawBlock(ctx, r2, color, 'white', 'black');
-          const r3 = rect(1, dx + dispenser.x, dy + dispenser.y, 8 * 0.025);
-          drawBlock(ctx, r3, color, 'white', 'black');
-          ctx.fillStyle = 'white';
-          ctx.fillText(`[${dispenser.type}]`, dx + dispenser.x + 0.5, dy + dispenser.y + 0.5);
+          if (visible(xmin, xmax, ymin, ymax, dispenser, dx, dy)) {
+            ctx.lineWidth = 2 * 0.025;
+            const r1 = rect(1, dx + dispenser.x, dy + dispenser.y, 0.025);
+            const color = styles.blocks[ctrl.root.vm.static.blockTypes.indexOf(dispenser.type) % styles.blocks.length];
+            drawBlock(ctx, r1, color, 'white', 'black');
+            const r2 = rect(1, dx + dispenser.x, dy + dispenser.y, 4 * 0.025);
+            drawBlock(ctx, r2, color, 'white', 'black');
+            const r3 = rect(1, dx + dispenser.x, dy + dispenser.y, 8 * 0.025);
+            drawBlock(ctx, r3, color, 'white', 'black');
+            ctx.fillStyle = 'white';
+            ctx.fillText(`[${dispenser.type}]`, dx + dispenser.x + 0.5, dy + dispenser.y + 0.5);
+          }
         }
 
         // task boards
         if (ctrl.root.vm.dynamic.taskboards) {
           for (const board of ctrl.root.vm.dynamic.taskboards) {
-            ctx.lineWidth = 0.05;
-            drawBlock(ctx, rect(1, dx + board.x, dy + board.y, 0.05), styles.board, 'white', 'black');
+            if (visible(xmin, xmax, ymin, ymax, board, dx, dy)) {
+              ctx.lineWidth = 0.05;
+              drawBlock(ctx, rect(1, dx + board.x, dy + board.y, 0.05), styles.board, 'white', 'black');
+            }
           }
         }
 
         // blocks
-        drawBlocks(ctx, dx, dy, ctrl.root.vm.static, ctrl.root.vm.dynamic.blocks);
+        drawBlocks(ctx, dx, dy, ctrl.root.vm.static, ctrl.root.vm.dynamic.blocks.filter(b => visible(xmin, xmax, ymin, ymax, b, dx, dy)));
 
         // agents
         for (const agent of ctrl.root.vm.dynamic.entities) {
-          ctx.lineWidth = 0.125;
-          ctx.strokeStyle = 'black';
+          if (visible(xmin, xmax, ymin, ymax, agent, dx, dy)) {
+            ctx.lineWidth = 0.125;
+            ctx.strokeStyle = 'black';
 
-          ctx.beginPath();
-          ctx.moveTo(dx + agent.x + 0.5, dy + agent.y);
-          ctx.lineTo(dx + agent.x + 0.5, dy + agent.y + 1);
-          ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(dx + agent.x + 0.5, dy + agent.y);
+            ctx.lineTo(dx + agent.x + 0.5, dy + agent.y + 1);
+            ctx.stroke();
 
-          ctx.beginPath();
-          ctx.moveTo(dx + agent.x, dy + agent.y + 0.5);
-          ctx.lineTo(dx + agent.x + 1, dy + agent.y + 0.5);
-          ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(dx + agent.x, dy + agent.y + 0.5);
+            ctx.lineTo(dx + agent.x + 1, dy + agent.y + 0.5);
+            ctx.stroke();
 
-          const teamIndex = ctrl.root.vm.teamNames.indexOf(agent.team);
-          const color = styles.teams[teamIndex];
-          if (teamIndex === 0) {
-            ctx.lineWidth = 0.05;
-            const margin = (1 - 15 / 16 / Math.sqrt(2)) / 2;
-            const r = rect(1, dx + agent.x, dy + agent.y, margin);
-            drawBlock(ctx, r, color, 'white', 'black');
-          } else {
-            ctx.lineWidth = 0.04;
-            const r = rect(1, dx + agent.x, dy + agent.y, 0.0625);
-            drawRotatedBlock(ctx, r, color, 'white', 'black');
+            const teamIndex = ctrl.root.vm.teamNames.indexOf(agent.team);
+            const color = styles.teams[teamIndex];
+            if (teamIndex === 0) {
+              ctx.lineWidth = 0.05;
+              const margin = (1 - 15 / 16 / Math.sqrt(2)) / 2;
+              const r = rect(1, dx + agent.x, dy + agent.y, margin);
+              drawBlock(ctx, r, color, 'white', 'black');
+            } else {
+              ctx.lineWidth = 0.04;
+              const r = rect(1, dx + agent.x, dy + agent.y, 0.0625);
+              drawRotatedBlock(ctx, r, color, 'white', 'black');
+            }
+
+            ctx.fillStyle = 'white';
+            ctx.fillText(shortName(agent), dx + agent.x + 0.5, dy + agent.y + 0.5);
           }
-
-          ctx.fillStyle = 'white';
-          ctx.fillText(shortName(agent), dx + agent.x + 0.5, dy + agent.y + 0.5);
 
           // agent action
           if (agent.action == 'clear' && agent.actionResult.indexOf('failed_') != 0) {
@@ -394,6 +399,10 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
   ctx.restore();
 
   if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, opts, true));
+}
+
+function visible(xmin: number, xmax: number, ymin: number, ymax: number, pos: Positionable, dx: number, dy: number): boolean {
+  return xmin <= pos.x + dx && pos.x + dx <= xmax && ymin <= pos.y + dy && pos.y + dy <= ymax;
 }
 
 function drawFogOfWar(ctx: CanvasRenderingContext2D, st: StaticWorld, dx: number, dy: number, agent: Agent) {
