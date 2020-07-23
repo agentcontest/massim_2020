@@ -48,7 +48,7 @@ export interface Agent extends Positionable {
   vision: number
   attached?: Pos[]
   disabled?: boolean
-  action: string
+  action: string // can be empty string before first step
   actionParams: string[]
   actionResult: string
   acceptedTask?: string // can also be empty string

@@ -116,7 +116,8 @@ function selected(world: DynamicWorld, selected: number): VNode | undefined {
 }
 
 function agentDescription(agent: Agent): string {
-  let description = `agent: name = ${agent.name}, team = ${agent.team}, energy = ${agent.energy}, ${agent.action}(…) = ${agent.actionResult}`;
+  let description = `agent: name = ${agent.name}, team = ${agent.team}, energy = ${agent.energy}`;
+  if (agent.action) description += `${agent.action}(…) = ${agent.actionResult}`;
   if (agent.acceptedTask) description += `, ${agent.acceptedTask}`;
   if (agent.disabled) description += ', disabled';
   return description;

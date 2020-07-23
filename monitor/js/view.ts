@@ -52,7 +52,7 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
       }),
       h('div.meta', [
         h('div', `energy = ${agent.energy}`),
-        h('div', `${agent.action}(…) = ${agent.actionResult}`),
+        agent.action ? h('div', `${agent.action}(…) = ${agent.actionResult}`) : undefined,
         acceptedTask ? h('a', {
           on: {
             click() {
