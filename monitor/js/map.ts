@@ -446,7 +446,9 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
 
   ctx.restore();
 
-  if (vm.dragging && raf) requestAnimationFrame(() => render(canvas, ctrl, opts, true));
+  if (raf && (vm.dragging || vm.zooming)) {
+    requestAnimationFrame(() => render(canvas, ctrl, opts, true));
+  }
 }
 
 function visible(xmin: number, xmax: number, ymin: number, ymax: number, pos: Positionable, dx: number, dy: number): boolean {
