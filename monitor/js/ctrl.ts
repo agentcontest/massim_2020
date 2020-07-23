@@ -57,15 +57,17 @@ export class Ctrl {
     };
   }
 
-  setStatic(st: StaticWorld) {
-    st.blockTypes.sort();
-    this.vm.teamNames = Object.keys(st.teams);
-    this.vm.teamNames.sort();
+  setStatic(st?: StaticWorld) {
+    if (st) {
+      st.blockTypes.sort();
+      this.vm.teamNames = Object.keys(st.teams);
+      this.vm.teamNames.sort();
+    }
     this.vm.static = st;
   }
 
-  setDynamic(dynamic: DynamicWorld) {
-    dynamic.entities.sort(compareAgent);
+  setDynamic(dynamic?: DynamicWorld) {
+    if (dynamic) dynamic.entities.sort(compareAgent);
     this.vm.dynamic = dynamic;
   }
 
@@ -146,29 +148,35 @@ export class ReplayCtrl {
       return;
     }
 
+    const onerror = () => {
+      this.root.vm.state = 'error';
+      this.stop();
+      this.root.redraw();
+    };
+
     const group = step > 0 ? Math.floor(step / 5) * 5 : 0;
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `${this.path}/${group}.json${this.suffix}`);
     xhr.onload = () => {
       if (xhr.status === 200) {
-        var response = JSON.parse(xhr.responseText);
-        this.root.setDynamic(response[step]);
-        this.root.vm.state = (this.root.vm.dynamic && this.root.vm.dynamic.step == step) ? 'online' : 'connecting';
+        const response = JSON.parse(xhr.responseText);
 
         // write to cache
         if (this.cache.size > 100) this.cache.clear();
         for (const s in response) this.cache.set(parseInt(s, 10), response[s]);
-      } else {
-        this.root.vm.state = 'error';
-        this.stop();
+
+        if (response[step]) {
+          this.root.setDynamic(response[step]);
+          this.root.vm.state = (this.root.vm.dynamic && this.root.vm.dynamic.step == step) ? 'online' : 'connecting';
+          this.root.redraw();
+          return;
+        }
       }
-      this.root.redraw();
+
+      // status !== 200 or !response[step]
+      onerror();
     };
-    xhr.onerror = () => {
-      this.root.vm.state = 'error';
-      this.stop();
-      this.root.redraw();
-    };
+    xhr.onerror = onerror;
     xhr.send();
   }
 

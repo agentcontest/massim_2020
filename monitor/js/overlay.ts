@@ -235,7 +235,8 @@ export function overlay(ctrl: Ctrl): VNode {
       h('div.box', [
         `Step: ${ctrl.vm.dynamic.step} / ${ctrl.vm.static.steps - 1}`
       ]) : undefined,
-    (ctrl.vm.state === 'connecting' || !ctrl.vm.static || !ctrl.vm.dynamic) ? h('div.box', [h('div.loader', 'Waiting ...')]) : undefined,
+    ctrl.vm.state === 'connecting' ? h('div.box', ['Connecting ...', h('div.loader')]) : undefined,
+    (ctrl.vm.state === 'online' && (!ctrl.vm.static || !ctrl.vm.dynamic)) ? h('div.box', ['Waiting ...', h('div.loader')]) : undefined,
     ...((ctrl.vm.state === 'online' && ctrl.vm.static && ctrl.vm.dynamic) ? [
       h('div.box', teams(ctrl.vm.teamNames, ctrl.vm.dynamic)),
       h('div.box', tasks(ctrl, ctrl.vm.static, ctrl.vm.dynamic)),
