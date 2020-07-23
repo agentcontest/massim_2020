@@ -1,5 +1,3 @@
-// TODO: Remove test task hack
-
 import { init } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 import { classModule } from 'snabbdom/modules/class';

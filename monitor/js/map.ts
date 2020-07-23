@@ -58,7 +58,6 @@ export class MapCtrl {
       for (const agent of agents) {
         if (!selected || compareAgent(selected, agent) > 0) {
           this.vm.selected = agent.id;
-          agent.acceptedTask = 'task0'; // TODO: HACK
           this.root.redraw();
           return;
         }
