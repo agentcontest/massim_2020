@@ -421,11 +421,17 @@ function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: Dynami
     }
   }
 
+  ctx.lineWidth = 0.1;
+  if (world.taskboards) for (const taskboard of world.taskboards) {
+    if (Math.abs(taskboard.x - hover.x) + Math.abs(taskboard.y - hover.y) <= 2) {
+      ctx.strokeStyle = styles.board;
+      drawArea(ctx, dx + taskboard.x, dy + taskboard.y, 2);
+    }
+  }
   const teamNames = Object.keys(st.teams);
   teamNames.sort();
   for (const agent of world.entities) {
     if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= agent.vision) {
-      ctx.lineWidth = 0.1;
       ctx.strokeStyle = styles.teams[teamNames.indexOf(agent.team)];
       drawArea(ctx, dx + agent.x, dy + agent.y, 5);
     }

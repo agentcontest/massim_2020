@@ -2,7 +2,6 @@
 // TODO: Block colors in hover
 // TODO: Dispenser colors in hover
 // TODO: Task board color in hover
-// TODO: Task board radius
 // TODO: Clickable task in agent description
 // TODO: Agent list in task description
 // TODO: Agent count in task selector
