@@ -106,18 +106,9 @@ function hover(world: DynamicWorld, pos: Pos): VNode | undefined {
   return h('ul', r);
 }
 
-function selected(world: DynamicWorld, selected: number): VNode | undefined {
-  for (const agent of world.entities) {
-    if (agent.id === selected) {
-      return h('div', 'Selected ' + agentDescription(agent));
-    }
-  }
-  return;
-}
-
 function agentDescription(agent: Agent): string {
   let description = `agent: name = ${agent.name}, team = ${agent.team}, energy = ${agent.energy}`;
-  if (agent.action) description += `${agent.action}(…) = ${agent.actionResult}`;
+  if (agent.action) description += `, ${agent.action}(…) = ${agent.actionResult}`;
   if (agent.acceptedTask) description += `, ${agent.acceptedTask}`;
   if (agent.disabled) description += ', disabled';
   return description;
@@ -171,6 +162,7 @@ function box(child: VNode | undefined): VNode | undefined {
 }
 
 export function overlay(ctrl: Ctrl): VNode {
+  const selectedAgent = ctrl.map.selectedAgent();
   return h('div#overlay', [
     ctrl.vm.static && (ctrl.replay ? replay(ctrl.replay) : h('div.box', ctrl.vm.static.sim)),
     (ctrl.vm.state === 'error' || ctrl.vm.state === 'offline') ?
@@ -192,7 +184,7 @@ export function overlay(ctrl: Ctrl): VNode {
           }
         }, ctrl.maps.length ? 'Global view' : 'Agent view'),
       ]),
-      ctrl.map.vm.selected ? box(selected(ctrl.vm.dynamic, ctrl.map.vm.selected)) : undefined,
+      selectedAgent ? box(h('div', 'Selected ' + agentDescription(selectedAgent))) : undefined,
       ctrl.vm.hover ? box(hover(ctrl.vm.dynamic, ctrl.vm.hover)) : undefined,
     ] : [])
   ]);

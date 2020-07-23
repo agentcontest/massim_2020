@@ -19,8 +19,7 @@ function allMaps(ctrl: Ctrl): VNode | undefined {
   teamNames.sort();
 
   return h('div.maps', ctrl.maps.map(m => {
-    if (!ctrl.vm.dynamic) return;
-    const agent = ctrl.vm.dynamic.entities.find(a => a.id === m.vm.selected);
+    const agent = m.selectedAgent();
     if (!agent) return;
     const acceptedTask = agent.acceptedTask;
     return h('div', {

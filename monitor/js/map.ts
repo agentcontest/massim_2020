@@ -232,14 +232,12 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
 
   // draw grid
   const transform = ctrl.vm.transform;
-  if (opts?.viewOnly && ctrl.vm.selected && ctrl.root.vm.dynamic) {
+  const selectedAgent = ctrl.selectedAgent();
+  if (opts?.viewOnly && selectedAgent) {
     // auto center to selection
-    const agent =  ctrl.root.vm.dynamic.entities.find(a => a.id === ctrl.vm.selected);
-    if (agent) {
-      transform.scale = Math.min(canvas.width, canvas.height) / (agent.vision * 2 + 3);
-      transform.x = canvas.width / 2 - (agent.x + 0.5) * transform.scale;
-      transform.y = canvas.height / 2 - (agent.y + 0.5) * transform.scale;
-    }
+    transform.scale = Math.min(canvas.width, canvas.height) / (selectedAgent.vision * 2 + 3);
+    transform.x = canvas.width / 2 - (selectedAgent.x + 0.5) * transform.scale;
+    transform.y = canvas.height / 2 - (selectedAgent.y + 0.5) * transform.scale;
   }
   ctx.translate(transform.x, transform.y);
   ctx.scale(transform.scale, transform.scale);
@@ -351,14 +349,6 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
           ctx.fillStyle = 'white';
           ctx.fillText(shortName(agent), dx + agent.x + 0.5, dy + agent.y + 0.5);
 
-          // attachables of selected agent
-          if (agent.id === ctrl.vm.selected && agent.attached) {
-            ctx.fillStyle = styles.hover;
-            for (const attached of agent.attached) {
-              if (attached.x != agent.x || attached.y != agent.y) ctx.fillRect(dx + attached.x, dy + attached.y, 1, 1);
-            }
-          }
-
           // agent action
           if (agent.action == 'clear' && agent.actionResult.indexOf('failed_') != 0) {
             const x = dx + agent.x + parseInt(agent.actionParams[0], 10);
@@ -366,6 +356,16 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
             ctx.lineWidth = 0.05;
             ctx.strokeStyle = 'red';
             drawArea(ctx, x, y, 1);
+          }
+        }
+
+        // attachables of selected agent
+        if (selectedAgent?.attached) {
+          ctx.fillStyle = styles.hover;
+          for (const attached of selectedAgent.attached) {
+            if (attached.x != selectedAgent.x || attached.y != selectedAgent.y) {
+              ctx.fillRect(dx + attached.x, dy + attached.y, 1, 1);
+            }
           }
         }
 
