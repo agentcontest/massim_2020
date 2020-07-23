@@ -263,7 +263,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
       for (let x = xmin; x <= xmax; x++) {
         switch (ctrl.root.vm.dynamic.cells[mod(y, grid.height)][mod(x, grid.width)]) {
           case 1: // GOAL
-            ctx.fillStyle = styles.goalFill;
+            ctx.fillStyle = styles.goal;
             ctx.fillRect(x, y, 1, 1);
             break;
           case 2: // OBSTABLE

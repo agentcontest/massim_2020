@@ -76,8 +76,11 @@ function hover(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld, pos: Pos): VNod
   const r = [h('li', `x = ${pos.x}, y = ${pos.y}`)];
 
   // terrain
-  if (terrain === 0) r.push(h('li', 'terrain: empty'));
-  else if (terrain === 1) r.push(h('li', 'terrain: goal'));
+  if (terrain === 1) r.push(h('li', ['terrain: ', h('span', {
+    style: {
+      background: styles.goal,
+    }
+  }, 'goal')]));
   else if (terrain === 2) r.push(h('li', 'terrain: obstacle'));
 
   // dispensers
