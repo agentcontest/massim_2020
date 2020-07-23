@@ -58,7 +58,7 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
   ]
 }
 
-function hover(ctrl: Ctrl, world: DynamicWorld, pos: Pos): VNode | undefined {
+function hover(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld, pos: Pos): VNode | undefined {
   if (!world.cells[pos.y]) return;
   const terrain = world.cells[pos.y][pos.x];
   if (typeof terrain == 'undefined') return;
@@ -74,7 +74,7 @@ function hover(ctrl: Ctrl, world: DynamicWorld, pos: Pos): VNode | undefined {
   // dispensers
   for (const dispenser of world.dispensers) {
     if (dispenser.x == pos.x && dispenser.y == pos.y) {
-      r.push(h('li', `dispenser: type = ${dispenser.type}`));
+      r.push(h('li', ['dispenser: type = ', blockSpan(st, dispenser.type)]));
     }
   }
 
@@ -90,7 +90,7 @@ function hover(ctrl: Ctrl, world: DynamicWorld, pos: Pos): VNode | undefined {
   // blocks
   for (const block of world.blocks) {
     if (block.x == pos.x && block.y == pos.y) {
-      r.push(h('li', `block: type = ${block.type}`));
+      r.push(h('li', ['block: type = ', blockSpan(st, block.type)]));
     }
   }
 
@@ -102,6 +102,15 @@ function hover(ctrl: Ctrl, world: DynamicWorld, pos: Pos): VNode | undefined {
   }
 
   return h('ul', r);
+}
+
+function blockSpan(st: StaticWorld, type: string): VNode {
+  return h('span', {
+    style: {
+      background: styles.blocks[st.blockTypes.indexOf(type)],
+      color: 'white',
+    }
+  }, type)
 }
 
 function agentDescription(ctrl: Ctrl, agent: Agent): Array<VNode | string> {
@@ -202,7 +211,7 @@ export function overlay(ctrl: Ctrl): VNode {
         }, ctrl.maps.length ? 'Global view' : 'Agent view'),
       ]),
       selectedAgent ? box(h('div', ['Selected agent: ', ...agentDescription(ctrl, selectedAgent)])) : undefined,
-      ctrl.vm.hover ? box(hover(ctrl, ctrl.vm.dynamic, ctrl.vm.hover)) : undefined,
+      ctrl.vm.hover ? box(hover(ctrl, ctrl.vm.static, ctrl.vm.dynamic, ctrl.vm.hover)) : undefined,
     ] : [])
   ]);
 }
