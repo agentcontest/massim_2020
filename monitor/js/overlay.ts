@@ -1,6 +1,6 @@
 import { Agent, StaticWorld, DynamicWorld, Task, Pos } from './interfaces';
 import { Ctrl, ReplayCtrl } from './ctrl';
-import { drawBlocks } from './map';
+import { drawBlocks, drawAgent } from './map';
 import  * as styles from './styles';
 
 import { h } from 'snabbdom';
@@ -173,10 +173,7 @@ function taskDetails(ctrl: Ctrl, st: StaticWorld, dynamic: DynamicWorld, task: T
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.translate((elementWidth - gridSize) / 2, (elementHeight - gridSize) / 2);
     ctx.scale(gridSize, gridSize);
-    ctx.beginPath();
-    ctx.rect(0.4, 0.4, 0.2, 0.2);
-    ctx.fillStyle = 'red';
-    ctx.fill();
+    drawAgent(ctx, 0, 0, { x: 0, y: 0 }, 0);
     drawBlocks(ctx, 0, 0, st, task.requirements);
     ctx.restore();
   };

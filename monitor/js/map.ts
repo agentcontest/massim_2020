@@ -368,34 +368,8 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
         // agents
         for (const agent of ctrl.root.vm.dynamic.entities) {
           if (visible(xmin, xmax, ymin, ymax, agent, dx, dy)) {
-            ctx.lineWidth = 0.125;
-            ctx.strokeStyle = 'black';
-
-            ctx.beginPath();
-            ctx.moveTo(dx + agent.x + 0.5, dy + agent.y);
-            ctx.lineTo(dx + agent.x + 0.5, dy + agent.y + 1);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(dx + agent.x, dy + agent.y + 0.5);
-            ctx.lineTo(dx + agent.x + 1, dy + agent.y + 0.5);
-            ctx.stroke();
-
             const teamIndex = ctrl.root.vm.teamNames.indexOf(agent.team);
-            const color = styles.teams[teamIndex];
-            if (teamIndex === 0) {
-              ctx.lineWidth = 0.05;
-              const margin = (1 - 15 / 16 / Math.sqrt(2)) / 2;
-              const r = rect(1, dx + agent.x, dy + agent.y, margin);
-              drawBlock(ctx, r, color, 'white', 'black');
-            } else {
-              ctx.lineWidth = 0.04;
-              const r = rect(1, dx + agent.x, dy + agent.y, 0.0625);
-              drawRotatedBlock(ctx, r, color, 'white', 'black');
-            }
-
-            ctx.fillStyle = 'white';
-            ctx.fillText(shortName(agent), dx + agent.x + 0.5, dy + agent.y + 0.5);
+            drawAgent(ctx, dx, dy, agent, teamIndex);
           }
 
           // agent action
@@ -518,6 +492,42 @@ function rect(blockSize: number, x: number, y: number, margin: number): Rect {
   };
 }
 
+interface DrawAgent extends Positionable {
+  name?: string
+}
+
+export function drawAgent(ctx: CanvasRenderingContext2D, dx: number, dy: number, agent: DrawAgent, teamIndex: number) {
+  ctx.lineWidth = 0.125;
+  ctx.strokeStyle = 'black';
+
+  ctx.beginPath();
+  ctx.moveTo(dx + agent.x + 0.5, dy + agent.y);
+  ctx.lineTo(dx + agent.x + 0.5, dy + agent.y + 1);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(dx + agent.x, dy + agent.y + 0.5);
+  ctx.lineTo(dx + agent.x + 1, dy + agent.y + 0.5);
+  ctx.stroke();
+
+  const color = styles.teams[teamIndex];
+  if (teamIndex === 0) {
+    ctx.lineWidth = 0.05;
+    const margin = (1 - 15 / 16 / Math.sqrt(2)) / 2;
+    const r = rect(1, dx + agent.x, dy + agent.y, margin);
+    drawBlock(ctx, r, color, 'white', 'black');
+  } else {
+    ctx.lineWidth = 0.04;
+    const r = rect(1, dx + agent.x, dy + agent.y, 0.0625);
+    drawRotatedBlock(ctx, r, color, 'white', 'black');
+  }
+
+  if (agent.name) {
+    ctx.fillStyle = 'white';
+    ctx.fillText(shortAgentName(agent.name), dx + agent.x + 0.5, dy + agent.y + 0.5);
+  }
+}
+
 export function drawBlocks(ctx: CanvasRenderingContext2D, dx: number, dy: number, st: StaticWorld, blocks: Block[]) {
   for (const block of blocks) {
     ctx.lineWidth = 0.05;
@@ -586,7 +596,7 @@ function drawRotatedBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string,
   ctx.stroke();
 }
 
-function shortName(agent: Agent): string {
-  const match = agent.name.match(/^agent-?([A-Za-z])[A-Za-z-_]*([0-9]+)$/);
-  return match ? match[1] + match[2] : agent.name;
+function shortAgentName(name: string): string {
+  const match = name.match(/^agent-?([A-Za-z])[A-Za-z-_]*([0-9]+)$/);
+  return match ? match[1] + match[2] : name;
 }
