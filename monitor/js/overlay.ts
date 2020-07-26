@@ -58,7 +58,7 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
             value: t.name
           },
         }, [
-          `${t.reward}$ for ${t.name} until step ${t.deadline}`,
+          `$${t.reward} for ${t.name} until step ${t.deadline}`,
           acceptedBy ? ` (${acceptedBy} accepted)` : undefined,
         ]);
       }),
