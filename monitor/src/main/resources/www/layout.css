@@ -35,6 +35,11 @@ p {
   word-wrap: anywhere;
 }
 
+#overlay canvas {
+  margin: 0.8em auto;
+  display: block;
+}
+
 span.no_action, span.unknown {
   color: red;
 }
