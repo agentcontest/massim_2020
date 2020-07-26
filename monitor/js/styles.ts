@@ -1,6 +1,7 @@
 export const teams = ['blue', 'green', '#ff1493', '#8b0000'];
 
 export const goal = 'rgba(255, 0, 0, 0.4)';
+export const goalOnLight = '#f58f8f';
 
 export const obstacle = '#333';
 

@@ -78,7 +78,8 @@ function hover(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld, pos: Pos): VNod
   // terrain
   if (terrain === 1) r.push(h('li', ['terrain: ', h('span', {
     style: {
-      background: styles.goal,
+      background: styles.goalOnLight,
+      color: 'black',
     }
   }, 'goal')]));
   else if (terrain === 2) r.push(h('li', 'terrain: obstacle'));
