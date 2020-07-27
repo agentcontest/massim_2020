@@ -340,15 +340,15 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
         for (const dispenser of ctrl.root.vm.dynamic.dispensers) {
           if (visible(xmin, xmax, ymin, ymax, dispenser, dx, dy)) {
             ctx.lineWidth = 2 * 0.025;
-            const r1 = rect(1, dx + dispenser.x, dy + dispenser.y, 0.025);
             const color = styles.blocks[ctrl.root.vm.static.blockTypes.indexOf(dispenser.type) % styles.blocks.length];
+            const r1 = rect(1, dx + dispenser.x, dy + dispenser.y, 0.025);
             drawBlock(ctx, r1, color, 'white', 'black');
-            const r2 = rect(1, dx + dispenser.x, dy + dispenser.y, 4 * 0.025);
+            const r2 = rect(1, dx + dispenser.x, dy + dispenser.y, 5 * 0.025);
             drawBlock(ctx, r2, color, 'white', 'black');
-            const r3 = rect(1, dx + dispenser.x, dy + dispenser.y, 8 * 0.025);
+            const r3 = rect(1, dx + dispenser.x, dy + dispenser.y, 9 * 0.025);
             drawBlock(ctx, r3, color, 'white', 'black');
             ctx.fillStyle = 'white';
-            ctx.fillText(`[${dispenser.type}]`, dx + dispenser.x + 0.5, dy + dispenser.y + 0.5);
+            ctx.fillText(dispenser.type, dx + dispenser.x + 0.5, dy + dispenser.y + 0.5);
           }
         }
 
@@ -597,6 +597,6 @@ function drawRotatedBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string,
 }
 
 function shortAgentName(name: string): string {
-  const match = name.match(/^agent-?([A-Za-z])[A-Za-z-_]*([0-9]+)$/);
-  return match ? match[1] + match[2] : name;
+  const match = name.match(/^agent-?[A-Za-z][A-Za-z-_]*([0-9]+)$/);
+  return match ? match[1] : name;
 }
