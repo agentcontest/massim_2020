@@ -51,7 +51,7 @@ export class Ctrl {
 
     ws.onclose = () => {
       console.log('Disconnected');
-      setTimeout(this.connect, 5000);
+      setTimeout(() => this.connect(), 5000);
       this.vm.state = 'offline';
       this.redraw();
     };

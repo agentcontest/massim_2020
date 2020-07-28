@@ -26,7 +26,7 @@ export function makeStatusCtrl(redraw: Redraw): StatusCtrl {
 
     ws.onclose = () => {
       console.log('Disconnected');
-      setTimeout(connect, 5000);
+      setTimeout(() => connect(), 5000);
       vm.data = undefined;
       vm.state = 'offline';
       redraw();
