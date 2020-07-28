@@ -322,7 +322,8 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
     for (let dy = Math.floor(ymin / grid.height) * grid.height; dy <= ymax + grid.height; dy += grid.height) {
       for (let dx = Math.floor(xmin / grid.width) * grid.width; dx <= xmax + grid.width; dx += grid.width) {
         // draw axis
-        ctx.strokeStyle = 'black';
+        ctx.globalCompositeOperation = 'difference';
+        ctx.strokeStyle = 'white';
         ctx.lineWidth = 0.3;
         ctx.beginPath();
         if (ctrl.root.vm.dynamic.taskboards) {
@@ -335,6 +336,7 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
           ctx.rect(dx, dy, grid.width, grid.height);
         }
         ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
 
         // dispensers
         for (const dispenser of ctrl.root.vm.dynamic.dispensers) {
