@@ -1,0 +1,33 @@
+{
+  "server" : {
+    "tournamentMode" : "round-robin",
+    "teamsPerMatch" : 2,
+    "launch" : "key",
+    "port" : 12300,
+    "backlog" : 10000,
+    "agentTimeout" : 4000,
+    "resultPath" : "results",
+    "logLevel" : "normal",
+    "logPath" : "logs",
+    "replayPath" : "replays",
+    "maxPacketLength" : 65536,
+    "waitBetweenSimulations" : 5000
+  },
+
+  "manual-mode" : [
+    ["A", "B"],
+    ["B", "C"],
+    ["A", "C"]
+  ],
+
+  "match" : [
+    "$(sim-test/tasks.json)",
+    "$(sim-test/large-events.json)",
+    "$(sim-test/more-obstacles.json)"
+  ],
+
+  "teams" : {
+    "A" : {"prefix" : "agent", "password" : "1"},
+    "B" : {"prefix" : "agent", "password" : "1"}
+  }
+}

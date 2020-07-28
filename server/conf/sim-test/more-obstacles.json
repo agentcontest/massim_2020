@@ -1,0 +1,50 @@
+{
+    "description": "more obstacles, fewer events",
+
+    "NOsetup" : "conf/setup/test.txt",
+
+    "steps" : 750,
+    "randomSeed" : 17,
+    "randomFail" : 1,
+    "entities" : {"standard" : 15},
+    "clusterBounds" : [1,3],
+
+    "clearSteps" : 3,
+    "clearEnergyCost" : 30,
+    "disableDuration" : 4,
+    "maxEnergy" : 300,
+    "attachLimit" : 10,
+
+    "grid" : {
+      "height" : 70,
+      "width" : 70,
+      "instructions": [
+        ["cave", 0.55, 9, 5, 4]
+      ],
+      "goals": {
+        "number" : 5,
+        "size" : [0,1]
+      }
+    },
+
+    "blockTypes" : [3, 3],
+    "dispensers" : [10, 15],
+
+    "tasks" : {
+      "size" : [1, 4],
+      "duration" : [100, 200],
+      "probability" : 0.05,
+      "taskboards" : 4,
+      "rewardDecay" : [1, 2],
+      "lowerRewardLimit" : 10,
+      "distanceToTaskboards" : 8
+    },
+
+    "events" : {
+      "chance" : 5,
+      "radius" : [3, 5],
+      "warning" : 5,
+      "create" : [-3, 1],
+      "perimeter" : 2
+    }
+}
