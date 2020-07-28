@@ -333,7 +333,10 @@ function render(canvas: HTMLCanvasElement, ctrl: MapCtrl, opts: MapViewOpts | un
           ctx.lineTo(dx, dy + 1.5);
         } else {
           // 2019
-          ctx.rect(dx, dy, grid.width, grid.height);
+          ctx.moveTo(dx, dy);
+          ctx.lineTo(dx + grid.width, dy);
+          ctx.moveTo(dx, dy);
+          ctx.lineTo(dx, dy + grid.height);
         }
         ctx.stroke();
         ctx.globalCompositeOperation = 'source-over';
