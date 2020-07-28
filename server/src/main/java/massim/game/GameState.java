@@ -77,7 +77,7 @@ class GameState {
         var clusterSizes = config.getJSONArray("clusterBounds");
         int clusterSizeMin = clusterSizes.getInt(0);
         int clusterSizeMax = clusterSizes.getInt(1);
-        Log.log(Log.Level.NORMAL, "config.clusterBOunds: " + clusterSizeMin + ", " + clusterSizeMax);
+        Log.log(Log.Level.NORMAL, "config.clusterBounds: " + clusterSizeMin + ", " + clusterSizeMax);
 
         Entity.clearEnergyCost = config.getInt("clearEnergyCost");
         Log.log(Log.Level.NORMAL, "config.clearEnergyCost: " + Entity.clearEnergyCost);
