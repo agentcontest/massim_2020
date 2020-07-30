@@ -2,6 +2,24 @@
 
 ## 2020
 
+### MASSim 2020-2.0 - Registration release
+
+* scenario
+  * new more distinctive failure codes for some actions
+  * new percept for team size
+  * new status messages in the protocol for querying which teams are currently playing which simulation
+  * randomized which agents start in clusters
+  * starting clusters have variables size
+  * task boards can now be added via the setup file
+  * some new sample configs
+* eismassim
+  * new entity for the new status messages
+* monitor
+  * now wraps around (+ marks the origin)
+  * new view for each agent's local perspective
+  * zoom!
+  * select agents!
+
 ### MASSim 2020-1.0 - Initial release
 
 * general
@@ -17,7 +35,7 @@
   * new option to add a pause between consecutive simulations
 * eismassim
   * update to newest EIS version
-  * new option that delivers percepts only once 
+  * new option that delivers percepts only once
 
 ## 2019
 
