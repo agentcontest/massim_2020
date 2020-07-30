@@ -19,6 +19,7 @@
   * new view for each agent's local perspective
   * zoom!
   * select agents!
+  * track accepted tasks
 
 ### MASSim 2020-1.0 - Initial release
 
