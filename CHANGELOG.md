@@ -9,7 +9,7 @@
   * new percept for team size
   * new status messages in the protocol for querying which teams are currently playing which simulation
   * randomized which agents start in clusters
-  * starting clusters have variables size
+  * starting clusters have variable size (configurable interval)
   * task boards can now be added via the setup file
   * some new sample configs
 * eismassim
