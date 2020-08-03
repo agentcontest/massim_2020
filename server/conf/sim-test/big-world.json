@@ -1,0 +1,50 @@
+{
+    "description": "50 agents, small clusters, non-square map, complex layout",
+
+    "NOsetup" : "conf/setup/test.txt",
+
+    "steps" : 750,
+    "randomSeed" : 17,
+    "randomFail" : 1,
+    "entities" : {"standard" : 50},
+    "clusterBounds" : [1,5],
+
+    "clearSteps" : 3,
+    "clearEnergyCost" : 30,
+    "disableDuration" : 4,
+    "maxEnergy" : 300,
+    "attachLimit" : 10,
+
+    "grid" : {
+      "height" : 50,
+      "width" : 100,
+      "instructions": [
+        ["cave", 0.55, 9, 5, 4]
+      ],
+      "goals": {
+        "number" : 3,
+        "size" : [1,2]
+      }
+    },
+
+    "blockTypes" : [3, 3],
+    "dispensers" : [10, 15],
+
+    "tasks" : {
+      "size" : [1, 4],
+      "duration" : [100, 200],
+      "taskboards" : 5,
+      "probability" : 0.1,
+      "rewardDecay" : [1, 1],
+      "lowerRewardLimit" : 10,
+      "distanceToTaskboards" : 10
+    },
+
+    "events" : {
+      "chance" : 15,
+      "radius" : [3, 5],
+      "warning" : 5,
+      "create" : [-3, 1],
+      "perimeter" : 2
+    }
+}

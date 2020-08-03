@@ -21,9 +21,12 @@
   ],
 
   "match" : [
+    "$(sim-test/small-world.json)",
+    "$(sim-test/big-world.json)",
     "$(sim-test/tasks.json)",
     "$(sim-test/large-events.json)",
-    "$(sim-test/more-obstacles.json)"
+    "$(sim-test/more-obstacles.json)",
+    "$(sim-test/grid-on-fire.json)"
   ],
 
   "teams" : {
