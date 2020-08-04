@@ -1,0 +1,48 @@
+{
+    "description" : "qualification round 1 (candidate) config. goal: complete 1 task.",
+
+    "steps" : 300,
+    "randomSeed" : 17,
+    "randomFail" : 1,
+    "entities" : {"standard" : 15},
+    "clusterBounds" : [1,3],
+
+    "clearSteps" : 3,
+    "clearEnergyCost" : 30,
+    "disableDuration" : 4,
+    "maxEnergy" : 300,
+    "attachLimit" : 10,
+
+    "grid" : {
+      "height" : 70,
+      "width" : 70,
+      "instructions": [
+        ["cave", 0.45, 9, 5, 4]
+      ],
+      "goals": {
+        "number" : 3,
+        "size" : [1,2]
+      }
+    },
+
+    "blockTypes" : [3, 3],
+    "dispensers" : [5, 10],
+
+    "tasks" : {
+      "size" : [2, 3],
+      "duration" : [100, 200],
+      "probability" : 0.1,
+      "taskboards" : 3,
+      "rewardDecay" : [1, 2],
+      "lowerRewardLimit" : 10,
+      "distanceToTaskboards" : 8
+    },
+
+    "events" : {
+      "chance" : 15,
+      "radius" : [3, 5],
+      "warning" : 5,
+      "create" : [-3, 1],
+      "perimeter" : 2
+    }
+}

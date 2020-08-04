@@ -1,0 +1,25 @@
+{
+  "server" : {
+    "tournamentMode" : "round-robin",
+    "teamsPerMatch" : 1,
+    "launch" : "key",
+    "port" : 12300,
+    "backlog" : 10000,
+    "agentTimeout" : 4000,
+    "resultPath" : "results",
+    "logLevel" : "normal",
+    "logPath" : "logs",
+    "replayPath" : "replays",
+    "maxPacketLength" : 65536,
+    "waitBetweenSimulations" : 5000
+  },
+
+  "match" : [
+    "$(sim/sim-q1.json)",
+    "$(sim/sim-q2.json)"
+  ],
+
+  "teams" : {
+    "A" : {"prefix" : "agent", "password" : "1"}
+  }
+}
