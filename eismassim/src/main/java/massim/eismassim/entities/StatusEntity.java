@@ -95,7 +95,7 @@ public class StatusEntity extends Entity {
                 for (var teamSize : status.teamSizes) {
                     teamSizes.add(new Numeral(teamSize));
                 }
-                percepts.add(new Percept("teamSizes", teams));
+                percepts.add(new Percept("teamSizes", teamSizes));
 
                 percepts.add(new Percept("currentSim", new Numeral(status.currentSimulation)));
 
