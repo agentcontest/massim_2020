@@ -37,7 +37,7 @@ public class Monitor {
     public Monitor(int port) throws ExecutionException, InterruptedException {
         ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         InetSocketAddress bind = new InetSocketAddress(port);
-        String publicUri = "http://127.0.0.1:" + port + "/";
+        String publicUri = "http://localhost:" + port + "/";
 
         WebServer server = WebServers.createWebServer(executor, bind, URI.create(publicUri))
             .add("/live/monitor", monitorSink)
@@ -62,7 +62,7 @@ public class Monitor {
 
         ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         InetSocketAddress bind = new InetSocketAddress(port);
-        String publicUri = "http://127.0.0.1:" + port + "/";
+        String publicUri = "http://localhost:" + port + "/";
 
         WebServer server = WebServers.createWebServer(executor, bind, URI.create(publicUri))
             .add(new EmbeddedResourceHandler("www"))
