@@ -113,7 +113,7 @@ export class ReplayCtrl {
   private cache = new Map<number, any>();
 
   constructor(readonly root: Ctrl, readonly path: string) {
-    if (path[path.length - 1] == '/') path = path.substr(0, path.length - 1);
+    if (path[path.length - 1] == '/') this.path = path.substr(0, path.length - 1);
     this.suffix = location.pathname == '/' ? `?sri=${Math.random().toString(36).slice(-8)}` : '';
 
     this.loadStatic();
