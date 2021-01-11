@@ -1,11 +1,10 @@
 package massim.eismassim;
 
+import eis.PerceptUpdate;
 import eis.exceptions.ActException;
 import eis.exceptions.EntityException;
 import eis.exceptions.PerceiveException;
 import eis.iilang.Action;
-import eis.iilang.Numeral;
-import eis.iilang.Parameter;
 import eis.iilang.Percept;
 import massim.protocol.messages.*;
 import org.json.JSONException;
@@ -29,7 +28,6 @@ public abstract class ConnectedEntity extends Entity {
     // config for all entities
     private static int timeout; // timeout for performing actions (if scheduling is enabled)
     private static boolean scheduling = false; // send only one action per action-id?
-    private static boolean times = false; // annotate percepts with timestamp?
     private static boolean notifications = false; // send percepts as notifications?
     private static boolean queued = false; // only get one set of percepts per call
     private static boolean onlyOnce = false; // clear percepts after retrieval
@@ -50,12 +48,16 @@ public abstract class ConnectedEntity extends Entity {
     private volatile boolean terminated = false;
 
     private Set<Percept> simStartPercepts = Collections.synchronizedSet(new HashSet<>());
+    private Set<Percept> previousSimStartPercepts = Collections.synchronizedSet(new HashSet<>());
     private Set<Percept> requestActionPercepts = Collections.synchronizedSet(new HashSet<>());
+    private Set<Percept> previousRequestActionPercepts = Collections.synchronizedSet(new HashSet<>());
     private Set<Percept> simEndPercepts = Collections.synchronizedSet(new HashSet<>());
+    private Set<Percept> previousSimEndPercepts = Collections.synchronizedSet(new HashSet<>());
     private Set<Percept> byePercepts = Collections.synchronizedSet(new HashSet<>());
+    private Set<Percept> previousByePercepts = Collections.synchronizedSet(new HashSet<>());
 
     // used to store the percepts in the order of arrival, if queuing is activated
-    private AbstractQueue<Collection<Percept>> perceptsQueue = new ConcurrentLinkedQueue<>();
+    private AbstractQueue<PerceptUpdate> perceptsQueue = new ConcurrentLinkedQueue<>();
 
     // action IDs
     private long lastUsedActionId;
@@ -113,13 +115,6 @@ public abstract class ConnectedEntity extends Entity {
      */
     static void setTimeout(int timeout) {
         ConnectedEntity.timeout = timeout;
-    }
-
-    /**
-     * Enables timestamp annotations for percepts.
-     */
-    static void enableTimeAnnotations() {
-        times = true;
     }
 
     /**
@@ -196,9 +191,15 @@ public abstract class ConnectedEntity extends Entity {
                 simStartPercepts.add(new Percept("simStart"));
                 simStartPercepts.addAll(simStartToIIL(startMessage));
 
-                if (times) annotatePercepts(simStartPercepts, new Numeral(startMessage.getTime()));
                 if (notifications) EI.sendNotifications(getName(), simStartPercepts);
-                if (queued) perceptsQueue.add(Collections.synchronizedSet(new HashSet<>(simStartPercepts)));
+                if (queued) {
+                	var addList = new ArrayList<>(simStartPercepts);
+            		addList.removeAll(previousSimStartPercepts);
+            		var delList = new ArrayList<>(previousSimStartPercepts);
+            		delList.removeAll(simStartPercepts);
+            		previousSimStartPercepts = Collections.synchronizedSet(new HashSet<>(simStartPercepts));
+                	perceptsQueue.add(new PerceptUpdate(addList, delList));
+                }
             }
             else if (msg instanceof RequestActionMessage) {
                 RequestActionMessage rac = (RequestActionMessage) msg;
@@ -208,10 +209,16 @@ public abstract class ConnectedEntity extends Entity {
                 requestActionPercepts.add(new Percept("requestAction"));
                 requestActionPercepts.addAll(requestActionToIIL(rac));
 
-                if (times) annotatePercepts(requestActionPercepts, new Numeral(rac.getTime()));
                 if (notifications) EI.sendNotifications(this.getName(), requestActionPercepts);
                 currentActionId = id;
-                if (queued) perceptsQueue.add(Collections.synchronizedSet(new HashSet<>(requestActionPercepts)));
+                if (queued) {
+                	var addList = new ArrayList<>(requestActionPercepts);
+            		addList.removeAll(previousRequestActionPercepts);
+            		var delList = new ArrayList<>(previousRequestActionPercepts);
+            		delList.removeAll(requestActionPercepts);
+            		previousRequestActionPercepts = Collections.synchronizedSet(new HashSet<>(requestActionPercepts));
+                	perceptsQueue.add(new PerceptUpdate(addList, delList));
+                }
             }
             else if (msg instanceof SimEndMessage) {
                 SimEndMessage endMessage = (SimEndMessage) msg;
@@ -220,19 +227,30 @@ public abstract class ConnectedEntity extends Entity {
                 simEndPercepts.clear();
                 simEndPercepts.add(new Percept("simEnd"));
                 simEndPercepts.addAll(simEndToIIL(endMessage));
-                if (times) annotatePercepts(simEndPercepts,new Numeral(endMessage.getTime()));
                 if (notifications) EI.sendNotifications(this.getName(), simEndPercepts);
-                if (queued) perceptsQueue.add(Collections.synchronizedSet(new HashSet<>(simEndPercepts)));
+                if (queued) {
+                	var addList = new ArrayList<>(simEndPercepts);
+            		addList.removeAll(previousSimEndPercepts);
+            		var delList = new ArrayList<>(previousSimEndPercepts);
+            		delList.removeAll(simEndPercepts);
+            		previousSimEndPercepts = Collections.synchronizedSet(new HashSet<>(simEndPercepts));
+                	perceptsQueue.add(new PerceptUpdate(addList, delList));
+                }
             }
             else if (msg instanceof ByeMessage) {
-                ByeMessage byeMessage = (ByeMessage) msg;
                 simStartPercepts.clear();
                 requestActionPercepts.clear();
                 byePercepts.clear();
                 byePercepts.add(new Percept("bye"));
-                if (times) annotatePercepts(byePercepts,new Numeral(byeMessage.getTime()));
                 if (notifications) EI.sendNotifications(this.getName(), byePercepts);
-                if (queued) perceptsQueue.add(Collections.synchronizedSet(new HashSet<>(byePercepts)));
+                if (queued) {
+                	var addList = new ArrayList<>(byePercepts);
+            		addList.removeAll(previousByePercepts);
+            		var delList = new ArrayList<>(previousByePercepts);
+            		delList.removeAll(byePercepts);
+            		previousByePercepts = Collections.synchronizedSet(new HashSet<>(byePercepts));
+                	perceptsQueue.add(new PerceptUpdate(addList, delList));
+                }
             }
             else {
                 log("unexpected type " + msg.getMessageType());
@@ -248,16 +266,16 @@ public abstract class ConnectedEntity extends Entity {
     }
 
     /**
-     * Retrieves all percepts for this entity.
      * If scheduling is enabled, the method blocks until a new action id, i.e. new percepts, are received
      * or the configured timeout is reached.
      * If queued is enabled, scheduling is overridden. Also, if queued is enabled, this method has to be called
      * repeatedly, as only one collection of percepts is removed from the queue with each call (until an empty list
      * is returned).
-     * @return all percepts for this entity
+     * @return the percepts for this entity
      * @throws PerceiveException if timeout configured and occurred
      */
-    public LinkedList<Percept> getAllPercepts() throws PerceiveException{
+    @Override
+    public PerceptUpdate getPercepts() throws PerceiveException{
         if (scheduling && !queued) {
             // wait for new action id or timeout
             long startTime = System.currentTimeMillis();
@@ -274,11 +292,38 @@ public abstract class ConnectedEntity extends Entity {
 
         if(!queued){
             //return all percepts
-            LinkedList<Percept> ret = new LinkedList<>();
-            ret.addAll(simStartPercepts);
-            ret.addAll(requestActionPercepts);
-            ret.addAll(simEndPercepts);
-            ret.addAll(byePercepts);
+        	var addList1 = new ArrayList<>(simStartPercepts);
+    		addList1.removeAll(previousSimStartPercepts);
+    		var delList1 = new ArrayList<>(previousSimStartPercepts);
+    		delList1.removeAll(simStartPercepts);
+    		previousSimStartPercepts = Collections.synchronizedSet(new HashSet<>(simStartPercepts));
+        	var ret = new PerceptUpdate(addList1,delList1);
+        	
+
+        	var addList2 = new ArrayList<>(requestActionPercepts);
+        	addList2.removeAll(previousRequestActionPercepts);
+    		var delList2 = new ArrayList<>(previousRequestActionPercepts);
+    		delList2.removeAll(requestActionPercepts);
+    		previousRequestActionPercepts = Collections.synchronizedSet(new HashSet<>(requestActionPercepts));
+    		ret.merge(new PerceptUpdate(addList2, delList2));
+        	
+
+        	var addList3 = new ArrayList<>(simEndPercepts);
+        	addList3.removeAll(previousSimEndPercepts);
+    		var delList3 = new ArrayList<>(simStartPercepts);
+    		delList3.removeAll(previousSimEndPercepts);
+    		previousSimEndPercepts = Collections.synchronizedSet(new HashSet<>(simEndPercepts));
+    		ret.merge(new PerceptUpdate(addList3, delList3));
+        	
+
+        	var addList4 = new ArrayList<>(byePercepts);
+        	addList4.removeAll(previousByePercepts);
+    		var delList4 = new ArrayList<>(previousByePercepts);
+    		delList4.removeAll(byePercepts);
+    		previousByePercepts = Collections.synchronizedSet(new HashSet<>(byePercepts));
+    		ret.merge(new PerceptUpdate(addList4, delList4));
+        	
+        	
             if (useIILang) log(ret.toString());
             if (onlyOnce) {
                 simStartPercepts.clear();
@@ -290,7 +335,7 @@ public abstract class ConnectedEntity extends Entity {
         }
         else{
             //return only the first queued elements
-            return perceptsQueue.peek() != null? new LinkedList<>(perceptsQueue.poll()) : new LinkedList<>();
+            return perceptsQueue.peek() != null? perceptsQueue.poll() : new PerceptUpdate();
         }
     }
 
@@ -395,15 +440,6 @@ public abstract class ConnectedEntity extends Entity {
             return authResponse.getResult().equals(AuthResponseMessage.OK);
         }
         return false;
-    }
-
-    /**
-     * Annotates a collection of percepts with a given parameter
-     * @param percepts the percepts to annotate
-     * @param param the new parameter
-     */
-    private void annotatePercepts(Collection<Percept> percepts, Parameter param) {
-        for( Percept p : percepts ) p.addParameter(param);
     }
 
     /**

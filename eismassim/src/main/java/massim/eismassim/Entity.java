@@ -1,9 +1,7 @@
 package massim.eismassim;
 
-import java.util.LinkedList;
-
+import eis.PerceptUpdate;
 import eis.exceptions.PerceiveException;
-import eis.iilang.Percept;
 
 public abstract class Entity implements Runnable {
 
@@ -24,8 +22,8 @@ public abstract class Entity implements Runnable {
      * If queued is enabled, scheduling is overridden. Also, if queued is enabled, this method has to be called
      * repeatedly, as only one collection of percepts is removed from the queue with each call (until an empty list
      * is returned).
-     * @return all percepts for this entity
+     * @return the percepts for this entity
      * @throws PerceiveException if timeout configured and occurred
      */
-    public abstract LinkedList<Percept> getAllPercepts() throws PerceiveException;
+    public abstract PerceptUpdate getPercepts() throws PerceiveException;
 }

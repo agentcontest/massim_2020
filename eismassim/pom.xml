@@ -60,7 +60,7 @@
         <dependency>
             <groupId>eishub</groupId>
             <artifactId>eis</artifactId>
-            <version>0.6.2</version>
+            <version>0.7.0</version>
         </dependency>
         <dependency>
             <groupId>massim</groupId>
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20190722</version>
+            <version>20201115</version>
         </dependency>
     </dependencies>
 
