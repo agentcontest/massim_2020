@@ -3,10 +3,7 @@ package massim.eismassim;
 import eis.EIDefaultImpl;
 import eis.PerceptUpdate;
 import eis.exceptions.*;
-import eis.iilang.Action;
-import eis.iilang.EnvironmentState;
-import eis.iilang.IILElement;
-import eis.iilang.Percept;
+import eis.iilang.*;
 import massim.eismassim.entities.ScenarioEntity;
 import massim.eismassim.entities.StatusEntity;
 import massim.protocol.messages.scenario.Actions;
@@ -36,7 +33,6 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
      */
     public EnvironmentInterface() {
         super();
-        setup();
     }
 
     /**
@@ -46,6 +42,10 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
     public EnvironmentInterface(String configFile){
         super();
         this.configFile = configFile;
+    }
+
+    public void init(Map<String, Parameter> parameters) throws ManagementException {
+        super.init(parameters);
         setup();
     }
 

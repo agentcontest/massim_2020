@@ -275,13 +275,13 @@ public abstract class ConnectedEntity extends Entity {
      * @throws PerceiveException if timeout configured and occurred
      */
     @Override
-    public PerceptUpdate getPercepts() throws PerceiveException{
+    public synchronized PerceptUpdate getPercepts() throws PerceiveException{
         if (scheduling && !queued) {
             // wait for new action id or timeout
             long startTime = System.currentTimeMillis();
             while (currentActionId <= lastUsedActionIdPercept || currentActionId == -1 ) {
                 try {
-                    TimeUnit.MILLISECONDS.wait(100);
+                    TimeUnit.MILLISECONDS.timedWait(this, 100);
                 } catch (InterruptedException ignored) {}
                 if (System.currentTimeMillis() - startTime >= timeout) {
                     throw new PerceiveException("timeout. no valid action-id available in time");
