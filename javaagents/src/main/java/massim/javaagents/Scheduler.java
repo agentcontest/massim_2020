@@ -132,12 +132,16 @@ public class Scheduler implements AgentListener, EnvironmentListener{
         // retrieve percepts for all agents
         List<Agent> newPerceptAgents = new ArrayList<>();
         agents.values().forEach(ag -> {
-            List<Percept> percepts = new ArrayList<>();
             try {
-                eis.getAllPercepts(ag.getName()).values().forEach(percepts::addAll);
-                if (!percepts.isEmpty()) newPerceptAgents.add(ag);
+                var addList = new ArrayList<Percept>();
+                var delList = new ArrayList<Percept>();
+                eis.getPercepts(ag.getName()).values().forEach(pUpdate -> {
+                    addList.addAll(pUpdate.getAddList());
+                    delList.addAll(pUpdate.getDeleteList());
+                });
+                if (!addList.isEmpty() || !delList.isEmpty()) newPerceptAgents.add(ag);
+                ag.setPercepts(addList, delList);
             } catch (PerceiveException ignored) { }
-            ag.setPercepts(percepts);
         });
 
         // step all agents which have new percepts
