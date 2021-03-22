@@ -516,7 +516,7 @@ export function drawAgent(ctx: CanvasRenderingContext2D, dx: number, dy: number,
   ctx.stroke();
 
   const color = styles.teams[teamIndex];
-  if (teamIndex === 0) {
+  if (teamIndex % 2 === 0) {
     ctx.lineWidth = 0.05;
     const margin = (1 - 15 / 16 / Math.sqrt(2)) / 2;
     const r = rect(1, dx + agent.x, dy + agent.y, margin);
