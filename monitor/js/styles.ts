@@ -1,4 +1,19 @@
-export const teams = ['blue', 'green', '#ff1493', '#8b0000', '#ed553b'];
+export const teams = [
+  'blue',
+  'green',
+  '#ff1493',
+  '#8b0000',
+  '#ed553b',
+  '#a63d40',
+  '#e9b872',
+  '#90a959',
+  '#6494aa',
+  '#192457',
+  '#2b5397',
+  '#a2dcdc',
+  '#ffffff',
+  '#f67e4b',
+];
 
 export const goal = 'rgba(255, 0, 0, 0.4)';
 export const goalOnLight = '#f58f8f';
