@@ -28,7 +28,7 @@ function simplePlural(n: number, singular: string): string {
 
 function teams(teamNames: string[], world: DynamicWorld): VNode[] {
   return teamNames.map((name, i) => h('div.team', {
-    style: { background: styles.teams[i] }
+    style: styles.teams[i]
   }, `${name}: $${world.scores[name]}`));
 }
 
@@ -134,9 +134,7 @@ function blockSpan(st: StaticWorld, type: string): VNode {
 function agentDescription(ctrl: Ctrl, agent: Agent): Array<VNode | string> {
   const r = [
     'name = ', h('span', {
-      style: {
-        background: styles.teams[ctrl.vm.teamNames.indexOf(agent.team)],
-      }
+      style: styles.teams[ctrl.vm.teamNames.indexOf(agent.team)],
     }, agent.name),
     `, energy = ${agent.energy}`
   ];
@@ -193,9 +191,7 @@ function taskDetails(ctrl: Ctrl, st: StaticWorld, dynamic: DynamicWorld, task: T
     ...(acceptedBy.length ? [
       h('p', `Accepted by ${simplePlural(acceptedBy.length, 'agent')}:`),
       h('ul', acceptedBy.map(by => h('li', h('a', {
-        style: {
-          background: styles.teams[ctrl.vm.teamNames.indexOf(by.team)],
-        },
+        style: styles.teams[ctrl.vm.teamNames.indexOf(by.team)],
         on: {
           click() {
             ctrl.map.vm.selected = by.id;

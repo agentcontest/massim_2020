@@ -471,7 +471,7 @@ function drawHover(ctx: CanvasRenderingContext2D, st: StaticWorld, world: Dynami
   }
   for (const agent of world.entities) {
     if (Math.abs(agent.x - hover.x) + Math.abs(agent.y - hover.y) <= agent.vision) {
-      ctx.strokeStyle = styles.teams[teamNames.indexOf(agent.team)];
+      ctx.strokeStyle = styles.teams[teamNames.indexOf(agent.team)].background;
       drawArea(ctx, dx + agent.x, dy + agent.y, 5);
     }
   }
@@ -515,20 +515,20 @@ export function drawAgent(ctx: CanvasRenderingContext2D, dx: number, dy: number,
   ctx.lineTo(dx + agent.x + 1, dy + agent.y + 0.5);
   ctx.stroke();
 
-  const color = styles.teams[teamIndex];
+  const style = styles.teams[teamIndex];
   if (teamIndex % 2 === 0) {
     ctx.lineWidth = 0.05;
     const margin = (1 - 15 / 16 / Math.sqrt(2)) / 2;
     const r = rect(1, dx + agent.x, dy + agent.y, margin);
-    drawBlock(ctx, r, color, 'white', 'black');
+    drawBlock(ctx, r, style.background, 'white', 'black');
   } else {
     ctx.lineWidth = 0.04;
     const r = rect(1, dx + agent.x, dy + agent.y, 0.0625);
-    drawRotatedBlock(ctx, r, color, 'white', 'black');
+    drawRotatedBlock(ctx, r, style.background, 'white', 'black');
   }
 
   if (agent.name) {
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = style.color;
     ctx.fillText(shortAgentName(agent.name), dx + agent.x + 0.5, dy + agent.y + 0.5);
   }
 }

@@ -1,18 +1,23 @@
-export const teams = [
-  'blue',
-  'green',
-  '#ff1493',
-  '#8b0000',
-  '#ed553b',
-  '#a63d40',
-  '#e9b872',
-  '#90a959',
-  '#6494aa',
-  '#192457',
-  '#2b5397',
-  '#a2dcdc',
-  '#ffffff',
-  '#f67e4b',
+export type Style = {
+  background: string,
+  color: string,
+};
+
+export const teams: Style[] = [
+  { background: '#0000ff', color: 'white' },
+  { background: '#00ff00', color: 'white' },
+  { background: '#ff1493', color: 'white' },
+  { background: '#8b0000', color: 'white' },
+  { background: '#ed553b', color: 'white' },
+  { background: '#a63d40', color: 'white' },
+  { background: '#e9b872', color: 'black' },
+  { background: '#90a959', color: 'white' },
+  { background: '#6494aa', color: 'white' },
+  { background: '#192457', color: 'white' },
+  { background: '#2b5397', color: 'white' },
+  { background: '#a2dcdc', color: 'black' },
+  { background: '#ffffff', color: 'white' },
+  { background: '#3ab1ad', color: 'white' },
 ];
 
 export const goal = 'rgba(255, 0, 0, 0.4)';
