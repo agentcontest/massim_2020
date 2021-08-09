@@ -25,7 +25,7 @@ function view(data: StatusData): VNode[] {
         ])
       ]),
       h('tbody', data.entities.map((entity) => {
-        const teamStyle = { style: styles.teams[teams.indexOf(entity.team)] };
+        const teamStyle = { style: styles.team(teams.indexOf(entity.team)) };
         return h('tr', [
           h('td', teamStyle, entity.team),
           h('td', teamStyle, entity.name),

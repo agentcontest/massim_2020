@@ -33,7 +33,7 @@ function agentView(ctrl: Ctrl): VNode | undefined {
         style: m.vm.selected === ctrl.map.vm.selected ? {
           background: 'white',
           color: 'black',
-        } : styles.teams[ctrl.vm.teamNames.indexOf(agent.team)],
+        } : styles.team(ctrl.vm.teamNames.indexOf(agent.team)),
         on: {
           click() {
             ctrl.map.vm.selected = agent.id;

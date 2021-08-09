@@ -3,7 +3,7 @@ export type Style = {
   color: string,
 };
 
-export const teams: Style[] = [
+const teams: Style[] = [
   { background: '#0000ff', color: 'white' },
   { background: '#00ff00', color: 'white' },
   { background: '#ff1493', color: 'white' },
@@ -19,6 +19,10 @@ export const teams: Style[] = [
   { background: '#ffffff', color: 'white' },
   { background: '#3ab1ad', color: 'white' },
 ];
+
+export function team(index: number): Style {
+  return teams[index % teams.length];
+}
 
 export const goal = 'rgba(255, 0, 0, 0.4)';
 export const goalOnLight = '#f58f8f';
