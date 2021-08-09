@@ -1,7 +1,6 @@
 import { init } from 'snabbdom';
 import { VNode } from 'snabbdom/vnode';
 import { classModule } from 'snabbdom/modules/class';
-import { propsModule } from 'snabbdom/modules/props';
 import { attributesModule } from 'snabbdom/modules/attributes';
 import { eventListenersModule } from 'snabbdom/modules/eventlisteners';
 import { styleModule } from 'snabbdom/modules/style';
@@ -15,7 +14,6 @@ import { statusView } from './statusView';
 
 const patch = init([
   classModule,
-  propsModule,
   attributesModule,
   styleModule,
   eventListenersModule

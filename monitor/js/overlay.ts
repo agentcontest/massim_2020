@@ -36,8 +36,8 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
   const selectedTask = world.tasks.find(t => t.name === ctrl.vm.taskName);
   return [
     h('select', {
-      props: {
-        value: ctrl.vm.taskName || '',
+      attrs: {
+        name: 'tasks',
       },
       on: {
         change: function(e) {
@@ -55,7 +55,8 @@ function tasks(ctrl: Ctrl, st: StaticWorld, world: DynamicWorld): VNode[] {
         const acceptedBy = world.entities.filter(a => a.acceptedTask === t.name).length;
         return h('option', {
           attrs: {
-            value: t.name
+            value: t.name,
+            selected: t.name === ctrl.vm.taskName,
           },
         }, [
           `$${t.reward} for ${t.name} until step ${t.deadline}`,
@@ -179,7 +180,7 @@ function taskDetails(ctrl: Ctrl, st: StaticWorld, dynamic: DynamicWorld, task: T
   const acceptedBy = dynamic.entities.filter(a => a.acceptedTask === task.name);
   return [
     h('canvas', {
-      props: {
+      attrs: {
         width: elementWidth,
         height: elementHeight
       },
@@ -208,7 +209,7 @@ function disconnected(): VNode {
   return h('div.box', [
     h('p', 'Live server not connected.'),
     h('a', {
-      props: { href: document.location.pathname + document.location.search }
+      attrs: { href: document.location.pathname + document.location.search }
     }, 'Retry now.')
   ]);
 }
