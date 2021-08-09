@@ -1,6 +1,6 @@
 import { Redraw, StaticWorld, DynamicWorld, ConnectionState, Pos } from './interfaces';
 import { MapCtrl, minScale, maxScale } from './map';
-import { compareAgent } from './util';
+import { compareAgent, compareNumbered } from './util';
 
 export interface ViewModel {
   state: ConnectionState
@@ -59,9 +59,9 @@ export class Ctrl {
 
   setStatic(st?: StaticWorld) {
     if (st) {
-      st.blockTypes.sort();
+      st.blockTypes.sort(compareNumbered);
       this.vm.teamNames = Object.keys(st.teams);
-      this.vm.teamNames.sort();
+      this.vm.teamNames.sort(compareNumbered);
     }
     this.vm.static = st;
     this.resetTransform();
