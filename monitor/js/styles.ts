@@ -5,7 +5,7 @@ export type Style = {
 
 const teams: Style[] = [
   { background: '#0000ff', color: 'white' },
-  { background: '#00ff00', color: 'white' },
+  { background: '#00ff00', color: 'black' },
   { background: '#ff1493', color: 'white' },
   { background: '#8b0000', color: 'white' },
   { background: '#ed553b', color: 'white' },
@@ -16,7 +16,7 @@ const teams: Style[] = [
   { background: '#192457', color: 'white' },
   { background: '#2b5397', color: 'white' },
   { background: '#a2dcdc', color: 'black' },
-  { background: '#ffffff', color: 'white' },
+  { background: '#27ec5f', color: 'black' },
   { background: '#3ab1ad', color: 'white' },
 ];
 
