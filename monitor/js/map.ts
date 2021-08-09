@@ -602,6 +602,7 @@ function drawRotatedBlock(ctx: CanvasRenderingContext2D, r: Rect, color: string,
 }
 
 function shortAgentName(name: string): string {
-  const match = name.match(/^agent-?[A-Za-z][A-Za-z-_]*([0-9]+)$/);
+  if (name.startsWith('agent')) name = name.slice('agent'.length);
+  const match = name.match(/^-?[A-Za-z][A-Za-z-_]*([0-9]+)$/);
   return match ? match[1] : name;
 }
