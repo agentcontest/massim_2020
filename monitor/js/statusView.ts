@@ -25,10 +25,10 @@ function view(data: StatusData): VNode[] {
         ])
       ]),
       h('tbody', data.entities.map((entity) => {
-        const teamColors = { style: { background: styles.teams[teams.indexOf(entity.team)] } };
+        const teamStyle = { style: styles.team(teams.indexOf(entity.team)) };
         return h('tr', [
-          h('td', teamColors, entity.team),
-          h('td', teamColors, entity.name),
+          h('td', teamStyle, entity.team),
+          h('td', teamStyle, entity.name),
           h('td', { attrs: { class: entity.action } }, entity.action),
           h('td', { attrs: { class: entity.actionResult } }, entity.actionResult)
         ]);
