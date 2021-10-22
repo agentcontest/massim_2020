@@ -3,17 +3,16 @@ package massim.javaagents.agents;
 import eis.iilang.Percept;
 import massim.javaagents.MailService;
 
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * An abstract Java agent.
  */
 public abstract class Agent {
 
-    private String name;
-    private MailService mailbox;
-    private List<Percept> percepts = new Vector<>();
+    private final String name;
+    private final MailService mailbox;
+    private final Set<Percept> percepts = Collections.synchronizedSet(new HashSet<>());
 
     /**
      * Constructor
@@ -74,10 +73,12 @@ public abstract class Agent {
 
     /**
      * Sets the percepts for this agent. Should only be called from the outside.
-     * @param percepts the new percepts for this agent.
+     * @param addList the new percepts for this agent.
+     * @param delList the now invalid percepts for this agent.
      */
-    public void setPercepts(List<Percept> percepts) {
-        this.percepts = percepts;
+    public void setPercepts(List<Percept> addList, List<Percept> delList) {
+        this.percepts.removeAll(delList);
+        this.percepts.addAll(addList);
     }
 
     /**
@@ -96,6 +97,6 @@ public abstract class Agent {
      * @return a list of all new percepts for the current step
      */
     List<Percept> getPercepts(){
-        return percepts;
+        return new ArrayList<>(percepts);
     }
 }

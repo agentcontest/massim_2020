@@ -1,11 +1,9 @@
 package massim.eismassim;
 
 import eis.EIDefaultImpl;
+import eis.PerceptUpdate;
 import eis.exceptions.*;
-import eis.iilang.Action;
-import eis.iilang.EnvironmentState;
-import eis.iilang.IILElement;
-import eis.iilang.Percept;
+import eis.iilang.*;
 import massim.eismassim.entities.ScenarioEntity;
 import massim.eismassim.entities.StatusEntity;
 import massim.protocol.messages.scenario.Actions;
@@ -18,14 +16,13 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Environment interface to the MASSim server following the Environment Interface Standard (EIS).
  */
 public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
-
-    private Set<String> supportedActions = new HashSet<>();
+	private static final long serialVersionUID = 1L;
+	private Set<String> supportedActions = new HashSet<>();
     private Map<String, Entity> entities = new HashMap<>();
 
     private String configFile = "eismassimconfig.json";
@@ -36,7 +33,6 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
      */
     public EnvironmentInterface() {
         super();
-        setup();
     }
 
     /**
@@ -46,6 +42,10 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
     public EnvironmentInterface(String configFile){
         super();
         this.configFile = configFile;
+    }
+
+    public void init(Map<String, Parameter> parameters) throws ManagementException {
+        super.init(parameters);
         setup();
     }
 
@@ -82,12 +82,12 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
     }
 
     @Override
-    protected LinkedList<Percept> getAllPerceptsFromEntity(String name) throws PerceiveException, NoEnvironmentException {
+    protected PerceptUpdate getPerceptsForEntity(String name) throws PerceiveException, NoEnvironmentException {
         var e = entities.get(name);
         if (e == null) throw new PerceiveException("unknown entity");
         if (e instanceof ConnectedEntity && !((ConnectedEntity) e).isConnected())
             throw new PerceiveException("no valid connection");
-        return e.getAllPercepts();
+        return e.getPercepts();
     }
 
     @Override
@@ -106,14 +106,12 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
     }
 
     @Override
-    protected Percept performEntityAction(String name, Action action) throws ActException {
+    protected void performEntityAction(Action action, String name) throws ActException {
         var entity = entities.get(name);
         if (entity instanceof ConnectedEntity) {
             ((ConnectedEntity) entity).performAction(action);
-            return new Percept("done");
-        }
-        else {
-            return new Percept("impossible");
+        } else {
+        	throw new ActException(ActException.NOTREGISTERED);
         }
     }
 
@@ -135,12 +133,6 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
         String host = config.optString("host", "localhost");
         int port = config.optInt("port", 12300);
         Log.log("Configuring EIS: " + host + ":" + port);
-
-        // annotate percepts with timestamps
-        if(config.optBoolean("times", true)){
-            ConnectedEntity.enableTimeAnnotations();
-            Log.log("Timed annotations enabled.");
-        }
 
         // enable scheduling
         if(config.optBoolean("scheduling", true)){

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,6 +14,7 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import eis.PerceptUpdate;
 import eis.exceptions.PerceiveException;
 import eis.iilang.Identifier;
 import eis.iilang.Numeral;
@@ -30,6 +32,7 @@ public class StatusEntity extends Entity {
     private int port;
 
     private Set<Percept> statusPercepts = Collections.synchronizedSet(new HashSet<>());
+    private Set<Percept> previousStatusPercepts = Collections.synchronizedSet(new HashSet<>());
     private volatile boolean terminated = false;
 
     public StatusEntity(String name, String host, int port) {
@@ -117,7 +120,12 @@ public class StatusEntity extends Entity {
     }
 
     @Override
-    public LinkedList<Percept> getAllPercepts() throws PerceiveException {
-        return new LinkedList<>(statusPercepts);
+    public PerceptUpdate getPercepts() throws PerceiveException {
+    	var addList = new ArrayList<>(statusPercepts);
+		addList.removeAll(previousStatusPercepts);
+		var delList = new ArrayList<>(previousStatusPercepts);
+		delList.removeAll(statusPercepts);
+		previousStatusPercepts = Collections.synchronizedSet(new HashSet<>(statusPercepts));
+        return new PerceptUpdate(addList, delList);
     }
 }
