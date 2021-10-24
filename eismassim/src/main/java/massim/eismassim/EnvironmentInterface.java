@@ -42,6 +42,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
     public EnvironmentInterface(String configFile){
         super();
         this.configFile = configFile;
+        setup();
     }
 
     public void init(Map<String, Parameter> parameters) throws ManagementException {
@@ -77,6 +78,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
     @Override
     public void start() throws ManagementException{
+        if(getState() == EnvironmentState.INITIALIZING) super.pause();
         super.start();
         new Thread(this).start();
     }
