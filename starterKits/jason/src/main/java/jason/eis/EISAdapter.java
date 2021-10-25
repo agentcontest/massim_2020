@@ -3,6 +3,7 @@ package jason.eis;
 import eis.AgentListener;
 import eis.EnvironmentInterfaceStandard;
 import eis.EnvironmentListener;
+import eis.PerceptUpdate;
 import eis.exceptions.*;
 import eis.iilang.*;
 import jason.JasonException;
@@ -21,8 +22,7 @@ import java.util.logging.Logger;
  * (see http://cig.in.tu-clausthal.de/eis)
  * (see also https://multiagentcontest.org)
  *
- * @author Jomi
- * - adapted by ta10
+ * @author Jomi, Tobias
  */
 public class EISAdapter extends Environment implements AgentListener {
 
@@ -36,6 +36,8 @@ public class EISAdapter extends Environment implements AgentListener {
 
     @Override
     public void init(String[] args) {
+
+        System.out.println("Initialising EISAdapter Environment");
 
         ei = new EnvironmentInterface("conf/eismassimconfig.json");
 
@@ -86,10 +88,11 @@ public class EISAdapter extends Environment implements AgentListener {
 
         if (ei != null) {
             try {
-                Map<String,Collection<Percept>> perMap = ei.getAllPercepts(agName);
-                for (String entity: perMap.keySet()) {
+                var entities = ei.getAssociatedEntities(agName);
+                Map<String, PerceptUpdate> perMap = ei.getPercepts(agName, entities.toArray(String[]::new));
+                for (String entity: entities) {
                     Structure strcEnt = ASSyntax.createStructure("entity", ASSyntax.createAtom(entity));
-                    for (Percept p: perMap.get(entity)) {
+                    for (Percept p: perMap.get(entity).getAddList()) {
                         try {
                             percepts.add(perceptToLiteral(p).addAnnots(strcEnt));
                         } catch (JasonException e) {
@@ -97,10 +100,22 @@ public class EISAdapter extends Environment implements AgentListener {
                         }
                     }
                 }
-            } catch (PerceiveException e) {
-                logger.log(Level.WARNING, "Could not perceive.");
+            } catch (PerceiveException | AgentException e) {
+                logger.log(Level.WARNING, "Could not perceive. " + e.getLocalizedMessage());
+                e.printStackTrace();
             }
         }
+        return sortPercepts(percepts);
+    }
+
+    /**
+     * TODO: Adapt this method if you want the percepts to arrive in Jason in some specific order.
+     * @param percepts the current list of percepts
+     * @return a list of the same percepts in some desired order
+     */
+    private List<Literal> sortPercepts(List<Literal> percepts) {
+        // example: alphabetical order
+        percepts.sort(Comparator.comparing(Literal::getFunctor));
         return percepts;
     }
 
@@ -187,7 +202,7 @@ public class EISAdapter extends Environment implements AgentListener {
             }
             return new Numeral(null);
         } else if (t.isList()) {
-            Collection<Parameter> terms = new ArrayList<>();
+            List<Parameter> terms = new ArrayList<>();
             for (Term listTerm: (ListTerm)t)
                 terms.add(termToParameter(listTerm));
             return new ParameterList( terms );

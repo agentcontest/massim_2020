@@ -6,13 +6,13 @@
  * https://multiagentcontest.org/
  */
 
-MAS mAPC2018 {
+MAS mapc2021 {
 
     infrastructure: Centralised
 	
 	environment: jason.eis.EISAdapter
 
     agents:
-		connectionA #34;
+		connectionA #2;
 }
 

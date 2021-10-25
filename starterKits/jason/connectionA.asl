@@ -12,8 +12,8 @@
 	.print("hello massim world.").
 
 +step(X) : true <-
-	.print("Received step percept.").
+	.print("Received step percept:", X).
 	
 +actionID(X) : true <- 
-	.print("Determining my action");
+	.print("Determining my action.", X);
 	skip.

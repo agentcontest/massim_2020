@@ -1,11 +1,11 @@
-# MASSim Starter Kit for Jason 2.2a
+# MASSim Starter Kit for Jason 3.0
 
 This is a starter kit to connect [Jason](http://jason.sourceforge.net/) agents
 to the [MASSim server](https://multiagentcontest.org) in a few simple steps.
 
 1. Prepare the Jason project
 - Create a ``lib`` folder.
-- Find the ``jason-2.2.jar`` and put it into the ``lib`` folder (it's part of the Jason package)
+- Find the ``jason-3.0.jar`` and put it into the ``lib`` folder (it's part of the Jason package)
 - Download or compile EISMASSim and put ``eismassim-X.Y-jar-with-dependencies.jar``
  into the ``lib`` folder as well. Use the version matching the server you want to
  connect to.
