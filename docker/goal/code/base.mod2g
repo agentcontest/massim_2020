@@ -1,0 +1,7 @@
+use dummy as knowledge.
+
+exit=always.
+
+module base {
+    if true then print("Hello, MAPC world!").
+}

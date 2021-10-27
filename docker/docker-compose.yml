@@ -1,0 +1,60 @@
+version: '3.8'
+
+networks:
+  main:
+
+services:
+  massimserver:
+    image: massimserver
+    build:
+      context: ./server/
+      args:
+        JAVA_VERSION: ${JAVA_VERSION}
+    networks:
+      - main
+    ports:
+      - "12300:12300"
+    command: bash -c "java -jar server/target/server-*-jar-with-dependencies.jar -conf ./server/conf/SampleConfig.json"
+
+  # javaagents:
+  #   image: javaagents
+  #   build:
+  #     context: .
+  #     dockerfile: javaagents/Dockerfile
+  #     args:
+  #       JAVA_VERSION: ${JAVA_VERSION}
+  #   networks:
+  #     - main
+  #   command: bash -c "java -jar javaagents/target/javaagents-*-jar-with-dependencies.jar ./javaagents/conf/BasicAgents"
+
+  goal:
+    build:
+      context: .
+      dockerfile: goal/Dockerfile
+      args:
+        JAVA_VERSION: ${JAVA_VERSION}
+        GOAL_URL: ${GOAL_URL}
+    networks:
+      - main
+    volumes:
+      - ./goal/code:/goal/code
+      - ./lib:/goal/lib
+    working_dir: /goal
+    command: bash -c "java -jar ./goal.jar ./code/test.mas2g"
+
+  # jason:
+  #   image: jason
+  #   build:
+  #     context: .
+  #     dockerfile: jason/Dockerfile
+  #     args:
+  #       JASON_JAVA_VERSION: ${JASON_JAVA_VERSION}
+  #       JASON_URL: ${JASON_URL}
+  #   working_dir: /jason/code
+  #   networks:
+  #     - main
+  #   volumes:
+  #     - ./jason/code:/jason/code
+  #     - ./lib:/jason/code/lib
+  #     - ./conf:/jason/code/conf
+  #   command: bash -c "gradle"

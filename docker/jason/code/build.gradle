@@ -1,0 +1,58 @@
+/*
+    Project jason_MAPC_Test
+
+    Gradle build file for Jason Application
+*/
+
+defaultTasks 'run'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+version '1.0'
+group   'org.jason'
+
+// java {
+//     toolchain {
+//         languageVersion = JavaLanguageVersion.of(15)
+//     }
+// }
+
+repositories {
+    mavenCentral()
+
+    //maven { url "http://jacamo.sourceforge.net/maven2" }
+    maven { url "https://raw.github.com/jacamo-lang/mvn-repo/master" }
+    maven { url "https://jade.tilab.com/maven/" }
+    
+    flatDir { dirs 'lib' }
+}
+
+dependencies {
+    compile group: 'org.jason',     name: 'jason' ,   version: '3.0-SNAPSHOT'
+    implementation name: 'eismassim'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+    }
+}
+
+task run (type: JavaExec, dependsOn: 'classes') {
+    description 'runs the application'
+    main = 'jason.infra.local.RunLocalMAS'
+    args 'SampleMAS.mas2j'
+    classpath sourceSets.main.runtimeClasspath
+}
+
+clean {
+    delete 'bin'
+    delete 'build'
+}
+
