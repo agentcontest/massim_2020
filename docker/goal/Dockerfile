@@ -10,5 +10,4 @@ ENV PATH $JAVA_HOME/bin:$PATH
 
 RUN mkdir /goal
 RUN curl -sL ${GOAL_URL} -o /goal/goal.jar
-
-COPY conf/eismassimconfig.json /goal/
+COPY goal/eismassimconfig.json /goal/

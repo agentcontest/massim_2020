@@ -1,11 +1,12 @@
 use "../lib/eismassim.jar" as environment.
 
 
-define helloMAPCWorldAgent as agent {
-    use base as main module.
+define myMAPCAgent as agent {
+    use "main" as main.
+    use "event" as event.
 }
 
 
 launchpolicy{
-    when * launch helloMAPCWorldAgent.
+    when * launch myMAPCAgent with name = *.
 }

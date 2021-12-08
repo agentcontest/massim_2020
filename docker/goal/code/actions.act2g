@@ -1,0 +1,10 @@
+use "dummy" as knowledge.
+
+% move
+define move(Dir) with
+	pre { true }
+	post { true }
+
+define pass as internal with
+	pre{ true }
+	post{ true }

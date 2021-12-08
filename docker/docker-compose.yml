@@ -14,7 +14,7 @@ services:
       - main
     ports:
       - "12300:12300"
-    command: bash -c "java -jar server/target/server-*-jar-with-dependencies.jar -conf ./server/conf/SampleConfig.json"
+    command: bash -c "java -jar server/target/server-*-jar-with-dependencies.jar -conf ./server/conf/AutoLaunch.json"
 
   # javaagents:
   #   image: javaagents
@@ -40,7 +40,7 @@ services:
       - ./goal/code:/goal/code
       - ./lib:/goal/lib
     working_dir: /goal
-    command: bash -c "java -jar ./goal.jar ./code/test.mas2g"
+    command: bash -c "java -jar ./goal.jar ./code/test.mas2g -v"
 
   # jason:
   #   image: jason

@@ -1,0 +1,77 @@
+{
+  "server" : {
+    "tournamentMode" : "round-robin",
+    "teamsPerMatch" : 1,
+    "launch" : "key",
+    "port" : 12300,
+    "backlog" : 10000,
+    "agentTimeout" : 4000,
+    "resultPath" : "results",
+    "logLevel" : "normal",
+    "logPath" : "logs",
+    "replayPath" : "replays",
+    "maxPacketLength" : 65536,
+    "waitBetweenSimulations" : 5000
+  },
+
+  "manual-mode" : [
+    ["A", "B"],
+    ["B", "C"],
+    ["A", "C"]
+  ],
+
+  "match" : [
+    {
+      "NOsetup" : "conf/setup/test.txt",
+  
+      "steps" : 750,
+      "randomSeed" : 17,
+      "randomFail" : 0,
+      "entities" : {"standard" : 15},
+      "clusterBounds" : [2,3],
+  
+      "clearSteps" : 3,
+      "clearEnergyCost" : 30,
+      "disableDuration" : 4,
+      "maxEnergy" : 300,
+      "attachLimit" : 10,
+  
+      "grid" : {
+        "height" : 50,
+        "width" : 50,
+        "instructions": [
+          ["cave", 0.45, 9, 5, 4]
+        ],
+        "goals": {
+          "number" : 5,
+          "size" : [1,3]
+        }
+      },
+  
+      "blockTypes" : [1, 2],
+      "dispensers" : [5, 10],
+  
+      "tasks" : {
+        "size" : [1, 1],
+        "duration" : [200, 200],
+        "probability" : 0.05,
+        "taskboards" : 3,
+        "rewardDecay" : [1, 2],
+        "lowerRewardLimit" : 10,
+        "distanceToTaskboards" : 8
+      },
+  
+      "events" : {
+        "chance" : 0,
+        "radius" : [3, 5],
+        "warning" : 5,
+        "create" : [-3, 1],
+        "perimeter" : 2
+      }
+    }
+  ],
+
+  "teams" : {
+    "A" : {"prefix" : "agent", "password" : "1"}
+  }
+}

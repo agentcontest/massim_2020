@@ -3,15 +3,15 @@
   "host": "massimserver",
   "port": 12300,
   "scheduling": false,
-  "timeout": 3000,
+  "timeout": 100000,
   "notifications": false,
-  "exceptions": "true",
+  "exceptions": false,
 
   "entities" : {},
   
   "multi-entities": [
     {
-      "name-prefix": "agentA",
+      "name-prefix": "entityA",
       "username-prefix": "agentA",
       "password": "1",
       "print-iilang": false,

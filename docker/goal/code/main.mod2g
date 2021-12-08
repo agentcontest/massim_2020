@@ -1,0 +1,6 @@
+use "dummy" as knowledge.
+use "actions" as actionspec.
+
+module main {
+    if true then pass.
+}

@@ -1,0 +1,6 @@
+use "dummy" as knowledge.
+use "actions" as actionspec.
+
+module event {
+    if percept(step(_)) then move("s").
+}
