@@ -5,17 +5,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import eis.PerceptUpdate;
-import eis.exceptions.PerceiveException;
 import eis.iilang.Identifier;
 import eis.iilang.Numeral;
 import eis.iilang.ParameterList;
@@ -28,12 +23,11 @@ import massim.protocol.messages.StatusResponseMessage;
 
 public class StatusEntity extends Entity {
 
-    private String host;
-    private int port;
+    private final String host;
+    private final int port;
 
-    private Set<Percept> statusPercepts = Collections.synchronizedSet(new HashSet<>());
-    private Set<Percept> previousStatusPercepts = Collections.synchronizedSet(new HashSet<>());
-    private volatile boolean terminated = false;
+    private final Set<Percept> statusPercepts = new HashSet<>();
+    private final Set<Percept> previousStatusPercepts = new HashSet<>();
 
     public StatusEntity(String name, String host, int port) {
         super(name);
@@ -41,12 +35,12 @@ public class StatusEntity extends Entity {
         this.port = port;
     }
 
-    public static StatusResponseMessage queryServerStatus(String host, int port) {
+    public static StatusResponseMessage queryServerStatus(String host, int port) throws IOException {
 
-        Message result = null;
+        Message result;
         try (var socket = new Socket(host, port);
                 var out = socket.getOutputStream();
-                var in = socket.getInputStream();) {
+                var in = socket.getInputStream()) {
             var statusRequest = new StatusRequestMessage();
             var osw = new OutputStreamWriter(out, StandardCharsets.UTF_8);
             osw.write(statusRequest.toJson().toString());
@@ -65,16 +59,9 @@ public class StatusEntity extends Entity {
                 result = Message.buildFromJson(new JSONObject(message));
                 if (result instanceof StatusResponseMessage)
                     return (StatusResponseMessage) result;
-            } catch (JSONException e) {
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            } catch (JSONException ignored) {}
         }
         return null;
-    }
-
-    public void terminate() {
-        terminated = true;
     }
 
     public void start() {
@@ -83,9 +70,12 @@ public class StatusEntity extends Entity {
 
     @Override
     public void run() {
-        while (!terminated) {
+        while (true) {
             Log.log(getName() + ": Query server status");
-            var status = queryServerStatus(host, port);
+            StatusResponseMessage status = null;
+            try {
+                status = queryServerStatus(host, port);
+            } catch (IOException ignored) {}
             var percepts = new LinkedList<Percept>();
             if (status != null) {
                 var teams = new ParameterList();
@@ -108,8 +98,7 @@ public class StatusEntity extends Entity {
                 percepts.add(new Percept("error"));
             }
 
-            statusPercepts.clear();
-            statusPercepts.addAll(percepts);
+            updatePercepts(percepts);
 
             try {
                 Thread.sleep(2000);
@@ -119,13 +108,19 @@ public class StatusEntity extends Entity {
         }
     }
 
+    private synchronized void updatePercepts(List<Percept> percepts) {
+        statusPercepts.clear();
+        statusPercepts.addAll(percepts);
+    }
+
     @Override
-    public PerceptUpdate getPercepts() throws PerceiveException {
+    public synchronized PerceptUpdate getPercepts() {
     	var addList = new ArrayList<>(statusPercepts);
 		addList.removeAll(previousStatusPercepts);
 		var delList = new ArrayList<>(previousStatusPercepts);
 		delList.removeAll(statusPercepts);
-		previousStatusPercepts = Collections.synchronizedSet(new HashSet<>(statusPercepts));
+		previousStatusPercepts.clear();
+        previousStatusPercepts.addAll(statusPercepts);
         return new PerceptUpdate(addList, delList);
     }
 }
