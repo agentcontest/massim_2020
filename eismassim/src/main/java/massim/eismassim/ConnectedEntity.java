@@ -2,7 +2,6 @@ package massim.eismassim;
 
 import eis.PerceptUpdate;
 import eis.exceptions.ActException;
-import eis.exceptions.EntityException;
 import eis.exceptions.PerceiveException;
 import eis.iilang.Action;
 import eis.iilang.Percept;
@@ -15,7 +14,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,14 +28,12 @@ public abstract class ConnectedEntity extends Entity {
     private static int timeout; // timeout for performing actions (if scheduling is enabled)
     private static boolean scheduling = false; // send only one action per action-id?
     private static boolean notifications = false; // send percepts as notifications?
-    private static boolean queued = false; // only get one set of percepts per call
-    private static boolean onlyOnce = false; // clear percepts after retrieval
 
     // config for this entity
-    private String username;
-    private String password;
-    private String host;
-    private int port;
+    private final String username;
+    private final String password;
+    private final String host;
+    private final int port;
     private boolean useJSON = false;
     private boolean useIILang = false;
 
@@ -45,24 +42,21 @@ public abstract class ConnectedEntity extends Entity {
     private Socket socket;
     private InputStream in;
     private OutputStream out;
-    private volatile boolean terminated = false;
 
-    private Set<Percept> simStartPercepts = Collections.synchronizedSet(new HashSet<>());
-    private Set<Percept> previousSimStartPercepts = Collections.synchronizedSet(new HashSet<>());
-    private Set<Percept> requestActionPercepts = Collections.synchronizedSet(new HashSet<>());
-    private Set<Percept> previousRequestActionPercepts = Collections.synchronizedSet(new HashSet<>());
-    private Set<Percept> simEndPercepts = Collections.synchronizedSet(new HashSet<>());
-    private Set<Percept> previousSimEndPercepts = Collections.synchronizedSet(new HashSet<>());
-    private Set<Percept> byePercepts = Collections.synchronizedSet(new HashSet<>());
-    private Set<Percept> previousByePercepts = Collections.synchronizedSet(new HashSet<>());
+    private final Set<Percept> simStartPercepts = new HashSet<>();
+    private final Set<Percept> previousSimStartPercepts = new HashSet<>();
+    private final Set<Percept> requestActionPercepts = new HashSet<>();
+    private final Set<Percept> previousRequestActionPercepts = new HashSet<>();
+    private final Set<Percept> simEndPercepts = new HashSet<>();
+    private final Set<Percept> previousSimEndPercepts = new HashSet<>();
+    private final Set<Percept> byePercepts = new HashSet<>();
+    private final Set<Percept> previousByePercepts = new HashSet<>();
 
-    // used to store the percepts in the order of arrival, if queuing is activated
-    private AbstractQueue<PerceptUpdate> perceptsQueue = new ConcurrentLinkedQueue<>();
-
-    // action IDs
     private long lastUsedActionId;
     protected long currentActionId;
-    private long lastUsedActionIdPercept;
+    private long lastActionIdPerceivedFor;
+
+    private final LinkedBlockingQueue<Message> inbox = new LinkedBlockingQueue<>();
 
     public ConnectedEntity(String name, String host, int port, String username, String password) {
         super(name);
@@ -132,20 +126,6 @@ public abstract class ConnectedEntity extends Entity {
     }
 
     /**
-     * Enables queued percepts.
-     */
-    static void enablePerceptQueue() {
-        queued = true;
-    }
-
-    /**
-     * If enabled, percepts will be cleared after each call to {@link #getAllPercepts}.
-     */
-    static void enableOnlyOnceRetrieval() {
-        onlyOnce = true;
-    }
-
-    /**
      * Enables json output for percepts.
      */
     void enableJSON() {
@@ -159,102 +139,73 @@ public abstract class ConnectedEntity extends Entity {
         useIILang = true;
     }
 
-    /**
-     * Stops this entity and its thread. Closes the socket, if there is one.
-     */
-    public void terminate(){
-        terminated = true;
-        releaseConnection();
-    }
-
     @Override
     public void run() {
-        while (!terminated && connected){
 
-            // receive a message
-            JSONObject json;
+        new Thread(() -> {
+            while (connected) {
+                try {
+                    var json = receiveMessage();
+                    var msg = Message.buildFromJson(json);
+                    if (msg != null)
+                        inbox.add(msg);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    releaseConnection();
+                    break;
+                }
+            }
+        }).start();
+
+        while (connected) {
             try {
-                json = receiveMessage();
-            } catch (IOException e) {
-                e.printStackTrace();
-                releaseConnection();
-                break;
-            }
+                updatePercepts(inbox.take());
+            } catch (InterruptedException ignored) {}
+        }
+    }
 
-            // process message
-            Message msg = Message.buildFromJson(json);
-            if (msg == null) continue;
+    private synchronized void updatePercepts(Message msg) {
+        if (msg == null) return;
 
-            if (msg instanceof SimStartMessage) {
-                SimStartMessage startMessage = (SimStartMessage) msg;
-                simStartPercepts.clear();
-                simStartPercepts.add(new Percept("simStart"));
-                simStartPercepts.addAll(simStartToIIL(startMessage));
+        if (msg instanceof SimStartMessage) {
+            SimStartMessage startMessage = (SimStartMessage) msg;
+            simStartPercepts.clear();
+            simStartPercepts.add(new Percept("simStart"));
+            simStartPercepts.addAll(simStartToIIL(startMessage));
 
-                if (notifications) EI.sendNotifications(getName(), simStartPercepts);
-                if (queued) {
-                	var addList = new ArrayList<>(simStartPercepts);
-            		addList.removeAll(previousSimStartPercepts);
-            		var delList = new ArrayList<>(previousSimStartPercepts);
-            		delList.removeAll(simStartPercepts);
-            		previousSimStartPercepts = Collections.synchronizedSet(new HashSet<>(simStartPercepts));
-                	perceptsQueue.add(new PerceptUpdate(addList, delList));
-                }
-            }
-            else if (msg instanceof RequestActionMessage) {
-                RequestActionMessage rac = (RequestActionMessage) msg;
-                long id = rac.getId();
+            if (notifications) EI.sendNotifications(getName(), simStartPercepts);
+        }
+        else if (msg instanceof RequestActionMessage) {
+            RequestActionMessage rac = (RequestActionMessage) msg;
+            requestActionPercepts.clear();
+            requestActionPercepts.add(new Percept("requestAction"));
+            requestActionPercepts.addAll(requestActionToIIL(rac));
 
-                requestActionPercepts.clear();
-                requestActionPercepts.add(new Percept("requestAction"));
-                requestActionPercepts.addAll(requestActionToIIL(rac));
+            currentActionId = rac.getId();
 
-                if (notifications) EI.sendNotifications(this.getName(), requestActionPercepts);
-                currentActionId = id;
-                if (queued) {
-                	var addList = new ArrayList<>(requestActionPercepts);
-            		addList.removeAll(previousRequestActionPercepts);
-            		var delList = new ArrayList<>(previousRequestActionPercepts);
-            		delList.removeAll(requestActionPercepts);
-            		previousRequestActionPercepts = Collections.synchronizedSet(new HashSet<>(requestActionPercepts));
-                	perceptsQueue.add(new PerceptUpdate(addList, delList));
-                }
-            }
-            else if (msg instanceof SimEndMessage) {
-                SimEndMessage endMessage = (SimEndMessage) msg;
-                simStartPercepts.clear();
-                requestActionPercepts.clear();
-                simEndPercepts.clear();
-                simEndPercepts.add(new Percept("simEnd"));
-                simEndPercepts.addAll(simEndToIIL(endMessage));
-                if (notifications) EI.sendNotifications(this.getName(), simEndPercepts);
-                if (queued) {
-                	var addList = new ArrayList<>(simEndPercepts);
-            		addList.removeAll(previousSimEndPercepts);
-            		var delList = new ArrayList<>(previousSimEndPercepts);
-            		delList.removeAll(simEndPercepts);
-            		previousSimEndPercepts = Collections.synchronizedSet(new HashSet<>(simEndPercepts));
-                	perceptsQueue.add(new PerceptUpdate(addList, delList));
-                }
-            }
-            else if (msg instanceof ByeMessage) {
-                simStartPercepts.clear();
-                requestActionPercepts.clear();
-                byePercepts.clear();
-                byePercepts.add(new Percept("bye"));
-                if (notifications) EI.sendNotifications(this.getName(), byePercepts);
-                if (queued) {
-                	var addList = new ArrayList<>(byePercepts);
-            		addList.removeAll(previousByePercepts);
-            		var delList = new ArrayList<>(previousByePercepts);
-            		delList.removeAll(byePercepts);
-            		previousByePercepts = Collections.synchronizedSet(new HashSet<>(byePercepts));
-                	perceptsQueue.add(new PerceptUpdate(addList, delList));
-                }
-            }
-            else {
-                log("unexpected type " + msg.getMessageType());
-            }
+            if (notifications) EI.sendNotifications(this.getName(), requestActionPercepts);
+        }
+        else if (msg instanceof SimEndMessage) {
+            SimEndMessage endMessage = (SimEndMessage) msg;
+            simStartPercepts.clear();
+            requestActionPercepts.clear();
+            simEndPercepts.clear();
+            simEndPercepts.add(new Percept("simEnd"));
+            simEndPercepts.addAll(simEndToIIL(endMessage));
+
+            if (notifications) EI.sendNotifications(this.getName(), simEndPercepts);
+        }
+        else if (msg instanceof ByeMessage) {
+            simStartPercepts.clear();
+            requestActionPercepts.clear();
+            byePercepts.clear();
+            byePercepts.add(new Percept("bye"));
+
+            if (notifications) EI.sendNotifications(this.getName(), byePercepts);
+            this.releaseConnection();
+        }
+        else {
+            log("unexpected type " + msg.getMessageType());
         }
     }
 
@@ -268,75 +219,52 @@ public abstract class ConnectedEntity extends Entity {
     /**
      * If scheduling is enabled, the method blocks until a new action id, i.e. new percepts, are received
      * or the configured timeout is reached.
-     * If queued is enabled, scheduling is overridden. Also, if queued is enabled, this method has to be called
-     * repeatedly, as only one collection of percepts is removed from the queue with each call (until an empty list
-     * is returned).
      * @return the percepts for this entity
      * @throws PerceiveException if timeout configured and occurred
      */
     @Override
-    public synchronized PerceptUpdate getPercepts() throws PerceiveException{
-        if (scheduling && !queued) {
-            // wait for new action id or timeout
+    public PerceptUpdate getPercepts() throws PerceiveException{
+        if (scheduling) {
+            // block if already perceived for the same action ID
             long startTime = System.currentTimeMillis();
-            while (currentActionId <= lastUsedActionIdPercept || currentActionId == -1 ) {
+            while (currentActionId <= lastActionIdPerceivedFor || currentActionId == -1 ) {
                 try {
-                    TimeUnit.MILLISECONDS.timedWait(this, 100);
+                    TimeUnit.MILLISECONDS.sleep(50);
                 } catch (InterruptedException ignored) {}
-                if (System.currentTimeMillis() - startTime >= timeout) {
+                if (timeout > 0 && System.currentTimeMillis() - startTime >= timeout) {
                     throw new PerceiveException("timeout. no valid action-id available in time");
                 }
             }
-            lastUsedActionIdPercept = currentActionId;
+            lastActionIdPerceivedFor = currentActionId;
         }
 
-        if(!queued){
-            //return all percepts
-        	var addList1 = new ArrayList<>(simStartPercepts);
-    		addList1.removeAll(previousSimStartPercepts);
-    		var delList1 = new ArrayList<>(previousSimStartPercepts);
-    		delList1.removeAll(simStartPercepts);
-    		previousSimStartPercepts = Collections.synchronizedSet(new HashSet<>(simStartPercepts));
-        	var ret = new PerceptUpdate(addList1,delList1);
-        	
+        return takePercepts();
+    }
 
-        	var addList2 = new ArrayList<>(requestActionPercepts);
-        	addList2.removeAll(previousRequestActionPercepts);
-    		var delList2 = new ArrayList<>(previousRequestActionPercepts);
-    		delList2.removeAll(requestActionPercepts);
-    		previousRequestActionPercepts = Collections.synchronizedSet(new HashSet<>(requestActionPercepts));
-    		ret.merge(new PerceptUpdate(addList2, delList2));
-        	
+    private synchronized PerceptUpdate takePercepts() {
+        var ret = takePercepts(previousSimStartPercepts, simStartPercepts);
+        ret.merge(takePercepts(previousRequestActionPercepts, requestActionPercepts));
+        ret.merge(takePercepts(previousSimEndPercepts, simEndPercepts));
+        ret.merge(takePercepts(previousByePercepts, byePercepts));
 
-        	var addList3 = new ArrayList<>(simEndPercepts);
-        	addList3.removeAll(previousSimEndPercepts);
-    		var delList3 = new ArrayList<>(simStartPercepts);
-    		delList3.removeAll(previousSimEndPercepts);
-    		previousSimEndPercepts = Collections.synchronizedSet(new HashSet<>(simEndPercepts));
-    		ret.merge(new PerceptUpdate(addList3, delList3));
-        	
+        if (useIILang) log(ret.toString());
 
-        	var addList4 = new ArrayList<>(byePercepts);
-        	addList4.removeAll(previousByePercepts);
-    		var delList4 = new ArrayList<>(previousByePercepts);
-    		delList4.removeAll(byePercepts);
-    		previousByePercepts = Collections.synchronizedSet(new HashSet<>(byePercepts));
-    		ret.merge(new PerceptUpdate(addList4, delList4));
-        	
-        	
-            if (useIILang) log(ret.toString());
-            if (onlyOnce) {
-                simStartPercepts.clear();
-                requestActionPercepts.clear();
-                simEndPercepts.clear();
-                byePercepts.clear();
-            }
-            return ret;
-        }
-        else{
-            //return only the first queued elements
-            return perceptsQueue.peek() != null? perceptsQueue.poll() : new PerceptUpdate();
-        }
+        return ret;
+    }
+
+    private static PerceptUpdate takePercepts(Set<Percept> previousPercepts, Set<Percept> currentPercepts) {
+        var res = createPerceptUpdate(previousPercepts, currentPercepts);
+        previousPercepts.clear();
+        previousPercepts.addAll(currentPercepts);
+        return res;
+    }
+
+    private static PerceptUpdate createPerceptUpdate(Set<Percept> previousPercepts, Set<Percept> currentPercepts) {
+        var addList = new ArrayList<>(currentPercepts);
+        addList.removeAll(previousPercepts);
+        var delList = new ArrayList<>(previousPercepts);
+        delList.removeAll(currentPercepts);
+        return new PerceptUpdate(addList, delList);
     }
 
     /**
@@ -352,8 +280,10 @@ public abstract class ConnectedEntity extends Entity {
         long startTime = System.currentTimeMillis();
         if (scheduling) {
             while (currentActionId <= lastUsedActionId || currentActionId == -1) {
-                try { Thread.sleep(10); } catch (InterruptedException ignored) {}
-                if (System.currentTimeMillis() - startTime >= timeout) {
+                try {
+                    TimeUnit.MILLISECONDS.timedWait(this, 50);
+                } catch (InterruptedException ignored) {}
+                if (timeout > 0 && System.currentTimeMillis() - startTime >= timeout) {
                     throw new ActException(ActException.FAILURE, "timeout. no valid action-id available in time");
                 }
             }
@@ -361,7 +291,6 @@ public abstract class ConnectedEntity extends Entity {
 
         JSONObject json = actionToJSON(currentActionId, action);
         try {
-            assert currentActionId != lastUsedActionId;
             sendMessage(json);
             lastUsedActionId = currentActionId;
         } catch (IOException e) {
@@ -374,7 +303,7 @@ public abstract class ConnectedEntity extends Entity {
      * Tries to connect to a MASSim server. Including authentication and all.
      */
     void establishConnection() {
-        if(connecting) return;
+        if (connecting) return;
         connecting = true;
         try {
             socket = new Socket(host, port);
@@ -383,13 +312,12 @@ public abstract class ConnectedEntity extends Entity {
 
             log("socket successfully created");
 
-            boolean result = authenticate();
-            if (result) {
+            if (authenticate()) {
                 log("authentication acknowledged");
 
                 lastUsedActionId = -1;
                 currentActionId = -1;
-                lastUsedActionIdPercept = -1;
+                lastActionIdPerceivedFor = -1;
                 connected = true;
                 log("connection successfully authenticated");
 
@@ -414,7 +342,6 @@ public abstract class ConnectedEntity extends Entity {
      */
     private boolean authenticate() {
 
-        // create and try to send message
         Message authReq = new AuthRequestMessage(username, password);
         try {
             sendMessage(authReq.toJson());
@@ -423,7 +350,6 @@ public abstract class ConnectedEntity extends Entity {
             return false;
         }
 
-        // get responseMsg
         JSONObject jsonResponse;
         try {
             jsonResponse = receiveMessage();
@@ -434,7 +360,6 @@ public abstract class ConnectedEntity extends Entity {
         }
         Message responseMsg = Message.buildFromJson(jsonResponse);
 
-        // check for success
         if (responseMsg instanceof AuthResponseMessage) {
             AuthResponseMessage authResponse = (AuthResponseMessage) responseMsg;
             return authResponse.getResult().equals(AuthResponseMessage.OK);
@@ -454,7 +379,7 @@ public abstract class ConnectedEntity extends Entity {
             catch(IOException ignored) {}
         }
         try {
-            Thread.sleep(1000);
+            TimeUnit.MILLISECONDS.sleep(1000);
         } catch (InterruptedException ignored) {}
         connected = false;
         log("connection released");
@@ -502,13 +427,5 @@ public abstract class ConnectedEntity extends Entity {
             log("Invalid object: " + message);
         }
         return null;
-    }
-
-    protected void setType(String type) {
-        try {
-            if(EI.isEntityConnected(getName())) EI.setType(getName(), type);
-        } catch (EntityException e) {
-            e.printStackTrace();
-        }
     }
 }

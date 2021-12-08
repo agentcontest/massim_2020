@@ -16,14 +16,15 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Environment interface to the MASSim server following the Environment Interface Standard (EIS).
  */
 public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 	private static final long serialVersionUID = 1L;
-	private Set<String> supportedActions = new HashSet<>();
-    private Map<String, Entity> entities = new HashMap<>();
+	private final Set<String> supportedActions = new HashSet<>();
+    private final Map<String, Entity> entities = new HashMap<>();
 
     private String configFile = "eismassimconfig.json";
 
@@ -63,7 +64,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
         }
         IILElement.toProlog = true;
         try {
-            setState(EnvironmentState.PAUSED);
+            this.pause();
         } catch (ManagementException e1) {
             e1.printStackTrace();
         }
@@ -78,7 +79,6 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
     @Override
     public void start() throws ManagementException{
-        if(getState() == EnvironmentState.INITIALIZING) super.pause();
         super.start();
         new Thread(this).start();
     }
@@ -152,17 +152,6 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
         int timeout = config.optInt("timeout", 3000);
         ConnectedEntity.setTimeout(timeout);
         Log.log("Timeout set to " + timeout);
-
-        // queue
-        if(config.optBoolean("queued", true)){
-            ConnectedEntity.enablePerceptQueue();
-            Log.log("Percept queue enabled.");
-        }
-
-        if(config.optBoolean("only-once", false)){
-            ConnectedEntity.enableOnlyOnceRetrieval();
-            Log.log("Only once retrieval enabled.");
-        }
 
         // parse entities
         JSONArray jsonEntities = config.optJSONArray("entities");
@@ -253,7 +242,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
             }
 
             try {
-                Thread.sleep(1000);
+                TimeUnit.MILLISECONDS.sleep(1000);
             } catch (InterruptedException ignored) {} // be nice to the server and our CPU
         }
     }
@@ -281,6 +270,6 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
      */
     public boolean isEntityConnected(String entityName){
         var entity = entities.get(entityName);
-        return entity != null && entity instanceof ConnectedEntity && ((ConnectedEntity) entity).isConnected();
+        return entity instanceof ConnectedEntity && ((ConnectedEntity) entity).isConnected();
     }
 }
