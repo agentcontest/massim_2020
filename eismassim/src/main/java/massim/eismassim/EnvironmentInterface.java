@@ -6,6 +6,7 @@ import eis.exceptions.*;
 import eis.iilang.*;
 import massim.eismassim.entities.ScenarioEntity;
 import massim.eismassim.entities.StatusEntity;
+import massim.protocol.messages.StatusResponseMessage;
 import massim.protocol.messages.scenario.Actions;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,6 +33,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
      * Constructor.
      * Might be used by {@link eis.EILoader}.
      */
+    @SuppressWarnings("unused")
     public EnvironmentInterface() {
         super();
     }
@@ -185,7 +187,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
         // parse "multi-entities"
         var multiEntities = config.optJSONArray("multi-entities");
-        if(multiEntities == null) multiEntities = new JSONArray();
+        if (multiEntities == null) multiEntities = new JSONArray();
         for (int i = 0; i < multiEntities.length(); i++) {
             var multiEntity = multiEntities.optJSONObject(i);
             if (multiEntity == null) continue;
@@ -199,12 +201,9 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
             if (count == -1) {
                 Log.log("EISMASSim auto config found. Querying server for number of entities.");
-                var result = StatusEntity.queryServerStatus(host, port);
-                if (result == null) Log.log("Error while trying to contact MASSim server at " + host + ":" + port);
-                else {
-                    for (var size: result.teamSizes) if (size > count) count = size;
-                }
+                count = queryServerForEntities(host, port);
             }
+
             int endIndex = startIndex + count - 1;
             Log.log("Creating " + count + " new EISMASSim entities " + namePrefix + startIndex + " to " + namePrefix + endIndex);
             for (int index = startIndex; index <= endIndex; index++) {
@@ -224,6 +223,26 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
             Log.log("Creating status entity: " + name);
             entities.put(name, new StatusEntity(name, host, port));
         }
+    }
+
+    public int queryServerForEntities(String host, int port) {
+        int entities = 0;
+        StatusResponseMessage result = null;
+        int attempts = 1;
+        while (result == null) {
+            try {
+                result = StatusEntity.queryServerStatus(host, port);
+            } catch (IOException ignored) {}
+            if (result == null) {
+                Log.log("MASSim server at " + host + ":" + port + " not (yet) reachable. Attempts: " + attempts++);
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException ignored) {}
+            }
+        }
+        for (var size: result.teamSizes)
+            if (size > entities) entities = size;
+        return entities;
     }
 
     @Override
@@ -261,15 +280,5 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * Checks if an entity has a connection to a MASSim server.
-     * @param entityName name of an entity
-     * @return true if the entity exists and is connected to a MASSim server
-     */
-    public boolean isEntityConnected(String entityName){
-        var entity = entities.get(entityName);
-        return entity instanceof ConnectedEntity && ((ConnectedEntity) entity).isConnected();
     }
 }
