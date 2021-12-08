@@ -13,6 +13,6 @@ MAS mapc2021 {
     environment: jason.eis.EISAdapter
 
     agents:
-        connectionA #2;
+        agentA #15;
 }
 

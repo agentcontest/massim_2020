@@ -158,7 +158,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
         this.throwExceptions = config.optBoolean("exceptions", false);
         if (this.throwExceptions) ConnectedEntity.enableExceptions();
-        Log.flog("Act/PerceiveExceptions %s", throwExceptions? "enabled" : "disabled");
+        Log.flog("Act/PerceiveExceptions %s\n", throwExceptions? "enabled" : "disabled");
 
         // parse entities
         JSONArray jsonEntities = config.optJSONArray("entities");
