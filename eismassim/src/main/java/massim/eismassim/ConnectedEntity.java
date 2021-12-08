@@ -28,6 +28,7 @@ public abstract class ConnectedEntity extends Entity {
     private static int timeout; // timeout for performing actions (if scheduling is enabled)
     private static boolean scheduling = false; // send only one action per action-id?
     private static boolean notifications = false; // send percepts as notifications?
+    private static boolean throwExceptions = false; // throw exceptions? (some agent platforms don't like that)
 
     // config for this entity
     private final String username;
@@ -125,6 +126,10 @@ public abstract class ConnectedEntity extends Entity {
         notifications = true;
     }
 
+    static void enableExceptions() {
+        throwExceptions = true;
+    }
+
     /**
      * Enables json output for percepts.
      */
@@ -210,10 +215,10 @@ public abstract class ConnectedEntity extends Entity {
     }
 
     /**
-     * @return true if the entity is connected to a massim server
+     * @return whether the entity is not connected to a massim server
      */
-    boolean isConnected() {
-        return connected;
+    boolean isNotConnected() {
+        return !connected;
     }
 
     /**
@@ -232,7 +237,11 @@ public abstract class ConnectedEntity extends Entity {
                     TimeUnit.MILLISECONDS.sleep(50);
                 } catch (InterruptedException ignored) {}
                 if (timeout > 0 && System.currentTimeMillis() - startTime >= timeout) {
-                    throw new PerceiveException("timeout. no valid action-id available in time");
+                    if (throwExceptions)
+                        throw new PerceiveException("timeout. no valid action-id available in time");
+                    else {
+                        return new PerceptUpdate();
+                    }
                 }
             }
             lastActionIdPerceivedFor = currentActionId;
@@ -274,7 +283,11 @@ public abstract class ConnectedEntity extends Entity {
      */
     void performAction(Action action) throws ActException{
 
-        if (!connected) throw new ActException(ActException.FAILURE, "no valid connection");
+        if (!connected) {
+            if (throwExceptions)
+                throw new ActException(ActException.FAILURE, "cannot perform action - no valid connection");
+            else return;
+        }
 
         // wait for a valid action id
         long startTime = System.currentTimeMillis();
@@ -284,7 +297,10 @@ public abstract class ConnectedEntity extends Entity {
                     TimeUnit.MILLISECONDS.timedWait(this, 50);
                 } catch (InterruptedException ignored) {}
                 if (timeout > 0 && System.currentTimeMillis() - startTime >= timeout) {
-                    throw new ActException(ActException.FAILURE, "timeout. no valid action-id available in time");
+                    if (throwExceptions)
+                        throw new ActException(ActException.FAILURE, "timeout. no valid action-id available in time");
+                    else
+                        return;
                 }
             }
         }

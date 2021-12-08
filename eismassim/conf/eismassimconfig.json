@@ -3,11 +3,9 @@
   "host": "localhost",
   "port": 12300,
   "scheduling": true,
-  "only-once": false,
   "timeout": 3000,
-  "times": false,
   "notifications": false,
-  "queued": false,
+  "exceptions": false,
 
   "entities" : {},
   

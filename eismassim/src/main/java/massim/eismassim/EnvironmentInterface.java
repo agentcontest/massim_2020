@@ -28,6 +28,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
     private final Map<String, Entity> entities = new HashMap<>();
 
     private String configFile = "eismassimconfig.json";
+    private boolean throwExceptions = false;
 
     /**
      * Constructor.
@@ -89,8 +90,12 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
     protected PerceptUpdate getPerceptsForEntity(String name) throws PerceiveException, NoEnvironmentException {
         var e = entities.get(name);
         if (e == null) throw new PerceiveException("unknown entity");
-        if (e instanceof ConnectedEntity && !((ConnectedEntity) e).isConnected())
-            throw new PerceiveException("no valid connection");
+        if (e instanceof ConnectedEntity && ((ConnectedEntity) e).isNotConnected()) {
+            if (throwExceptions)
+                throw new PerceiveException("no valid connection");
+            else
+                return new PerceptUpdate();
+        }
         return e.getPercepts();
     }
 
@@ -115,7 +120,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
         if (entity instanceof ConnectedEntity) {
             ((ConnectedEntity) entity).performAction(action);
         } else {
-        	throw new ActException(ActException.NOTREGISTERED);
+            if (throwExceptions) throw new ActException(ActException.NOTREGISTERED);
         }
     }
 
@@ -133,27 +138,27 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
             e.printStackTrace();
         }
 
-        // parse host and port
         String host = config.optString("host", "localhost");
         int port = config.optInt("port", 12300);
         Log.log("Configuring EIS: " + host + ":" + port);
 
-        // enable scheduling
         if(config.optBoolean("scheduling", true)){
             ConnectedEntity.enableScheduling();
             Log.log("Scheduling enabled.");
         }
 
-        // enable notifications
         if(config.optBoolean("notifications", true)){
             ConnectedEntity.enableNotifications();
             Log.log("Notifications enabled.");
         }
 
-        // timeout
         int timeout = config.optInt("timeout", 3000);
         ConnectedEntity.setTimeout(timeout);
         Log.log("Timeout set to " + timeout);
+
+        this.throwExceptions = config.optBoolean("exceptions", false);
+        if (this.throwExceptions) ConnectedEntity.enableExceptions();
+        Log.flog("Act/PerceiveExceptions %s", throwExceptions? "enabled" : "disabled");
 
         // parse entities
         JSONArray jsonEntities = config.optJSONArray("entities");
@@ -254,7 +259,7 @@ public class EnvironmentInterface extends EIDefaultImpl implements Runnable{
 
             // check connections and attempt to reconnect if necessary
             for ( Entity e : entities.values()) {
-                if (e instanceof ConnectedEntity && !((ConnectedEntity) e).isConnected()) {
+                if (e instanceof ConnectedEntity && ((ConnectedEntity) e).isNotConnected()) {
                     Log.log("entity \"" + e.getName() + "\" is not connected. trying to connect.");
                     Executors.newSingleThreadExecutor().execute(((ConnectedEntity)e)::establishConnection);
                 }
