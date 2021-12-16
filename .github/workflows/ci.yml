@@ -15,5 +15,5 @@ jobs:
     - run: tar -xvzf target/massim-*.tar.gz
     - uses: actions/upload-artifact@v2-preview
       with:
-        name: massim-2020-dev.zip
+        name: massim-2020-dev
         path: massim-*
