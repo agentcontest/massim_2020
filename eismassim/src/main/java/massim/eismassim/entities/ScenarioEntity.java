@@ -43,6 +43,8 @@ public class ScenarioEntity extends ConnectedEntity {
         if(!(message instanceof StepPercept)) return ret; // percept incompatible with entity
         var percept = (StepPercept) message;
 
+        ret.add(new Percept("position", new Numeral(percept.position.x), new Numeral(percept.position.y)));
+
         ret.add(new Percept("actionID", new Numeral(percept.getId())));
         ret.add(new Percept("timestamp", new Numeral(percept.getTime())));
         ret.add(new Percept("deadline", new Numeral(percept.getDeadline())));

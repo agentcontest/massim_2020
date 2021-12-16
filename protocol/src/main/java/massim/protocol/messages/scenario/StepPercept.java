@@ -22,13 +22,14 @@ public class StepPercept extends RequestActionMessage {
     public int energy;
     public boolean disabled;
     public String task;
+    public Position position;
 
     public StepPercept(JSONObject content) {
         super(content);
         parsePercept(content.getJSONObject("percept"));
     }
 
-    public StepPercept(int step, long score, Set<Thing> things, Map<String, Set<Position>> terrain,
+    public StepPercept(Position pos, int step, long score, Set<Thing> things, Map<String, Set<Position>> terrain,
                        Set<TaskInfo> taskInfo, String action, List<String> lastActionParams, String result,
                        Set<Position> attachedThings, String task) {
         super(System.currentTimeMillis(), -1, -1, step); // id and deadline are updated later
@@ -41,6 +42,7 @@ public class StepPercept extends RequestActionMessage {
         this.lastActionParams.addAll(lastActionParams);
         this.attachedThings = attachedThings;
         this.task = task;
+        this.position = pos;
     }
 
     @Override
@@ -56,6 +58,7 @@ public class StepPercept extends RequestActionMessage {
         percept.put("energy", energy);
         percept.put("disabled", disabled);
         percept.put("task", task);
+        percept.put("position", this.position.toJSON());
         things.forEach(t -> jsonThings.put(t.toJSON()));
         taskInfo.forEach(t -> jsonTasks.put(t.toJSON()));
         terrain.forEach((t, positions) -> {
@@ -112,5 +115,12 @@ public class StepPercept extends RequestActionMessage {
         energy = percept.getInt("energy");
         disabled = percept.getBoolean("disabled");
         task = percept.getString("task");
+        var jsonPos = percept.optJSONArray("position");
+        if (jsonPos != null) {
+            this.position = Position.of(jsonPos.getInt(0), jsonPos.getInt(1));
+        }
+        else {
+            this.position = Position.of(-10000, -10000);
+        }
     }
 }

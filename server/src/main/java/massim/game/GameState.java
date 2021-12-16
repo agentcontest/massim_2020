@@ -393,7 +393,7 @@ class GameState {
                             t -> new HashSet<>()).add(currentPos.relativeTo(pos));
                 }
             }
-            var percept = new StepPercept(step, teams.get(entity.getTeamName()).getScore(),
+            var percept = new StepPercept(entity.getPosition(), step, teams.get(entity.getTeamName()).getScore(),
                     visibleThings, visibleTerrain, allTasks, entity.getLastAction(), entity.getLastActionParams(),
                     entity.getLastActionResult(), attachedThings, entity.getTask());
             percept.energy = entity.getEnergy();
