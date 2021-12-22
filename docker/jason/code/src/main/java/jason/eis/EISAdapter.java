@@ -26,7 +26,8 @@ import java.util.logging.Logger;
  */
 public class EISAdapter extends Environment implements AgentListener {
 
-    private Logger logger = Logger.getLogger("EISAdapter." + EISAdapter.class.getName());
+    private final Logger logger = Logger.getLogger("EISAdapter." + EISAdapter.class.getName());
+    Map<String, Set<Percept>> previousPercepts = new HashMap<>();
 
     private EnvironmentInterfaceStandard ei;
 
@@ -92,7 +93,11 @@ public class EISAdapter extends Environment implements AgentListener {
                 Map<String, PerceptUpdate> perMap = ei.getPercepts(agName, entities.toArray(String[]::new));
                 for (String entity: entities) {
                     Structure strcEnt = ASSyntax.createStructure("entity", ASSyntax.createAtom(entity));
-                    for (Percept p: perMap.get(entity).getAddList()) {
+                    var agPercepts = previousPercepts.computeIfAbsent(agName, k -> new HashSet<>());
+                    var update = perMap.get(entity);
+                    update.getDeleteList().forEach(agPercepts::remove);
+                    agPercepts.addAll(update.getAddList());
+                    for (Percept p: agPercepts) {
                         try {
                             percepts.add(perceptToLiteral(p).addAnnots(strcEnt));
                         } catch (JasonException e) {
@@ -174,8 +179,7 @@ public class EISAdapter extends Environment implements AgentListener {
             for (Parameter p: (ParameterList)par)
                 tail = tail.append( parameterToTerm(p) );
             return list;
-        } else if (par instanceof Function) {
-            Function f = (Function)par;
+        } else if (par instanceof Function f) {
             Structure l = ASSyntax.createStructure(f.getName());
             for (Parameter p: f.getParameters())
                 l.addTerm(parameterToTerm(p));
